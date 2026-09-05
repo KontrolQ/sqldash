@@ -6,6 +6,7 @@ const (
 	DefaultPageSize = 50
 	MaximumPageSize = 200
 	MaximumCellText = 160
+	MaximumPeeks    = 60
 	RowIdentifier   = "rowid"
 
 	DatabasePath    = "/databases/"

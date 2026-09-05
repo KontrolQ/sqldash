@@ -36,6 +36,18 @@ type CellView struct {
 	LinkTo     string
 	LinkColumn string
 	Truncated  bool
+	Peek       *PeekView
+}
+
+type PeekCell struct {
+	Text   string
+	IsNull bool
+}
+
+type PeekView struct {
+	Table   string
+	Columns []string
+	Cells   []PeekCell
 }
 
 type RowView struct {

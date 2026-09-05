@@ -110,6 +110,8 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 		return nil, rowsError
 	}
 
+	attachPeeks(requestContext, asked.Database, columns, rows)
+
 	shown.Rows = rows
 	shown.ColumnNames = namesOf(columns)
 	shown.View = viewOf(shown)

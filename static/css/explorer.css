@@ -373,3 +373,23 @@
   height: 16px;
   flex-shrink: 0;
 }
+
+.workbar {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.workbar::-webkit-scrollbar {
+  display: none;
+}
+
+.workbar-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.workbar-group[hidden] {
+  display: none;
+}

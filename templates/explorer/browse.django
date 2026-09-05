@@ -76,13 +76,6 @@ Columns
 <svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
 Add record
 </button>
-<div class="workbar-edits">
-<button class="button is-ghost is-small" type="button" data-grid-discard disabled>Discard</button>
-<button class="button is-small" type="submit" form="grid-form" data-grid-save disabled>
-Save changes
-<span class="badge is-secondary" data-grid-count>0</span>
-</button>
-</div>
 {% endif %}
 
 <div class="workbar-right">
@@ -114,10 +107,21 @@ Save changes
 <div class="workbar is-second">
 <input class="input is-small is-search" form="search-form" name="search" value="{{ Search }}" placeholder="Search every column" aria-label="Search every column">
 {% if Search %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ Carry }}">Clear</a>{% endif %}
-<div class="workbar-right" data-selection-bar hidden>
+<div class="workbar-right">
+<div class="workbar-group" data-selection-bar hidden>
 <span class="selection-count" data-selection-count></span>
 <button class="button is-ghost is-small" type="button" data-selection-clear>Clear</button>
 <button class="button is-destructive is-small" type="submit" form="row-form">Delete rows</button>
+</div>
+{% if Editable %}
+<div class="workbar-group">
+<button class="button is-ghost is-small" type="button" data-grid-discard disabled>Discard</button>
+<button class="button is-small" type="submit" form="grid-form" data-grid-save disabled>
+Save changes
+<span class="badge is-secondary" data-grid-count>0</span>
+</button>
+</div>
+{% endif %}
 </div>
 </div>
 
@@ -158,7 +162,12 @@ Save changes
 <span class="cell-text">{{ cell.Text }}</span>
 {% endif %}
 {% if cell.LinkTo %}
-<a class="cell-jump" href="{{ BrowsePath }}?table={{ cell.LinkTo }}{% if cell.LinkColumn %}&column={{ cell.LinkColumn }}&operator=is&value={{ cell.Text }}{% else %}&search={{ cell.Text }}{% endif %}" aria-label="Open the matching row in {{ cell.LinkTo }}" title="{{ cell.LinkTo }}">
+{% if cell.Peek %}
+<button class="chip" type="button" data-peek="peek-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" aria-expanded="false" title="Show the matching row in {{ cell.LinkTo }}">{{ cell.LinkTo }}</button>
+{% else %}
+<span class="chip is-missing" title="Nothing in {{ cell.LinkTo }} matches">{{ cell.LinkTo }}</span>
+{% endif %}
+<a class="cell-jump" href="{{ BrowsePath }}?table={{ cell.LinkTo }}{% if cell.LinkColumn %}&column={{ cell.LinkColumn }}&operator=is&value={{ cell.Text }}{% else %}&search={{ cell.Text }}{% endif %}" aria-label="Open {{ cell.LinkTo }} filtered to this row" title="Open in {{ cell.LinkTo }}">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
 </a>
 {% endif %}
@@ -172,6 +181,26 @@ Save changes
 </td>
 {% endif %}
 </tr>
+{% for cell in row.Cells %}
+{% if cell.Peek %}
+<tr class="peek-row" id="peek-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" hidden>
+<td colspan="99">
+<div class="peek">
+<div class="peek-head">
+<span class="chip">{{ cell.Peek.Table }}</span>
+<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ cell.LinkTo }}{% if cell.LinkColumn %}&column={{ cell.LinkColumn }}&operator=is&value={{ cell.Text }}{% else %}&search={{ cell.Text }}{% endif %}">Open in sub view</a>
+</div>
+<div class="table-wrap">
+<table class="table is-grid is-peek">
+<thead><tr>{% for name in cell.Peek.Columns %}<th scope="col">{{ name }}</th>{% endfor %}</tr></thead>
+<tbody><tr>{% for one in cell.Peek.Cells %}<td class="cell">{% if one.IsNull %}<span class="cell-text null">NULL</span>{% else %}<span class="cell-text">{{ one.Text }}</span>{% endif %}</td>{% endfor %}</tr></tbody>
+</table>
+</div>
+</div>
+</td>
+</tr>
+{% endif %}
+{% endfor %}
 {% empty %}
 <tr><td colspan="99" class="cell-empty">No rows match.</td></tr>
 {% endfor %}

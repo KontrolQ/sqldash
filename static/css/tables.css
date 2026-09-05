@@ -182,11 +182,12 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--secondary);
-  color: var(--secondary-foreground);
+  padding: 1px 7px;
+  border: 1px solid color-mix(in oklab, var(--success) 40%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--success) 12%, transparent);
+  color: var(--success);
+  cursor: pointer;
   font-family: var(--mono);
   font-size: 11px;
   gap: 6px;
@@ -195,11 +196,14 @@
 }
 
 .chip:hover {
-  border-color: var(--ring);
+  background: color-mix(in oklab, var(--success) 22%, transparent);
 }
 
-.chip-target {
+.chip.is-missing {
+  border-color: var(--border);
+  background: transparent;
   color: var(--muted-foreground);
+  cursor: default;
 }
 
 .code.is-block {
@@ -278,4 +282,44 @@ tr.is-picked td {
 .cell-jump:hover {
   background: var(--accent);
   color: var(--foreground);
+}
+
+.cell .chip {
+  position: absolute;
+  top: 50%;
+  right: 26px;
+  transform: translateY(-50%);
+}
+
+.peek-row > td {
+  padding: 0;
+  background: color-mix(in oklab, var(--muted) 40%, transparent);
+}
+
+.peek {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 12px 34px;
+  gap: 8px;
+}
+
+.peek-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.peek-head .chip {
+  position: static;
+  transform: none;
+}
+
+.peek .table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.table.is-peek {
+  width: auto;
 }
