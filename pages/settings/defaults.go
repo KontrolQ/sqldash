@@ -4,4 +4,5 @@ const (
 	LogPrefix = "SettingsPage"
 
 	IndexTemplate = "settings/index"
+	SettingsLabel = "Settings"
 )

@@ -12,16 +12,13 @@ import (
 func Index(context fiber.Ctx) error {
 	theme, _ := context.Locals(meta.ThemeKey).(string)
 
-	data, dataError := service.GetIndexData(
-		sessions.Remembered(context),
-		theme,
-	)
-
+	data, dataError := service.GetIndexData(sessions.Remembered(context), theme)
 	if dataError != nil {
 		return dataError
 	}
 
 	meta.SetPageTitle(context, data.Title)
+	meta.SetCrumbs(context, meta.Crumb{Label: SettingsLabel})
 
 	return shortcuts.Render(context, IndexTemplate, data)
 }

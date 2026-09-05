@@ -7,4 +7,8 @@ const (
 	ShowTemplate  = "databases/show"
 
 	NameParameter = "name"
+
+	DatabasesLabel  = "Databases"
+	DatabasesPath   = "/"
+	OverviewSection = "overview"
 )

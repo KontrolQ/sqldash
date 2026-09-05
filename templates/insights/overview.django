@@ -14,11 +14,33 @@
 </div>
 </div>
 
+{% include "partials/databasetabs.django" %}
+
 <div class="stats">
 <div class="stat"><span class="stat-label">Queries</span><span class="stat-value">{{ Queries }}</span><span class="stat-note">{{ Failures }} failed</span></div>
 <div class="stat"><span class="stat-label">Rows read</span><span class="stat-value">{{ RowsRead }}</span></div>
 <div class="stat"><span class="stat-label">Rows written</span><span class="stat-value">{{ RowsWritten }}</span></div>
 <div class="stat"><span class="stat-label">Average</span><span class="stat-value">{{ Average }}</span></div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Queries over time</div>
+<div class="card-note">Reads and writes over the last {{ Window }}.</div>
+</div>
+<div class="card-body">
+{% include "partials/chart.django" with chart_data=TrafficChart chart_series=TrafficSeries %}
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Latency over time</div>
+<div class="card-note">Percentiles are read from a histogram, so they are close rather than exact.</div>
+</div>
+<div class="card-body">
+{% include "partials/chart.django" with chart_data=LatencyChart chart_series=LatencySeries %}
+</div>
 </div>
 
 <div class="card">

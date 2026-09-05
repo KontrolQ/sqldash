@@ -12,4 +12,13 @@ const (
 	SortParameter      = "sort"
 	DirectionParameter = "direction"
 	SearchParameter    = "search"
+
+	DatabasesLabel = "Databases"
+	DatabasesPath  = "/"
+	DatabasePath   = "/databases/"
+
+	DataLabel      = "Data"
+	DataSection    = "data"
+	ConsoleLabel   = "Console"
+	ConsoleSection = "console"
 )

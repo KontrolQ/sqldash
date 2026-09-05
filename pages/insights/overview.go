@@ -15,6 +15,7 @@ func Overview(context fiber.Ctx) error {
 	}
 
 	meta.SetPageTitle(context, data.Title)
+	meta.SetCrumbs(context, meta.Crumb{Label: InsightsLabel})
 
 	return shortcuts.Render(context, OverviewTemplate, data)
 }

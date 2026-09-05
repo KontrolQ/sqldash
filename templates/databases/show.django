@@ -6,13 +6,9 @@
 <h1>{{ Name }}</h1>
 <p class="page-subtitle">{{ Address }}</p>
 </div>
-<div class="page-actions">
-<a class="button" href="{% url "databases.explore" name=Name %}">Explore</a>
-<a class="button is-outline" href="{% url "databases.insights" name=Name %}">Insights</a>
-<a class="button is-outline" href="{% url "databases" %}">All databases</a>
-</div>
 </div>
 
+{% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
 {% if Secret %}

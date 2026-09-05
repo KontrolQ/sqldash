@@ -8,7 +8,7 @@
 </div>
 </div>
 
-{% include "partials/explorertabs.django" %}
+{% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
 <div class="card">

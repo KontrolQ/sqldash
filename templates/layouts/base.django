@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="{% static "css/panels.css" %}">
 <link rel="stylesheet" href="{% static "css/tables.css" %}">
 <link rel="stylesheet" href="{% static "css/tabs.css" %}">
+<link rel="stylesheet" href="{% static "css/chart.css" %}">
 {% block styles %}{% endblock %}
 </head>
 <body>
@@ -39,6 +40,7 @@
 <script src="{% static "js/password.js" %}" defer></script>
 <script src="{% static "js/select.js" %}" defer></script>
 <script src="{% static "js/moment.js" %}" defer></script>
+<script src="{% static "js/chart.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

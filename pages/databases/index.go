@@ -15,6 +15,7 @@ func Index(context fiber.Ctx) error {
 	}
 
 	meta.SetPageTitle(context, data.Title)
+	meta.SetCrumbs(context, meta.Crumb{Label: DatabasesLabel})
 
 	return shortcuts.Render(context, IndexTemplate, data)
 }

@@ -1,6 +1,8 @@
 package insights
 
 import (
+	"net/url"
+
 	service "sqldash/services/insights"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -9,12 +11,20 @@ import (
 )
 
 func ForDatabase(context fiber.Ctx) error {
-	data, dataError := service.GetOverview(context.Params(NameParameter), context.Query(WindowParameter))
+	name := context.Params(NameParameter)
+
+	data, dataError := service.GetOverview(name, context.Query(WindowParameter))
 	if dataError != nil {
 		return dataError
 	}
 
 	meta.SetPageTitle(context, data.Title)
+	meta.SetCrumbs(context,
+		meta.Crumb{Label: DatabasesLabel, URL: DatabasesPath},
+		meta.Crumb{Label: name, URL: DatabasePath + url.PathEscape(name)},
+		meta.Crumb{Label: InsightsLabel},
+	)
+	meta.SetSection(context, name, InsightsSection)
 
 	return shortcuts.Render(context, OverviewTemplate, data)
 }

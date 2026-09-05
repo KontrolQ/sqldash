@@ -9,17 +9,19 @@ import (
 )
 
 func Show(context fiber.Ctx) error {
-	data, dataError := service.GetShowData(
-		context.Context(),
-		context.Params(NameParameter),
-		"",
-	)
+	name := context.Params(NameParameter)
 
+	data, dataError := service.GetShowData(context.Context(), name, "")
 	if dataError != nil {
 		return dataError
 	}
 
 	meta.SetPageTitle(context, data.Title)
+	meta.SetCrumbs(context,
+		meta.Crumb{Label: DatabasesLabel, URL: DatabasesPath},
+		meta.Crumb{Label: name},
+	)
+	meta.SetSection(context, name, OverviewSection)
 
 	return shortcuts.Render(context, ShowTemplate, data)
 }
