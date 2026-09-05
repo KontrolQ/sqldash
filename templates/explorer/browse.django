@@ -159,6 +159,7 @@ Save changes
 {% endif %}
 {% for cell in row.Cells %}
 <td class="cell" data-cell="{{ cell.Column }}"{% if Editable %} data-edit tabindex="-1"{% endif %}>
+<span class="cell-body">
 {% if cell.IsNull %}
 <span class="cell-text null">NULL</span>
 {% else %}
@@ -174,6 +175,7 @@ Save changes
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
 </a>
 {% endif %}
+</span>
 </td>
 {% endfor %}
 {% if Editable %}
@@ -187,7 +189,7 @@ Save changes
 {% for cell in row.Cells %}
 {% if cell.Peek %}
 <tr class="peek-row" id="peek-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" hidden>
-<td colspan="99">
+<td colspan="{% if Editable %}{{ Columns|length|add:2 }}{% else %}{{ Columns|length }}{% endif %}">
 <div class="peek">
 <div class="peek-head">
 <span class="chip">{{ cell.Peek.Table }}</span>
@@ -205,7 +207,7 @@ Save changes
 {% endif %}
 {% endfor %}
 {% empty %}
-<tr><td colspan="99" class="cell-empty">No rows match.</td></tr>
+<tr><td colspan="{% if Editable %}{{ Columns|length|add:2 }}{% else %}{{ Columns|length }}{% endif %}" class="cell-empty">No rows match.</td></tr>
 {% endfor %}
 </tbody>
 </table>

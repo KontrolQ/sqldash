@@ -108,7 +108,7 @@ CSV
 {% for row in Rows %}
 <tr>{% for cell in row %}<td class="cell">{{ cell }}</td>{% endfor %}</tr>
 {% empty %}
-<tr><td colspan="99" class="cell-empty">No rows returned.</td></tr>
+<tr><td colspan="{{ Columns|length }}" class="cell-empty">No rows returned.</td></tr>
 {% endfor %}
 </tbody>
 </table>

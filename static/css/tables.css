@@ -52,7 +52,8 @@
   gap: var(--sp-2);
 }
 
-.table-numeric {
+.table-numeric,
+.table th.table-numeric {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -256,17 +257,14 @@ tr.is-picked td {
 }
 
 .cell-jump {
-  position: absolute;
-  top: 50%;
-  right: 4px;
   display: grid;
   width: 18px;
   height: 18px;
+  padding: 0;
   border-radius: var(--radius-sm);
   color: var(--muted-foreground);
   opacity: 0;
   place-items: center;
-  transform: translateY(-50%);
 }
 
 .cell-jump svg {
@@ -284,11 +282,24 @@ tr.is-picked td {
   color: var(--foreground);
 }
 
-.cell .chip {
-  position: absolute;
-  top: 50%;
-  right: 26px;
-  transform: translateY(-50%);
+.cell-body {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+.cell-body .cell-text {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-body .chip,
+.cell-body .cell-jump {
+  flex-shrink: 0;
 }
 
 .peek-row > td {
