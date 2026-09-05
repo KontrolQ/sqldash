@@ -8,11 +8,15 @@ import (
 )
 
 func databaseFor(request *incoming) string {
-	if named := strings.TrimSpace(request.header.Get(NamespaceHeader)); named != "" {
+	if named := databaseInHost(request.host); named != "" {
 		return named
 	}
 
-	host := hostWithoutPort(request.host)
+	return strings.TrimSpace(request.header.Get(NamespaceHeader))
+}
+
+func databaseInHost(asked string) string {
+	host := hostWithoutPort(asked)
 	domain := strings.ToLower(config.Server.Domain)
 
 	if host == domain {

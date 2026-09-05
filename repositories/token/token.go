@@ -12,7 +12,7 @@ import (
 func ForDatabase(name string) ([]models.Token, error) {
 	records := make([]models.Token, 0)
 
-	if findError := store.DB.Where("database_name = ?", name).Order(NewestFirst).Find(&records).Error; findError != nil {
+	if findError := store.DB.Where("database_name = ? AND revoked_at IS NULL", name).Order(NewestFirst).Find(&records).Error; findError != nil {
 		return nil, findError
 	}
 
