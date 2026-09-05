@@ -52,6 +52,11 @@ func handle(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	if status, refusal := permitted(request, database); status != 0 {
+		http.Error(writer, refusal, status)
+		return
+	}
+
 	request.Header.Set(NamespaceHeader, database)
 
 	if carriesStatements(request) {

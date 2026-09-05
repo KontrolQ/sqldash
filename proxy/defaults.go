@@ -21,4 +21,8 @@ const (
 	MaximumMeasuredBody = 8 << 20
 
 	RegistryFreshness = 5 * time.Second
+
+	AuthorizationHeader = "authorization"
+	BearerPrefix        = "bearer "
+	UseNoteInterval     = time.Minute
 )
