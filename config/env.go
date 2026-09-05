@@ -13,6 +13,7 @@ type dataSettings struct {
 }
 
 type sqldSettings struct {
+	Managed      bool   `env:"SQLD_MANAGED" envDefault:"true"`
 	BinaryPath   string `env:"SQLD_BINARY" envDefault:"sqld"`
 	Address      string `env:"SQLD_ADDRESS" envDefault:"127.0.0.1:8080"`
 	AdminAddress string `env:"SQLD_ADMIN_ADDRESS" envDefault:"127.0.0.1:8081"`

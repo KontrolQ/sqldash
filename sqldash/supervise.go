@@ -14,12 +14,19 @@ func supervise() {
 		logger.Fatalf(LogPrefix, ExecutableLog, executableError)
 	}
 
-	supervisor.Run(
-		supervisor.Process{
+	processes := make([]supervisor.Process, 0, 3)
+
+	if config.Sqld.Managed {
+		processes = append(processes, supervisor.Process{
 			Name:      SqldProcessName,
 			Path:      config.Sqld.BinaryPath,
 			Arguments: sqldArguments(),
-		},
+		})
+	} else {
+		logger.Infof(LogPrefix, UnmanagedSqldLog, config.Sqld.Address)
+	}
+
+	processes = append(processes,
 		supervisor.Process{
 			Name:      ProxyProcessName,
 			Path:      executable,
@@ -31,6 +38,8 @@ func supervise() {
 			Arguments: []string{ModeWeb},
 		},
 	)
+
+	supervisor.Run(processes...)
 }
 
 func sqldArguments() []string {
