@@ -9,6 +9,7 @@ const (
 	DatabaseKey = "Database"
 	ProblemKey  = "Problem"
 	DoneKey     = "Done"
+	PaletteKey  = "Palette"
 	RequestKey  = "Request"
 	TitleKey    = "Title"
 	UserKey     = "User"

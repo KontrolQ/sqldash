@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="{% static "css/tabs.css" %}">
 <link rel="stylesheet" href="{% static "css/chart.css" %}">
 <link rel="stylesheet" href="{% static "css/dialog.css" %}">
+<link rel="stylesheet" href="{% static "css/command.css" %}">
 {% block styles %}{% endblock %}
 </head>
 <body>
@@ -46,6 +47,7 @@
 <script src="{% static "js/confirm.js" %}" defer></script>
 <script src="{% static "js/copy.js" %}" defer></script>
 <script src="{% static "js/toast.js" %}" defer></script>
+<script src="{% static "js/palette.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

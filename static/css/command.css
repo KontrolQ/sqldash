@@ -1,0 +1,161 @@
+.palette-open {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  gap: 8px;
+  transition: color var(--ease), background var(--ease);
+}
+
+.palette-open:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.palette-open svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.palette-open-text {
+  padding-right: 24px;
+}
+
+.kbd {
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.palette {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+}
+
+.command {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-width: min(32rem, calc(100% - 2rem));
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--popover);
+  box-shadow: var(--shadow-lg);
+  color: var(--popover-foreground);
+  transform: translate(-50%, -50%);
+  animation: dialog-rise 200ms ease;
+}
+
+.command-search {
+  display: flex;
+  height: 48px;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+
+.command-search svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  opacity: 0.5;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.command-input {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+}
+
+.command-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.command-list {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 300px;
+  scroll-padding: 4px 0;
+}
+
+.command-group {
+  overflow: hidden;
+  padding: 8px;
+}
+
+.command-group + .command-group {
+  padding-top: 0;
+}
+
+.command-group-label {
+  padding: 6px 8px;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  line-height: var(--text-xs-lh);
+}
+
+.command-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-size: var(--text-sm);
+  gap: 8px;
+  line-height: var(--text-sm-lh);
+  user-select: none;
+}
+
+.command-item.is-active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.command-shortcut {
+  margin-left: auto;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+}
+
+.command-empty {
+  padding: 24px 0;
+  font-size: var(--text-sm);
+  text-align: center;
+}

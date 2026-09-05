@@ -11,4 +11,5 @@ func Initialize(application *fiber.App) {
 	application.Use(request)
 	application.Use(chrome)
 	application.Use(account)
+	application.Use(palette)
 }

@@ -1,5 +1,7 @@
 package middleware
 
+import "sqldash/utils/meta"
+
 const (
 	LogPrefix = "Middleware"
 
@@ -11,7 +13,30 @@ const (
 	ThemeSystem = "system"
 	ThemeLight  = "light"
 	ThemeDark   = "dark"
+
+	DatabasePath = "/databases/"
+	ExplorePath  = "/explore"
+	ConsolePath  = "/console"
+	InsightsPath = "/insights"
+	TableQuery   = "?table="
+
+	PaletteGoLabel        = "Go to"
+	PaletteDatabasesLabel = "Databases"
+	PaletteTablesLabel    = "Tables"
+	PaletteDatabaseNote   = "Database"
+	PaletteTableNote      = "Table"
+	PaletteViewNote       = "View"
+	PaletteOverviewLabel  = "Overview"
+	PaletteDataLabel      = "Data"
+	PaletteConsoleLabel   = "Console"
+	PaletteInsightsLabel  = "Insights"
 )
+
+var PaletteDestinations = []meta.PaletteItem{
+	{Label: "Databases", URL: "/"},
+	{Label: "Insights", URL: "/insights"},
+	{Label: "Settings", URL: "/settings"},
+}
 
 var OpenPaths = []string{LoginPath, SetupPath}
 

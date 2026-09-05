@@ -6,5 +6,6 @@
 {% endfor %}
 </nav>
 <div class="topbar-spacer"></div>
+{% include "partials/palette.django" %}
 <span class="topbar-meta">{{ Version }}</span>
 </header>
