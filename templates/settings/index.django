@@ -1,0 +1,84 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>Settings</h1>
+<p class="page-subtitle">Your account and how sqldash looks.</p>
+</div>
+</div>
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Account</div>
+<div class="card-note">The name and address this account signs in with.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "settings.details" %}">
+<div class="row">
+<div class="field">
+<label class="label" for="username">Username</label>
+<input class="input" id="username" name="username" value="{{ Username }}" autocomplete="username" required>
+</div>
+<div class="field">
+<label class="label" for="email">Email</label>
+<input class="input" id="email" name="email" type="email" value="{{ Email }}" autocomplete="email" required>
+</div>
+</div>
+<div class="actions">
+<button class="button" type="submit">Save changes</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Password</div>
+<div class="card-note">At least eight characters.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "settings.password" %}">
+<div class="row">
+<div class="field">
+<label class="label" for="current">Current password</label>
+{% include "partials/password.django" with field_id="current" field_name="current" field_autocomplete="current-password" %}
+</div>
+<div class="field">
+<label class="label" for="wanted">New password</label>
+{% include "partials/password.django" with field_id="wanted" field_name="wanted" field_autocomplete="new-password" %}
+</div>
+</div>
+<div class="actions">
+<button class="button" type="submit">Change password</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Appearance</div>
+<div class="card-note">Follow your system, or pick one.</div>
+</div>
+<div class="card-body">
+<form class="themes" method="post" action="{% url "settings.theme" %}">
+<button class="theme-choice {% if Theme == "system" %}is-chosen{% endif %}" type="submit" name="theme" value="system">
+<span class="theme-swatch is-system"></span>
+<span class="theme-name">System</span>
+</button>
+<button class="theme-choice {% if Theme == "light" %}is-chosen{% endif %}" type="submit" name="theme" value="light">
+<span class="theme-swatch is-light"></span>
+<span class="theme-name">Light</span>
+</button>
+<button class="theme-choice {% if Theme == "dark" %}is-chosen{% endif %}" type="submit" name="theme" value="dark">
+<span class="theme-swatch is-dark"></span>
+<span class="theme-name">Dark</span>
+</button>
+</form>
+</div>
+</div>
+{% endblock %}
