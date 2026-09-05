@@ -1,7 +1,7 @@
 {% extends "layouts/base.django" %}
 
 {% block content %}
-<div class="page-head">
+<div class="page-head is-slim">
 <div class="page-title">
 <h1>{{ Heading }}</h1>
 <p class="page-subtitle">Measured across {{ Scope }} over the last {{ Window }}.</p>
@@ -18,30 +18,32 @@
 {% for tile in Tiles %}{% include "partials/tile.django" %}{% endfor %}
 </div>
 
-<div class="card">
-<div class="card-head has-border">
+<div class="duo">
+<div class="card is-panel">
+<div class="card-head">
 <div class="card-title">Queries over time</div>
-<div class="card-note">Reads and writes over the last {{ Window }}.</div>
+{% include "partials/hint.django" with hint_text="Reads and writes counted over the last "|add:Window %}
 </div>
 <div class="card-body">
 {% include "partials/chart.django" with chart_data=TrafficChart chart_series=TrafficSeries %}
 </div>
 </div>
 
-<div class="card">
-<div class="card-head has-border">
+<div class="card is-panel">
+<div class="card-head">
 <div class="card-title">Latency over time</div>
-<div class="card-note">Percentiles are read from a histogram, so they are close rather than exact.</div>
+{% include "partials/hint.django" with hint_text="Percentiles are read from a histogram, so they are close rather than exact." %}
 </div>
 <div class="card-body">
 {% include "partials/chart.django" with chart_data=LatencyChart chart_series=LatencySeries %}
 </div>
 </div>
+</div>
 
-<div class="card">
-<div class="card-head has-border">
+<div class="card is-panel">
+<div class="card-head">
 <div class="card-title">Latency spread</div>
-<div class="card-note">Across every query in the period.</div>
+{% include "partials/hint.django" with hint_text="Across every query in the period." %}
 </div>
 <div class="card-body">
 <div class="spread">
@@ -55,10 +57,13 @@
 </div>
 </div>
 
-<div class="card is-table">
-<div class="card-head has-border is-padded">
+<div class="card is-panel is-table">
+<div class="card-head">
 <div class="card-title">Top queries</div>
-<div class="card-note">The heaviest {{ Top|length }} by total time. <a class="link" href="{{ QueriesPath }}?window={{ Window }}">See them all</a>.</div>
+{% include "partials/hint.django" with hint_text="The heaviest by total time over the period." %}
+<div class="card-tools">
+<a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}">See them all</a>
+</div>
 </div>
 {% if Top %}
 {% include "partials/querytable.django" with query_rows=Top query_sortable=0 %}

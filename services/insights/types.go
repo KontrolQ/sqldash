@@ -51,6 +51,7 @@ type TileView struct {
 	Tone   string
 	Alarm  bool
 	Spark  string
+	Fill   string
 }
 
 type QueryColumn struct {

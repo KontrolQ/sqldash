@@ -87,3 +87,62 @@
 .card-head.is-padded {
   padding-top: 24px;
 }
+
+.content > .card + .card {
+  margin-top: 0;
+}
+
+.card.is-panel {
+  padding: 0;
+  gap: 0;
+}
+
+.card.is-panel > .card-head {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 0 var(--sp-4);
+  border-bottom: var(--bw) solid var(--border);
+  gap: var(--sp-2);
+}
+
+.card.is-panel .card-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+}
+
+.card.is-panel > .card-body {
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+}
+
+.card-tools {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: var(--sp-2);
+}
+
+.hint {
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  cursor: help;
+  place-items: center;
+}
+
+.hint svg {
+  width: 14px;
+  height: 14px;
+}
+
+.duo {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+}
+
+.duo > .card + .card {
+  margin-top: 0;
+}

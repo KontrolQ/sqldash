@@ -14,12 +14,13 @@ type chartPoint struct {
 type chartData struct {
 	Kind   string       `json:"kind"`
 	Unit   string       `json:"unit"`
+	Axis   string       `json:"axis"`
 	Series []string     `json:"series"`
 	Points []chartPoint `json:"points"`
 }
 
 func trafficChart(points []analytics.Point) string {
-	held := chartData{Kind: StackedKind, Series: []string{ReadsName, WritesName}}
+	held := chartData{Kind: StackedKind, Axis: RowsAxis, Series: []string{ReadsName, WritesName}}
 
 	measured := false
 

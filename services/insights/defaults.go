@@ -80,8 +80,9 @@ const (
 	MoveTo         = "M"
 	LineTo         = "L"
 	BarLabelFormat = "%d queries · %d read · %d written · %s"
-	MomentLayout   = "2 Jan 15:04"
-	TickLayout     = "2 Jan 15:04"
+	MomentLayout   = "Jan 2, 15:04"
+	TickLayout     = "Jan 2, 15:04"
+	RowsAxis       = "rows"
 
 	StackedKind     = "stacked"
 	LineKind        = "line"
@@ -101,7 +102,8 @@ const (
 
 	SparkWidth   = 120.0
 	SparkHeight  = 32.0
-	SparkPadding = 6.0
+	SparkPadding = 4.0
+	FillFormat   = "%s L%.2f %.2f L0 %.2f Z"
 
 	QueriesLabel     = "Queries"
 	FailuresLabel    = "Failures"

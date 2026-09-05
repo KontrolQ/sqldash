@@ -118,3 +118,8 @@ svg {
   stroke-linejoin: round;
   stroke-width: 2;
 }
+
+svg text {
+  fill: currentColor;
+  stroke: none;
+}

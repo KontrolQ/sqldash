@@ -1,50 +1,59 @@
 .tiles {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  overflow: hidden;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
 }
 
 .tile {
   display: flex;
+  overflow: hidden;
+  height: 96px;
   flex-direction: column;
-  padding: 14px 16px 12px;
+  padding: 10px 12px 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   background: var(--card);
-  box-shadow: var(--shadow-sm);
-  gap: 4px;
+  gap: 3px;
 }
 
 .tile-label {
+  overflow: hidden;
   color: var(--muted-foreground);
   font-size: var(--text-xs);
   line-height: var(--text-xs-lh);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tile-line {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tile-value {
-  font-size: var(--text-2xl);
+  font-size: 20px;
   font-weight: var(--fw-semibold);
-  letter-spacing: -0.025em;
-  line-height: var(--text-2xl-lh);
+  letter-spacing: -0.02em;
+  line-height: 26px;
 }
 
 .tile-change {
   display: inline-flex;
+  overflow: hidden;
   align-items: center;
   color: var(--muted-foreground);
-  font-size: var(--text-xs);
-  gap: 2px;
+  font-size: 11px;
+  gap: 1px;
+  line-height: 16px;
+  white-space: nowrap;
 }
 
 .tile-change svg {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 
 .tile-change.is-good {
@@ -59,49 +68,71 @@
   color: var(--destructive);
 }
 
-.tile.is-alarm .tile-spark {
+.tile.is-alarm .tile-spark-line {
   stroke: var(--destructive);
 }
 
+.tile.is-alarm .tile-spark-fill {
+  fill: var(--destructive);
+}
+
 .tile-spark {
-  width: 100%;
-  height: 32px;
-  margin-top: 6px;
+  width: calc(100% + 24px);
+  height: 34px;
+  margin: auto -12px 0;
+}
+
+.tile-spark-line {
+  fill: none;
   stroke: var(--chart-read);
-  stroke-width: 1.5;
+  stroke-width: 1.25;
   vector-effect: non-scaling-stroke;
 }
 
+.tile-spark-fill {
+  fill: var(--chart-read);
+  opacity: 0.16;
+  stroke: none;
+}
+
 .tile-quiet {
-  margin-top: 6px;
+  margin-top: auto;
   color: var(--muted-foreground);
   font-size: 11px;
-  line-height: 32px;
+  line-height: 34px;
+  text-align: center;
 }
 
 .spread {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
 }
 
 .spread-part {
   display: flex;
   flex-direction: column;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  padding: 0 var(--sp-4);
+  border-left: var(--bw) solid var(--border);
   gap: 2px;
+}
+
+.spread-part:first-child {
+  padding-left: 0;
+  border-left: 0;
 }
 
 .spread-label {
   color: var(--muted-foreground);
   font-size: var(--text-xs);
+  line-height: var(--text-xs-lh);
 }
 
 .spread-value {
-  font-size: var(--text-lg);
-  font-weight: var(--fw-semibold);
+  font-size: var(--text-base);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: 22px;
 }
 
 .table.is-queries .statement {

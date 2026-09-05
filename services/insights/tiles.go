@@ -63,6 +63,7 @@ func tilesFor(now *analytics.Summary, before *analytics.Summary, points []analyt
 
 func measure(spec tileSpec, points []analytics.Point) TileView {
 	change, kind := readableChange(spec.Now, spec.Before)
+	line := spark(points, spec.Pick)
 
 	return TileView{
 		Label:  spec.Label,
@@ -71,8 +72,17 @@ func measure(spec tileSpec, points []analytics.Point) TileView {
 		Kind:   kind,
 		Tone:   toneOf(kind, spec.Better),
 		Alarm:  spec.Alarm,
-		Spark:  spark(points, spec.Pick),
+		Spark:  line,
+		Fill:   closed(line),
 	}
+}
+
+func closed(line string) string {
+	if line == "" {
+		return ""
+	}
+
+	return fmt.Sprintf(FillFormat, line, SparkWidth, SparkHeight, SparkHeight)
 }
 
 func toneOf(kind string, better string) string {

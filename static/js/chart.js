@@ -6,10 +6,12 @@
   }
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const PLOT_HEIGHT = 220;
-  const AXIS_WIDTH = 58;
-  const AXIS_HEIGHT = 26;
-  const TOP_ROOM = 10;
+  const PLOT_HEIGHT = 190;
+  const AXIS_WIDTH = 62;
+  const AXIS_HEIGHT = 30;
+  const TOP_ROOM = 12;
+  const TICK_LENGTH = 5;
+  const TICK_GAP = 6;
 
   function make(name, attributes) {
     const node = document.createElementNS(SVG, name);
@@ -53,6 +55,22 @@
 
   function label(value, unit) {
     return unit === 'ms' ? duration(value) : readable(value);
+  }
+
+  function bare(value, unit) {
+    if (unit !== 'ms') {
+      return readable(value);
+    }
+
+    return value >= 1000 ? trim(value / 1000) : trim(value);
+  }
+
+  function unitOf(chart) {
+    if (chart.unit === 'ms') {
+      return 'ms';
+    }
+
+    return chart.axis || '';
   }
 
   function niceStep(rough) {
@@ -114,6 +132,7 @@
     const key = holder.querySelector('[data-chart-key]');
     const stacked = chart.kind === 'stacked';
     const series = chart.series || [];
+    const readings = [];
 
     function summarise(band) {
       if (stacked) {
@@ -129,10 +148,11 @@
 
     if (key) {
       key.innerHTML = '';
+      readings.length = 0;
 
       series.forEach(function (name, band) {
         const item = document.createElement('span');
-        item.className = 'chart-key-item';
+        item.className = 'chart-key-item is-' + band;
 
         const swatch = document.createElement('span');
         swatch.className = 'chart-swatch is-' + band;
@@ -148,12 +168,28 @@
         item.appendChild(title);
         item.appendChild(value);
         key.appendChild(item);
+
+        readings.push({ item: item, value: value, resting: value.textContent });
       });
 
       const note = document.createElement('span');
       note.className = 'chart-key-note';
       note.textContent = stacked ? 'total' : 'peak';
       key.appendChild(note);
+    }
+
+    function rest() {
+      readings.forEach(function (reading) {
+        reading.value.textContent = reading.resting;
+        reading.item.classList.remove('is-live');
+      });
+    }
+
+    function show(point) {
+      readings.forEach(function (reading, band) {
+        reading.value.textContent = label(point.values[band], chart.unit);
+        reading.item.classList.add('is-live');
+      });
     }
 
     function draw() {
@@ -188,14 +224,46 @@
         const y = scale(value);
 
         svg.appendChild(make('line', {
-          class: value === 0 ? 'chart-base' : 'chart-rule',
-          x1: AXIS_WIDTH, y1: y, x2: width, y2: y,
+          class: 'chart-mark',
+          x1: AXIS_WIDTH - TICK_LENGTH - 1,
+          y1: y,
+          x2: AXIS_WIDTH - 1,
+          y2: y,
         }));
 
-        const text = make('text', { class: 'chart-tick', x: AXIS_WIDTH - 10, y: y + 4, 'text-anchor': 'end' });
-        text.textContent = chart.unit === 'ms' ? duration(value) : readable(value);
+        const text = make('text', {
+          class: 'chart-tick',
+          x: AXIS_WIDTH - TICK_LENGTH - TICK_GAP,
+          y: y + 4,
+          'text-anchor': 'end',
+        });
+
+        text.textContent = bare(value, chart.unit);
         svg.appendChild(text);
       });
+
+      const unit = unitOf(chart);
+
+      if (unit) {
+        const side = make('text', {
+          class: 'chart-unit',
+          x: 12,
+          y: TOP_ROOM + PLOT_HEIGHT / 2,
+          transform: 'rotate(-90 12 ' + (TOP_ROOM + PLOT_HEIGHT / 2) + ')',
+          'text-anchor': 'middle',
+        });
+
+        side.textContent = unit;
+        svg.appendChild(side);
+      }
+
+      svg.appendChild(make('line', {
+        class: 'chart-base',
+        x1: AXIS_WIDTH - 1,
+        y1: scale(0),
+        x2: width,
+        y2: scale(0),
+      }));
 
       const slot = plotWidth / chart.points.length;
       const centreOf = function (index) {
@@ -236,26 +304,42 @@
         });
       }
 
-      const wanted = Math.max(2, Math.min(6, Math.floor(plotWidth / 130)));
-      const every = Math.max(1, Math.round((chart.points.length - 1) / (wanted - 1)));
+      const wanted = Math.max(2, Math.min(6, Math.floor(plotWidth / 110)));
+      const last = chart.points.length - 1;
+      const stops = [];
 
-      for (let index = 0; index < chart.points.length; index += every) {
+      for (let step = 0; step < wanted; step += 1) {
+        const index = Math.round((step * last) / (wanted - 1));
+
+        if (stops.indexOf(index) < 0) {
+          stops.push(index);
+        }
+      }
+
+      stops.forEach(function (index) {
         const x = centreOf(index);
 
         svg.appendChild(make('line', {
-          class: 'chart-mark', x1: x, y1: TOP_ROOM + PLOT_HEIGHT, x2: x, y2: TOP_ROOM + PLOT_HEIGHT + 4,
+          class: 'chart-mark',
+          x1: x,
+          y1: scale(0),
+          x2: x,
+          y2: scale(0) + TICK_LENGTH,
         }));
+
+        const first = index === stops[0];
+        const final = index === stops[stops.length - 1];
 
         const text = make('text', {
           class: 'chart-tick',
-          x: x,
-          y: TOP_ROOM + PLOT_HEIGHT + 18,
-          'text-anchor': index === 0 ? 'start' : 'middle',
+          x: final ? width : (first ? AXIS_WIDTH : x),
+          y: scale(0) + TICK_LENGTH + 14,
+          'text-anchor': final ? 'end' : (first ? 'start' : 'middle'),
         });
 
         text.textContent = chart.points[index].label;
         svg.appendChild(text);
-      }
+      });
 
       const crosshair = make('line', {
         class: 'chart-crosshair', x1: 0, y1: TOP_ROOM, x2: 0, y2: TOP_ROOM + PLOT_HEIGHT,
@@ -289,6 +373,8 @@
             dot.style.opacity = '1';
           });
         }
+
+        show(point);
 
         const when = document.createElement('span');
         when.className = 'chart-tip-when';
@@ -326,6 +412,7 @@
           dot.style.opacity = '0';
         });
         tip.hidden = true;
+        rest();
       });
 
       canvas.innerHTML = '';
