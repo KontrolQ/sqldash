@@ -207,6 +207,10 @@
         return;
       }
 
+      if (editing && editing.cell === cell) {
+        return;
+      }
+
       cell.focus();
     });
 
