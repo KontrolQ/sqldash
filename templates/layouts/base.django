@@ -59,6 +59,10 @@
 <script src="{% static "js/console.js" %}" defer></script>
 <script src="{% static "js/editor.js" %}" defer></script>
 <script src="{% static "js/rows.js" %}" defer></script>
+<script src="{% static "js/sheet.js" %}" defer></script>
+<script src="{% static "js/swap.js" %}" defer></script>
+<script src="{% static "js/filter.js" %}" defer></script>
+<script src="{% static "js/grid.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

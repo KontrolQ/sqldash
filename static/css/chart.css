@@ -1,4 +1,9 @@
 .chart {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-plot {
   position: relative;
 }
 
@@ -24,7 +29,7 @@
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 2;
+  stroke-width: 1.75;
 }
 
 .chart-line.is-0 {
@@ -41,7 +46,37 @@
 
 .chart-rule {
   stroke: var(--border);
+  stroke-dasharray: 2 4;
   stroke-width: 1;
+}
+
+.chart-base {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-mark {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-dot {
+  stroke: var(--background);
+  stroke-width: 2;
+  pointer-events: none;
+  transition: opacity var(--ease);
+}
+
+.chart-dot.is-0 {
+  fill: var(--chart-read);
+}
+
+.chart-dot.is-1 {
+  fill: var(--chart-write);
+}
+
+.chart-dot.is-2 {
+  fill: var(--chart-third);
 }
 
 .chart-crosshair {
@@ -68,10 +103,26 @@
   line-height: 16px;
 }
 
-.chart-key span {
+.chart-key-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.chart-key-name {
+  color: var(--muted-foreground);
+}
+
+.chart-key-item b {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.chart-key-note {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.7;
 }
 
 .chart-swatch {

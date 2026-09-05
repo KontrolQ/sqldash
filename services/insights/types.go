@@ -48,6 +48,8 @@ type TileView struct {
 	Value  string
 	Change string
 	Kind   string
+	Tone   string
+	Alarm  bool
 	Spark  string
 }
 

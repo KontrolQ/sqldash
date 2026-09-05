@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"sqldash/config"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
@@ -32,6 +33,7 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 	shown := &BrowseContext{
 		Title:         asked.Database,
 		Database:      asked.Database,
+		Address:       asked.Database + "." + config.Server.Domain,
 		Tables:        tables,
 		PageSize:      DefaultPageSize,
 		Page:          1,

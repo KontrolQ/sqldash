@@ -1,0 +1,8 @@
+<div class="filter-row" data-filter-row>
+{% include "partials/select.django" with select_name="column" select_label="Column" select_chosen=filter_column select_options=ColumnChoices select_small=1 select_form="filter-form" %}
+{% include "partials/select.django" with select_name="operator" select_label="Comparison" select_chosen=filter_operator select_options=Operators select_small=1 select_form="filter-form" %}
+<input class="input is-small" form="filter-form" name="value" value="{{ filter_value }}" placeholder="Value" aria-label="Value">
+<button class="step is-bare" type="button" data-filter-drop aria-label="Remove this filter">
+<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
+</div>

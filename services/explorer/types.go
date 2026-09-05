@@ -45,6 +45,7 @@ type RowView struct {
 type BrowseContext struct {
 	Title         string
 	Database      string
+	Address       string
 	Table         string
 	IsView        bool
 	Tables        []TableView
@@ -84,6 +85,7 @@ type SchemaTable struct {
 type ConsoleContext struct {
 	Title      string
 	Database   string
+	Address    string
 	Tables     []TableView
 	BrowsePath string
 	Table      string
@@ -110,6 +112,7 @@ type StructureContext struct {
 	BrowsePath    string
 	StructurePath string
 	Database      string
+	Address       string
 	Table         string
 	IsView        bool
 	Tables        []TableView

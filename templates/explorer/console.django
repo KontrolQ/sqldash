@@ -3,6 +3,13 @@
 {% block tight %}is-tight{% endblock %}
 
 {% block content %}
+<div class="page-head is-slim">
+<div class="page-title">
+<h1>{{ Database }}</h1>
+<p class="page-subtitle">{{ Address }}</p>
+</div>
+</div>
+
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 

@@ -1,10 +1,10 @@
 <div class="chart" data-chart>
 {% if chart_data %}
-<div class="chart-key">
-{% for name in chart_series %}<span><span class="chart-swatch is-{{ forloop.Counter0 }}"></span>{{ name }}</span>{% endfor %}
-</div>
+<div class="chart-key" data-chart-key></div>
+<div class="chart-plot">
 <div data-chart-canvas></div>
 <div class="chart-tip" data-chart-tip hidden></div>
+</div>
 <script type="application/json">{{ chart_data|safe }}</script>
 {% else %}
 <div class="chart-empty">Nothing measured yet.</div>

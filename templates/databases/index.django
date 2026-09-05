@@ -6,67 +6,60 @@
 <h1>Databases</h1>
 <p class="page-subtitle">Every database this server holds.</p>
 </div>
+<div class="page-actions">
+<button class="button" type="button" data-sheet-open="new-database">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
+Create database
+</button>
+</div>
 </div>
 
 {% include "partials/alert.django" %}
-
-<div class="row">
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">New database</div>
-<div class="card-note">Starts empty.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.create" %}">
-<div class="field">
-<label class="label" for="create-name">Name</label>
-<input class="input" id="create-name" name="name" required>
-<span class="field-note">Lowercase letters, digits and hyphens.</span>
-</div>
-<div class="actions">
-<button class="button" type="submit">Create database</button>
-</div>
-</form>
-</div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Load a dump</div>
-<div class="card-note">Builds a database from a .sql file.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data">
-<div class="field">
-<label class="label" for="import-name">Name</label>
-<input class="input" id="import-name" name="name" required>
-</div>
-<div class="field">
-<label class="label" for="import-dump">Dump</label>
-<input class="file" id="import-dump" type="file" name="dump" accept=".sql" required>
-</div>
-<div class="actions">
-<button class="button is-outline" type="submit">Load database</button>
-</div>
-</form>
-</div>
-</div>
-</div>
 
 {% if Databases %}
 <div class="card is-table">
 <div class="table-wrap">
 <table class="table">
 <thead>
-<tr><th>Name</th><th>Address</th><th>State</th><th></th></tr>
+<tr>
+<th>Name</th>
+<th>Address</th>
+<th class="table-numeric">Tables</th>
+<th class="table-numeric">Storage</th>
+<th class="table-numeric">Rows read</th>
+<th class="table-numeric">Queries</th>
+<th>State</th>
+<th class="table-pick"></th>
+</tr>
 </thead>
 <tbody>
 {% for database in Databases %}
 <tr>
-<td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot is-live"></span>{{ database.Name }}</a></td>
+<td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
 <td class="mono muted">{{ database.Address }}</td>
-<td>{% if database.Protected %}<span class="badge is-secondary">Protected</span>{% else %}<span class="badge is-outline">Open</span>{% endif %}</td>
-<td class="table-actions"><a class="button is-ghost is-small" href="{% url "databases.show" name=database.Name %}">Manage</a></td>
+<td class="table-numeric">{{ database.Tables }}</td>
+<td class="table-numeric">{{ database.Storage }}</td>
+<td class="table-numeric">{{ database.RowsRead }}</td>
+<td class="table-numeric">{{ database.Queries }}</td>
+<td>
+{% if database.Blocked %}<span class="badge is-outline">Blocked</span>
+{% elif database.Protected %}<span class="badge is-secondary">Protected</span>
+{% else %}<span class="badge is-outline">Open</span>{% endif %}
+</td>
+<td class="table-pick">
+<div class="menu" data-menu>
+<button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions for {{ database.Name }}">
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+</button>
+<div class="menu-content" data-menu-content hidden>
+<a class="menu-plain" href="{% url "databases.show" name=database.Name %}">Manage</a>
+<a class="menu-plain" href="{% url "databases.explore" name=database.Name %}">Browse data</a>
+<a class="menu-plain" href="{% url "databases.console" name=database.Name %}">Open the console</a>
+<div class="menu-separator"></div>
+<a class="menu-plain" href="{% url "databases.export" name=database.Name %}">Download a dump</a>
+</div>
+</div>
+</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -76,7 +69,50 @@
 {% else %}
 <div class="empty">
 <span class="empty-title">No databases yet</span>
-<span>Create one above to get started.</span>
+<span>Create one to get started.</span>
 </div>
 {% endif %}
+
+<div class="sheet-veil" data-sheet="new-database" hidden>
+<div class="dialog-veil" data-sheet-close></div>
+<div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
+<div class="dialog-head">
+<div class="dialog-title" id="new-database-title">Create a database</div>
+<div class="dialog-note">Start empty, or build one from a dump you already have.</div>
+</div>
+
+<div class="tabs" data-swap>
+<button class="tab is-current" type="button" data-swap-to="make-empty">Empty</button>
+<button class="tab" type="button" data-swap-to="make-dump">From a dump</button>
+</div>
+
+<form class="stack" method="post" action="{% url "databases.create" %}" data-swap-panel="make-empty">
+<div class="field">
+<label class="label" for="create-name">Name</label>
+<input class="input" id="create-name" name="name" required>
+<span class="field-note">Lowercase letters, digits and hyphens.</span>
+</div>
+<div class="dialog-foot">
+<button class="button is-outline" type="button" data-sheet-close>Cancel</button>
+<button class="button" type="submit">Create database</button>
+</div>
+</form>
+
+<form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data" data-swap-panel="make-dump" hidden>
+<div class="field">
+<label class="label" for="import-name">Name</label>
+<input class="input" id="import-name" name="name" required>
+</div>
+<div class="field">
+<label class="label" for="import-dump">Dump</label>
+<input class="file" id="import-dump" type="file" name="dump" accept=".sql" required>
+<span class="field-note">A .sql file of statements.</span>
+</div>
+<div class="dialog-foot">
+<button class="button is-outline" type="button" data-sheet-close>Cancel</button>
+<button class="button" type="submit">Load database</button>
+</div>
+</form>
+</div>
+</div>
 {% endblock %}

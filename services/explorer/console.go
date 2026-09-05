@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"sqldash/config"
 	"sqldash/sqld"
 
 	"github.com/gofiber/fiber/v3"
@@ -20,6 +21,7 @@ func RunConsole(requestContext context.Context, databaseName string, statement s
 	shown := &ConsoleContext{
 		Title:      ConsoleTitle,
 		Database:   databaseName,
+		Address:    databaseName + "." + config.Server.Domain,
 		Tables:     tables,
 		Statement:  statement,
 		BrowsePath: DatabasePath + databaseName + BrowseSuffix,

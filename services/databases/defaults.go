@@ -15,6 +15,17 @@ var ReservedNames = []string{"sqldash", "admin", "api", "static", "login", "setu
 const (
 	AddressScheme = "https://"
 
+	Thousand = 1_000.0
+	Million  = 1_000_000.0
+	Billion  = 1_000_000_000.0
+
+	ThousandSuffix = "k"
+	MillionSuffix  = "M"
+	BillionSuffix  = "B"
+
+	CompactFormat = "%.2f"
+	NoNumber      = "0"
+
 	UnknownSize  = "unknown"
 	BytesFormat  = "%d B"
 	SizeFormat   = "%.1f %s"

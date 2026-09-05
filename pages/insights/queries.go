@@ -40,7 +40,7 @@ func QueriesForDatabase(context fiber.Ctx) error {
 		meta.Crumb{Label: name, URL: DatabasePath + url.PathEscape(name)},
 		meta.Crumb{Label: QueriesLabel},
 	)
-	meta.SetSection(context, name, InsightsSection)
+	meta.SetSection(context, name, QueriesSection)
 
 	return shortcuts.Render(context, QueriesTemplate, data)
 }

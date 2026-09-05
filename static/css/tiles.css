@@ -47,12 +47,20 @@
   height: 12px;
 }
 
-.tile-change.is-up {
+.tile-change.is-good {
   color: var(--success);
 }
 
-.tile-change.is-down {
+.tile-change.is-bad {
   color: var(--destructive);
+}
+
+.tile.is-alarm .tile-value {
+  color: var(--destructive);
+}
+
+.tile.is-alarm .tile-spark {
+  stroke: var(--destructive);
 }
 
 .tile-spark {

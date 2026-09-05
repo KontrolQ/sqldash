@@ -89,6 +89,16 @@ const (
 	ReadsName       = "Reads"
 	WritesName      = "Writes"
 
+	MoreIsBetter    = "more"
+	LessIsBetter    = "less"
+	NeitherIsBetter = "neither"
+
+	GoodTone  = "good"
+	BadTone   = "bad"
+	PlainTone = "plain"
+
+	DurationScale = 1000.0
+
 	SparkWidth   = 120.0
 	SparkHeight  = 32.0
 	SparkPadding = 6.0

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"sqldash/config"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
@@ -21,6 +22,7 @@ func Structure(requestContext context.Context, databaseName string, table string
 	shown := &StructureContext{
 		Title:         databaseName,
 		Database:      databaseName,
+		Address:       databaseName + "." + config.Server.Domain,
 		Tables:        tables,
 		BrowsePath:    DatabasePath + databaseName + BrowseSuffix,
 		StructurePath: DatabasePath + databaseName + StructureSuffix,

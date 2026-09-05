@@ -7,39 +7,88 @@ import (
 	"sqldash/analytics"
 )
 
+type tileSpec struct {
+	Label  string
+	Value  string
+	Now    int64
+	Before int64
+	Better string
+	Alarm  bool
+	Pick   func(analytics.Point) float64
+}
+
 func tilesFor(now *analytics.Summary, before *analytics.Summary, points []analytics.Point) []TileView {
-	return []TileView{
-		measure(QueriesLabel, readableCount(now.Count), now.Count, before.Count, spark(points, func(point analytics.Point) float64 {
-			return float64(point.Total)
-		})),
-		measure(FailuresLabel, readableCount(now.Failures), now.Failures, before.Failures, spark(points, func(point analytics.Point) float64 {
-			return float64(point.Failures)
-		})),
-		measure(RowsReadLabel, readableCount(now.RowsRead), now.RowsRead, before.RowsRead, spark(points, func(point analytics.Point) float64 {
-			return float64(point.Total)
-		})),
-		measure(RowsWrittenLabel, readableCount(now.RowsWritten), now.RowsWritten, before.RowsWritten, spark(points, func(point analytics.Point) float64 {
-			return float64(point.Writes)
-		})),
-		measure(AverageLabel, readableDuration(now.Average()), int64(now.Average()*100), int64(before.Average()*100), spark(points, func(point analytics.Point) float64 {
-			return point.P50
-		})),
-		measure(TailLabel, readableDuration(now.Histogram.Percentile(0.99)), int64(now.Histogram.Percentile(0.99)*100), int64(before.Histogram.Percentile(0.99)*100), spark(points, func(point analytics.Point) float64 {
-			return point.P99
-		})),
+	specs := []tileSpec{
+		{
+			Label: QueriesLabel, Value: readableCount(now.Count),
+			Now: now.Count, Before: before.Count, Better: MoreIsBetter,
+			Pick: func(point analytics.Point) float64 { return float64(point.Total) },
+		},
+		{
+			Label: FailuresLabel, Value: readableCount(now.Failures),
+			Now: now.Failures, Before: before.Failures, Better: LessIsBetter, Alarm: now.Failures > 0,
+			Pick: func(point analytics.Point) float64 { return float64(point.Failures) },
+		},
+		{
+			Label: RowsReadLabel, Value: readableCount(now.RowsRead),
+			Now: now.RowsRead, Before: before.RowsRead, Better: NeitherIsBetter,
+			Pick: func(point analytics.Point) float64 { return float64(point.Reads) },
+		},
+		{
+			Label: RowsWrittenLabel, Value: readableCount(now.RowsWritten),
+			Now: now.RowsWritten, Before: before.RowsWritten, Better: NeitherIsBetter,
+			Pick: func(point analytics.Point) float64 { return float64(point.Writes) },
+		},
+		{
+			Label: AverageLabel, Value: readableDuration(now.Average()),
+			Now: scaled(now.Average()), Before: scaled(before.Average()), Better: LessIsBetter,
+			Pick: func(point analytics.Point) float64 { return point.P50 },
+		},
+		{
+			Label: TailLabel, Value: readableDuration(now.Histogram.Percentile(0.99)),
+			Now: scaled(now.Histogram.Percentile(0.99)), Before: scaled(before.Histogram.Percentile(0.99)),
+			Better: LessIsBetter,
+			Pick:   func(point analytics.Point) float64 { return point.P99 },
+		},
+	}
+
+	tiles := make([]TileView, 0, len(specs))
+
+	for _, spec := range specs {
+		tiles = append(tiles, measure(spec, points))
+	}
+
+	return tiles
+}
+
+func measure(spec tileSpec, points []analytics.Point) TileView {
+	change, kind := readableChange(spec.Now, spec.Before)
+
+	return TileView{
+		Label:  spec.Label,
+		Value:  spec.Value,
+		Change: change,
+		Kind:   kind,
+		Tone:   toneOf(kind, spec.Better),
+		Alarm:  spec.Alarm,
+		Spark:  spark(points, spec.Pick),
 	}
 }
 
-func measure(label string, value string, now int64, before int64, path string) TileView {
-	change, kind := readableChange(now, before)
-
-	return TileView{
-		Label:  label,
-		Value:  value,
-		Change: change,
-		Kind:   kind,
-		Spark:  path,
+func toneOf(kind string, better string) string {
+	if kind == ChangeSteady || better == NeitherIsBetter {
+		return PlainTone
 	}
+
+	if (kind == ChangeUp && better == MoreIsBetter) || (kind == ChangeDown && better == LessIsBetter) {
+		return GoodTone
+	}
+
+	return BadTone
+}
+
+func scaled(milliseconds float64) int64 {
+	return int64(milliseconds * DurationScale)
 }
 
 func spark(points []analytics.Point, pick func(analytics.Point) float64) string {

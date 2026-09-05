@@ -14,6 +14,11 @@ type DatabaseView struct {
 	Name      string
 	Address   string
 	Protected bool
+	Blocked   bool
+	Storage   string
+	Tables    int
+	RowsRead  string
+	Queries   string
 }
 
 type ShowContext struct {
@@ -27,9 +32,10 @@ type ShowContext struct {
 	BlockReason string
 	AllowAttach bool
 	Storage     string
-	RowsRead    int64
-	RowsWritten int64
-	QueryCount  int64
+	Tables      int
+	RowsRead    string
+	RowsWritten string
+	QueryCount  string
 	Tokens      []tokenservice.TokenView
 	Secret      string
 	Scopes      []collections.Option

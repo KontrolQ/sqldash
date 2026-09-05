@@ -9,7 +9,7 @@ import (
 )
 
 func Index(context fiber.Ctx) error {
-	data, dataError := service.GetIndexData()
+	data, dataError := service.GetIndexData(context.Context())
 	if dataError != nil {
 		return dataError
 	}

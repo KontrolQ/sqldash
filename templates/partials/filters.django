@@ -1,14 +1,30 @@
-{% if Filters %}
-<div class="filters">
+<div class="menu" data-menu>
+<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+Filters{% if Filters %}<span class="badge is-secondary">{{ Filters|length }}</span>{% endif %}
+</button>
+<div class="menu-content is-filters" data-menu-content hidden>
+<div class="filter-rows" data-filter-rows>
 {% for filter in Filters %}
-<span class="filter">
-<span class="filter-column">{{ filter.Column }}</span>
-<span class="filter-operator">{{ filter.Label }}</span>
-{% if filter.Value %}<span class="filter-value">{{ filter.Value }}</span>{% endif %}
-<a class="filter-drop" href="{{ filter.RemoveURL }}" aria-label="Remove this filter">
-<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-</a>
-</span>
+{% include "partials/filterrow.django" with filter_column=filter.Column filter_operator=filter.Operator filter_value=filter.Value %}
 {% endfor %}
-</div>
+{% if not Filters %}
+{% include "partials/filterrow.django" with filter_column="" filter_operator="contains" filter_value="" %}
 {% endif %}
+</div>
+
+<div class="filter-foot">
+<button class="button is-ghost is-small" type="button" data-filter-add>
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
+Add filter
+</button>
+<span class="tab-bar-spacer"></span>
+{% if Filters %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?table={{ Table }}{% if Search %}&search={{ Search }}{% endif %}">Clear all</a>{% endif %}
+<button class="button is-small" type="submit" form="filter-form">Apply</button>
+</div>
+
+<template data-filter-template>
+{% include "partials/filterrow.django" with filter_column="" filter_operator="contains" filter_value="" %}
+</template>
+</div>
+</div>

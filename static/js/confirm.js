@@ -17,7 +17,7 @@
     open = null;
   }
 
-  function ask(form) {
+  function ask(form, sender) {
     close();
 
     const veil = document.createElement('div');
@@ -28,9 +28,10 @@
     dialog.setAttribute('role', 'alertdialog');
     dialog.setAttribute('aria-modal', 'true');
 
-    const heading = form.dataset.confirmTitle || 'Are you sure?';
-    const note = form.dataset.confirm;
-    const proceed = form.dataset.confirmAction || 'Continue';
+    const source = sender && sender.dataset.confirm ? sender : form;
+    const heading = source.dataset.confirmTitle || 'Are you sure?';
+    const note = source.dataset.confirm;
+    const proceed = source.dataset.confirmAction || 'Continue';
 
     dialog.innerHTML =
       '<div class="dialog-head">' +
@@ -54,6 +55,12 @@
     dialog.querySelector('[data-dialog-go]').addEventListener('click', function () {
       close();
       form.dataset.confirmed = 'yes';
+
+      if (sender) {
+        sender.click();
+        return;
+      }
+
       form.submit();
     });
 
@@ -71,11 +78,12 @@
   forms.forEach(function (form) {
     form.addEventListener('submit', function (event) {
       if (form.dataset.confirmed === 'yes') {
+        delete form.dataset.confirmed;
         return;
       }
 
       event.preventDefault();
-      ask(form);
+      ask(form, event.submitter);
     });
   });
 })();

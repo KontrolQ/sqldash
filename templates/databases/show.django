@@ -25,11 +25,12 @@
 </div>
 {% endif %}
 
-<div class="stats">
-<div class="stat"><span class="stat-label">Storage</span><span class="stat-value">{{ Storage }}</span></div>
-<div class="stat"><span class="stat-label">Rows read</span><span class="stat-value">{{ RowsRead }}</span></div>
-<div class="stat"><span class="stat-label">Rows written</span><span class="stat-value">{{ RowsWritten }}</span></div>
-<div class="stat"><span class="stat-label">Queries</span><span class="stat-value">{{ QueryCount }}</span></div>
+<div class="tiles">
+<div class="tile"><span class="tile-label">Storage</span><div class="tile-line"><span class="tile-value">{{ Storage }}</span></div></div>
+<div class="tile"><span class="tile-label">Tables</span><div class="tile-line"><span class="tile-value">{{ Tables }}</span></div></div>
+<div class="tile"><span class="tile-label">Rows read</span><div class="tile-line"><span class="tile-value">{{ RowsRead }}</span></div></div>
+<div class="tile"><span class="tile-label">Rows written</span><div class="tile-line"><span class="tile-value">{{ RowsWritten }}</span></div></div>
+<div class="tile"><span class="tile-label">Queries</span><div class="tile-line"><span class="tile-value">{{ QueryCount }}</span></div></div>
 </div>
 
 <div class="card">
@@ -115,8 +116,9 @@
 <hr class="separator">
 {% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
 <div class="field">
-<label class="label" for="block_reason">Reason shown when blocked</label>
-<input class="input" id="block_reason" name="block_reason" value="{{ BlockReason }}">
+<label class="label" for="block_reason">Message sent to refused clients</label>
+<input class="input" id="block_reason" name="block_reason" value="{{ BlockReason }}" placeholder="Reads and writes are paused">
+<span class="field-note">Returned as the error when a blocked read or write is refused.</span>
 </div>
 <div class="actions">
 <button class="button" type="submit">Save configuration</button>

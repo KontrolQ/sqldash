@@ -2,12 +2,12 @@ package databases
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"sqldash/config"
 	ruleRepository "sqldash/repositories/accessrule"
 	repository "sqldash/repositories/database"
+	explorer "sqldash/services/explorer"
 	tokenservice "sqldash/services/tokens"
 	"sqldash/sqld"
 	"sqldash/utils/collections"
@@ -42,9 +42,9 @@ func GetShowData(requestContext context.Context, name string, secret string) (*S
 
 	if held, statisticsError := sqld.Statistics(requestContext, name); statisticsError == nil {
 		shown.Storage = readableSize(held.StorageBytesUsed)
-		shown.RowsRead = held.RowsRead
-		shown.RowsWritten = held.RowsWritten
-		shown.QueryCount = held.QueryCount
+		shown.RowsRead = readableCount(held.RowsRead)
+		shown.RowsWritten = readableCount(held.RowsWritten)
+		shown.QueryCount = readableCount(held.QueryCount)
 	} else {
 		logger.Warnf(LogPrefix, StatisticsFailedLog, name, statisticsError)
 		shown.Storage = UnknownSize
@@ -60,6 +60,10 @@ func GetShowData(requestContext context.Context, name string, secret string) (*S
 		}
 	} else {
 		logger.Warnf(LogPrefix, ConfigurationFailedLog, name, settingsError)
+	}
+
+	if tables, tablesError := explorer.Tables(requestContext, name); tablesError == nil {
+		shown.Tables = len(tables)
 	}
 
 	tokenViews, tokenError := tokenservice.ForDatabase(name)
@@ -80,23 +84,4 @@ func GetShowData(requestContext context.Context, name string, secret string) (*S
 	}
 
 	return shown, nil
-}
-
-func readableSize(bytes int64) string {
-	if bytes < KilobyteSize {
-		return fmt.Sprintf(BytesFormat, bytes)
-	}
-
-	value := float64(bytes)
-	units := []string{KilobyteUnit, MegabyteUnit, GigabyteUnit, TerabyteUnit}
-
-	for _, unit := range units {
-		value /= KilobyteSize
-
-		if value < KilobyteSize {
-			return fmt.Sprintf(SizeFormat, value, unit)
-		}
-	}
-
-	return fmt.Sprintf(SizeFormat, value, TerabyteUnit)
 }

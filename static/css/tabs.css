@@ -10,7 +10,12 @@
   color: var(--muted-foreground);
 }
 
+.tabs.is-compact {
+  height: 32px;
+}
+
 .tab {
+  position: relative;
   display: inline-flex;
   height: calc(100% - 1px);
   flex: 1;
@@ -19,17 +24,30 @@
   padding: 4px 8px;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
+  background: transparent;
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
-  font-size: 14px;
-  font-weight: 500;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
   gap: 6px;
-  line-height: 20px;
+  line-height: var(--text-sm-lh);
   transition: all var(--ease);
   white-space: nowrap;
 }
 
+.tabs.is-compact .tab {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-lh);
+}
+
 .tab:hover {
   color: var(--foreground);
+}
+
+.tab:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+  outline: none;
 }
 
 .tab.is-current {
@@ -38,16 +56,46 @@
   color: var(--foreground);
 }
 
-:root[data-theme='dark'] .tab.is-current,
-:root:not([data-theme='light']) .tab.is-current {
-  border-color: var(--input);
-  background: color-mix(in oklab, var(--input) 30%, transparent);
-}
-
 .tab svg {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  pointer-events: none;
+}
+
+.tabs.is-compact .tab svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .tab {
+    color: var(--muted-foreground);
+  }
+
+  :root:not([data-theme='light']) .tab:hover {
+    color: var(--foreground);
+  }
+
+  :root:not([data-theme='light']) .tab.is-current {
+    border-color: var(--input);
+    background: color-mix(in oklab, var(--input) 30%, transparent);
+    color: var(--foreground);
+  }
+}
+
+:root[data-theme='dark'] .tab {
+  color: var(--muted-foreground);
+}
+
+:root[data-theme='dark'] .tab:hover {
+  color: var(--foreground);
+}
+
+:root[data-theme='dark'] .tab.is-current {
+  border-color: var(--input);
+  background: color-mix(in oklab, var(--input) 30%, transparent);
+  color: var(--foreground);
 }
 
 .tab-bar {

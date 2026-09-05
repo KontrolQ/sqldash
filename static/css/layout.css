@@ -92,3 +92,12 @@
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 }
+
+.page-head.is-slim h1 {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-lh);
+}
+
+.content.is-tight {
+  gap: var(--sp-4);
+}

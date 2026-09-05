@@ -1,11 +1,9 @@
 (function () {
-  const fields = document.querySelectorAll('[data-select]');
+  function attach(field) {
+    if (field.dataset.selectReady === 'yes') {
+      return;
+    }
 
-  if (fields.length === 0) {
-    return;
-  }
-
-  fields.forEach(function (field) {
     const native = field.querySelector('select');
     const trigger = field.querySelector('[data-select-trigger]');
     const label = field.querySelector('[data-select-label]');
@@ -15,6 +13,7 @@
       return;
     }
 
+    field.dataset.selectReady = 'yes';
     native.classList.add('select-native');
     content.innerHTML = '';
 
@@ -86,5 +85,12 @@
     native.addEventListener('change', show);
     show();
     close();
-  });
+  }
+
+  function scan() {
+    document.querySelectorAll('[data-select]').forEach(attach);
+  }
+
+  document.addEventListener('sqldash:scan', scan);
+  scan();
 })();

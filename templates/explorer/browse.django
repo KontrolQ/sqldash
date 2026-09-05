@@ -3,6 +3,13 @@
 {% block tight %}is-tight{% endblock %}
 
 {% block content %}
+<div class="page-head is-slim">
+<div class="page-title">
+<h1>{{ Database }}</h1>
+<p class="page-subtitle">{{ Address }}</p>
+</div>
+</div>
+
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
@@ -11,12 +18,8 @@
 
 <div class="bench">
 {% if Table %}
-<form class="selection" method="post" action="{% url "databases.explore.row" name=Database %}" data-selection data-confirm="The rows you picked are removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete the rows you picked?" data-confirm-action="Delete rows">
-<input type="hidden" name="table" value="{{ Table }}">
-<input type="hidden" name="back" value="{{ View }}">
-
 <div class="workbar">
-<div class="tabs">
+<div class="tabs is-compact">
 <a class="tab is-current" href="{{ BrowsePath }}?table={{ Table }}">
 <svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
 Data
@@ -27,27 +30,7 @@ Structure
 </a>
 </div>
 
-<div class="menu" data-menu>
-<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
-<svg class="button-icon" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-Filters{% if Filters %} <span class="badge is-secondary">{{ Filters|length }}</span>{% endif %}
-</button>
-<div class="menu-content is-form" data-menu-content hidden>
-<form class="filter-form" method="get" action="{{ BrowsePath }}">
-<input type="hidden" name="table" value="{{ Table }}">
-{% if Search %}<input type="hidden" name="search" value="{{ Search }}">{% endif %}
-{% for filter in Filters %}
-<input type="hidden" name="column" value="{{ filter.Column }}">
-<input type="hidden" name="operator" value="{{ filter.Operator }}">
-<input type="hidden" name="value" value="{{ filter.Value }}">
-{% endfor %}
-{% include "partials/select.django" with select_name="column" select_label="Column to filter on" select_chosen="" select_options=ColumnChoices select_wide=1 %}
-{% include "partials/select.django" with select_name="operator" select_label="How to compare" select_chosen="contains" select_options=Operators select_wide=1 %}
-<input class="input" name="value" placeholder="Value" aria-label="Value to compare against">
-<button class="button is-small" type="submit">Apply filter</button>
-</form>
-</div>
-</div>
+{% include "partials/filters.django" %}
 
 <div class="menu" data-menu>
 <button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
@@ -122,21 +105,12 @@ Add record
 </div>
 
 <div class="workbar is-second">
-<form class="inline-form" method="get" action="{{ BrowsePath }}">
-<input type="hidden" name="table" value="{{ Table }}">
-{% for filter in Filters %}
-<input type="hidden" name="column" value="{{ filter.Column }}">
-<input type="hidden" name="operator" value="{{ filter.Operator }}">
-<input type="hidden" name="value" value="{{ filter.Value }}">
-{% endfor %}
-<input class="input is-small is-search" name="search" value="{{ Search }}" placeholder="Search every column" aria-label="Search every column">
+<input class="input is-small is-search" form="search-form" name="search" value="{{ Search }}" placeholder="Search every column" aria-label="Search every column">
 {% if Search %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ Carry }}">Clear</a>{% endif %}
-</form>
-{% include "partials/filters.django" %}
 <div class="workbar-right" data-selection-bar hidden>
 <span class="selection-count" data-selection-count></span>
 <button class="button is-ghost is-small" type="button" data-selection-clear>Clear</button>
-<button class="button is-destructive is-small" type="submit">Delete rows</button>
+<button class="button is-destructive is-small" type="submit" form="row-form">Delete rows</button>
 </div>
 </div>
 
@@ -166,23 +140,23 @@ Add record
 <tr>
 {% if Editable %}
 <td class="table-pick">
-{% include "partials/checkbox.django" with checkbox_name="key" checkbox_value=row.Key checkbox_label="Pick this row" checkbox_hook="selection-one" %}
+{% include "partials/checkbox.django" with checkbox_name="key" checkbox_value=row.Key checkbox_label="Pick this row" checkbox_hook="selection-one" checkbox_form="row-form" %}
 </td>
 {% endif %}
 {% for cell in row.Cells %}
-<td class="cell" data-cell="{{ cell.Column }}">
+<td class="cell" data-cell="{{ cell.Column }}"{% if Editable and not cell.LinkTo %} data-edit="cell-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" tabindex="-1"{% endif %}>
 {% if cell.LinkTo %}
 <a class="chip" href="{{ BrowsePath }}?table={{ cell.LinkTo }}&search={{ cell.Text }}">{{ cell.Text }}<span class="chip-target">{{ cell.LinkTo }}</span></a>
-{% elif Editable %}
-<input class="cell-input" form="cell-{{ forloop.ParentLoop.Counter }}-{{ forloop.Counter }}" name="value" value="{{ cell.Text }}"{% if cell.IsNull %} placeholder="NULL"{% endif %}>
+{% elif cell.IsNull %}
+<span class="cell-text null">NULL</span>
 {% else %}
-{% if cell.IsNull %}<span class="null">NULL</span>{% else %}{{ cell.Text }}{% endif %}
+<span class="cell-text">{{ cell.Text }}</span>
 {% endif %}
 </td>
 {% endfor %}
 {% if Editable %}
 <td class="table-pick">
-<button class="step is-bare" type="submit" name="key" value="{{ row.Key }}" data-row-delete aria-label="Delete this row">
+<button class="step is-bare" type="submit" form="row-form" name="key" value="{{ row.Key }}" data-row-delete aria-label="Delete this row" data-confirm="This row is removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete this row?" data-confirm-action="Delete row">
 <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
 </button>
 </td>
@@ -194,17 +168,37 @@ Add record
 </tbody>
 </table>
 </div>
+
+<form id="row-form" class="selection" method="post" action="{% url "databases.explore.row" name=Database %}" data-selection data-confirm="The rows you picked are removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete the rows you picked?" data-confirm-action="Delete rows" hidden>
+<input type="hidden" name="table" value="{{ Table }}">
+<input type="hidden" name="back" value="{{ View }}">
+</form>
+
+<form id="search-form" method="get" action="{{ BrowsePath }}" hidden>
+<input type="hidden" name="table" value="{{ Table }}">
+{% for filter in Filters %}
+<input type="hidden" name="column" value="{{ filter.Column }}">
+<input type="hidden" name="operator" value="{{ filter.Operator }}">
+<input type="hidden" name="value" value="{{ filter.Value }}">
+{% endfor %}
+</form>
+
+<form id="filter-form" method="get" action="{{ BrowsePath }}" hidden>
+<input type="hidden" name="table" value="{{ Table }}">
+{% if Search %}<input type="hidden" name="search" value="{{ Search }}">{% endif %}
 </form>
 
 {% if Editable %}
 {% for row in Rows %}
 {% for cell in row.Cells %}
 {% if not cell.LinkTo %}
-<form id="cell-{{ forloop.ParentLoop.Counter }}-{{ forloop.Counter }}" method="post" action="{% url "databases.explore.cell" name=Database %}" hidden>
+<form id="cell-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" method="post" action="{% url "databases.explore.cell" name=Database %}" hidden>
 <input type="hidden" name="table" value="{{ Table }}">
 <input type="hidden" name="column" value="{{ cell.Column }}">
 <input type="hidden" name="key" value="{{ row.Key }}">
 <input type="hidden" name="back" value="{{ View }}">
+<input type="hidden" name="value">
+<input type="hidden" name="clear">
 </form>
 {% endif %}
 {% endfor %}

@@ -19,4 +19,5 @@ const (
 	InsightsPath    = "/insights"
 	QueriesLabel    = "Top queries"
 	InsightsSection = "insights"
+	QueriesSection  = "queries"
 )

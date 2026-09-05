@@ -5,11 +5,14 @@
     return;
   }
 
-  const every = form.querySelector('[data-selection-all]');
-  const boxes = [...form.querySelectorAll('[data-selection-one]')];
-  const bar = form.querySelector('[data-selection-bar]');
-  const count = form.querySelector('[data-selection-count]');
-  const clear = form.querySelector('[data-selection-clear]');
+  const held = [...form.elements];
+  const every = document.querySelector('[data-selection-all]');
+  const boxes = held.filter(function (field) {
+    return field.dataset.selectionOne !== undefined;
+  });
+  const bar = document.querySelector('[data-selection-bar]');
+  const count = document.querySelector('[data-selection-count]');
+  const clear = document.querySelector('[data-selection-clear]');
 
   if (!every || boxes.length === 0) {
     return;
@@ -55,7 +58,7 @@
     refresh();
   });
 
-  form.querySelectorAll('[data-row-delete]').forEach(function (button) {
+  document.querySelectorAll('[data-row-delete]').forEach(function (button) {
     button.addEventListener('click', function () {
       boxes.forEach(function (box) {
         box.checked = false;
