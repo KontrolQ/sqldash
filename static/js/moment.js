@@ -32,12 +32,40 @@
     let chosen = null;
     let shown = new Date();
 
+    function endOfToday() {
+      const now = new Date();
+
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function clockLimit() {
+      if (!chosen || chosen.toDateString() !== new Date().toDateString()) {
+        return '';
+      }
+
+      const now = new Date();
+
+      return twoDigits(now.getHours()) + ':' + twoDigits(now.getMinutes());
+    }
+
     function write() {
       if (!chosen) {
         hidden.value = '';
         label.textContent = trigger.dataset.placeholder || 'Pick a moment';
         label.classList.add('is-empty');
         return;
+      }
+
+      const limit = clockLimit();
+
+      if (limit !== '') {
+        time.max = limit;
+
+        if (time.value > limit) {
+          time.value = limit;
+        }
+      } else {
+        time.removeAttribute('max');
       }
 
       const clock = (time.value || '00:00').split(':');
@@ -51,6 +79,9 @@
     }
 
     function draw() {
+      const now = new Date();
+      forward.disabled = shown.getFullYear() === now.getFullYear() && shown.getMonth() === now.getMonth();
+
       title.textContent = months[shown.getMonth()] + ' ' + shown.getFullYear();
       grid.innerHTML = '';
 
@@ -66,6 +97,7 @@
       start.setDate(1 - first.getDay());
 
       const today = new Date();
+      const latest = endOfToday();
 
       for (let index = 0; index < 42; index += 1) {
         const day = new Date(start);
@@ -88,8 +120,18 @@
           cell.classList.add('is-chosen');
         }
 
+        if (day > latest) {
+          cell.disabled = true;
+          cell.classList.add('is-later');
+        }
+
         cell.addEventListener('click', function () {
           chosen = day;
+
+          if (day.toDateString() === today.toDateString() && time.value === '00:00') {
+            time.value = twoDigits(today.getHours()) + ':' + twoDigits(today.getMinutes());
+          }
+
           write();
           draw();
         });
@@ -119,7 +161,13 @@
     });
 
     forward.addEventListener('click', function () {
-      shown = new Date(shown.getFullYear(), shown.getMonth() + 1, 1);
+      const next = new Date(shown.getFullYear(), shown.getMonth() + 1, 1);
+
+      if (next > new Date()) {
+        return;
+      }
+
+      shown = next;
       draw();
     });
 
