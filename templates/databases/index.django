@@ -1,0 +1,54 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>Databases</h1>
+<p class="page-subtitle">Every database this server holds.</p>
+</div>
+<div class="page-actions">
+<form class="inline-form" method="post" action="{% url "databases.create" %}">
+<input class="input is-inline" name="name" placeholder="new-database" aria-label="Name of the new database" required>
+<button class="button" type="submit">Create</button>
+</form>
+</div>
+</div>
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+
+{% if Databases %}
+<div class="card is-table">
+<div class="table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Address</th>
+<th>State</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+{% for database in Databases %}
+<tr>
+<td><span class="table-name"><span class="dot is-live"></span>{{ database.Name }}</span></td>
+<td class="mono muted">{{ database.Address }}</td>
+<td>{% if database.Protected %}<span class="badge is-secondary">Protected</span>{% else %}<span class="badge is-outline">Open</span>{% endif %}</td>
+<td class="table-actions">
+<form method="post" action="{% url "databases.delete" name=database.Name %}">
+<button class="button is-ghost is-small" type="submit">Delete</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% else %}
+<div class="empty">
+<span class="empty-title">No databases yet</span>
+<span>Create one with the field above.</span>
+</div>
+{% endif %}
+{% endblock %}

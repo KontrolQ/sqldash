@@ -1,0 +1,21 @@
+package databases
+
+const (
+	ListFailedLog   = "Failed to list databases: %v"
+	CreateFailedLog = "Failed to create database %s: %v"
+	DeleteFailedLog = "Failed to delete database %s: %v"
+	RegisterLog     = "Failed to register database %s: %v"
+)
+
+const (
+	ListUnavailable = "The list of databases could not be read."
+	NameUnusable    = "A name must be lowercase letters, digits and hyphens, and cannot start or end with a hyphen."
+	NameTooShort    = "That name is too short."
+	NameTooLong     = "That name is too long."
+	NameReserved    = "That name is reserved."
+	NameTaken       = "A database with that name already exists."
+	CreateRefused   = "The database could not be created."
+	DeleteRefused   = "The database could not be deleted."
+	DatabaseMissing = "No such database."
+	DatabaseHeld    = "That database is protected. Remove the protection before deleting it."
+)

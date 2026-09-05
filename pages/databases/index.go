@@ -1,7 +1,7 @@
-package home
+package databases
 
 import (
-	service "sqldash/services/home"
+	service "sqldash/services/databases"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func Index(context fiber.Ctx) error {
-	data, dataError := service.GetIndexData()
+	data, dataError := service.GetIndexData(context.Query(ProblemParameter))
 	if dataError != nil {
 		return dataError
 	}
