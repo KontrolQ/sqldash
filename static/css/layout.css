@@ -1,0 +1,34 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.page-content {
+  max-width: var(--wrap-max);
+  width: 100%;
+  flex: 1;
+  margin: 0 auto;
+  padding: var(--sp-12) var(--wrap-pad);
+}
+
+.page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--sp-12);
+  padding-bottom: var(--sp-6);
+  border-bottom: var(--bw) solid var(--border);
+}
+
+.page-head-note {
+  color: var(--dim);
+  font-size: var(--fs-sm);
+}
+
+.empty {
+  padding: var(--sp-16);
+  border: var(--bw) dashed var(--border2);
+  color: var(--dim);
+  text-align: center;
+}

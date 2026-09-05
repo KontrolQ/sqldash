@@ -1,0 +1,22 @@
+.panel {
+  margin-bottom: var(--sp-12);
+  border: var(--bw) solid var(--border);
+  background: var(--panel);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-8);
+  border-bottom: var(--bw) solid var(--border);
+  background: var(--head);
+  color: var(--dim);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-2);
+  text-transform: uppercase;
+}
+
+.panel-body {
+  padding: var(--sp-8);
+}

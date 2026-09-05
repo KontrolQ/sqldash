@@ -1,0 +1,49 @@
+.topbar {
+  display: flex;
+  height: var(--topbar-h);
+  align-items: center;
+  padding: 0 var(--wrap-pad);
+  border-bottom: var(--bw) solid var(--border);
+  background: var(--head);
+  gap: var(--sp-12);
+}
+
+.topbar-brand {
+  color: var(--teal);
+  font-size: var(--fs-lg);
+  letter-spacing: var(--ls-1);
+}
+
+.topbar-brand:hover {
+  text-decoration: none;
+}
+
+.topbar-nav {
+  display: flex;
+  gap: var(--sp-8);
+}
+
+.topbar-link {
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--dim);
+  font-size: var(--fs-sm);
+}
+
+.topbar-link:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.topbar-link.is-active {
+  color: var(--teal);
+  box-shadow: inset 0 -2px 0 var(--selbar);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-version {
+  color: var(--faint);
+  font-size: var(--fs-tiny);
+}

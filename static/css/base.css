@@ -1,0 +1,49 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: var(--wrap-min);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: var(--fs-md);
+  line-height: var(--lh);
+}
+
+a {
+  color: var(--teallink);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--teal);
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 500;
+}
+
+h1 {
+  font-size: var(--fs-2xl);
+  letter-spacing: var(--ls-1);
+}
+
+h2 {
+  font-size: var(--fs-lg);
+}
+
+code,
+pre {
+  font-family: var(--mono);
+}

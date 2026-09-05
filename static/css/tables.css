@@ -1,0 +1,36 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th {
+  padding: var(--sp-4) var(--sp-8);
+  border-bottom: var(--bw) solid var(--border);
+  background: var(--head);
+  color: var(--dim);
+  font-weight: 400;
+  letter-spacing: var(--ls-1);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table td {
+  height: var(--row-h);
+  padding: var(--sp-3) var(--sp-8);
+  border-bottom: var(--bw) solid var(--border);
+  background: var(--row);
+}
+
+.table tr:nth-child(even) td {
+  background: var(--rowalt);
+}
+
+.table tr:hover td {
+  background: var(--sel);
+}
+
+.table-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

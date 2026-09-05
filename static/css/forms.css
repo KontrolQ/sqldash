@@ -1,0 +1,44 @@
+.field {
+  height: var(--field-h);
+  padding: 0 var(--sp-6);
+  border: var(--bw) solid var(--border2);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+}
+
+.field:focus {
+  border-color: var(--tealdim);
+  outline: none;
+}
+
+.button {
+  height: var(--field-h);
+  padding: 0 var(--sp-10);
+  border: var(--bw) solid var(--border2);
+  background: var(--head);
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+}
+
+.button:hover {
+  border-color: var(--tealdim);
+  color: var(--teal);
+}
+
+.tag {
+  padding: var(--sp-1) var(--sp-4);
+  border: var(--bw) solid var(--border2);
+  color: var(--dim);
+  font-size: var(--fs-tiny);
+  letter-spacing: var(--ls-1);
+  text-transform: uppercase;
+}
+
+.tag.is-protected {
+  border-color: var(--tealdim);
+  color: var(--teal);
+}

@@ -1,0 +1,29 @@
+:root {
+  color-scheme: dark;
+
+  --bg: #06080c;
+  --panel: #0a0e13;
+  --head: #0d1219;
+  --row: #0b0f15;
+  --rowalt: #090c11;
+
+  --border: #18202b;
+  --border2: #253040;
+
+  --text: #c4cad4;
+  --dim: #6a7382;
+  --faint: #454d5b;
+
+  --teal: #4fc3b0;
+  --teallink: #5cb8ab;
+  --tealdim: #35867a;
+  --amber: #d8a24f;
+  --green: #5fc96b;
+  --red: #d96a6a;
+  --violet: #8f8ae8;
+
+  --sel: #14253a;
+  --selbar: #4fc3b0;
+
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', Menlo, Consolas, monospace;
+}

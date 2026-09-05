@@ -1,0 +1,4 @@
+<footer class="footer">
+<span>sqldash</span>
+<span>{{ Version }}</span>
+</footer>
