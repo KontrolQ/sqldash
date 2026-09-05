@@ -119,12 +119,12 @@ Add record
 <thead>
 <tr>
 {% if Editable %}
-<th class="table-pick">
+<th scope="col" class="table-pick">
 {% include "partials/checkbox.django" with checkbox_label="Pick every row on this page" checkbox_hook="selection-all" %}
 </th>
 {% endif %}
 {% for column in Columns %}
-<th data-cell="{{ column.Name }}">
+<th scope="col" data-cell="{{ column.Name }}">
 <a class="column-sort" href="{{ BrowsePath }}?{{ Carry }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}">
 <span class="column-name">{{ column.Name }}</span>
 <span class="column-kind">{{ column.Kind|lower }}</span>
@@ -132,7 +132,7 @@ Add record
 </a>
 </th>
 {% endfor %}
-{% if Editable %}<th class="table-pick"></th>{% endif %}
+{% if Editable %}<th scope="col" class="table-pick"></th>{% endif %}
 </tr>
 </thead>
 <tbody>

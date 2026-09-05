@@ -6,7 +6,9 @@
   }
 
   const shell = field.closest('.editor');
+  const NEWLINE = String.fromCharCode(10);
   const paint = shell.querySelector('.editor-paint');
+  const gutter = shell.querySelector('[data-editor-lines]');
   const hint = shell.querySelector('.editor-hint');
 
   let schema = [];
@@ -111,11 +113,33 @@
     paint.innerHTML = html + escaped(source.slice(at)) + '\n';
     paint.scrollTop = field.scrollTop;
     paint.scrollLeft = field.scrollLeft;
+    number();
   }
 
   let offered = [];
   let chosen = 0;
   let anchor = 0;
+
+  function number() {
+    if (!gutter) {
+      return;
+    }
+
+    const count = field.value.split(NEWLINE).length;
+
+    if (gutter.childElementCount === count) {
+      return;
+    }
+
+    const marks = [];
+
+    for (let line = 1; line <= count; line += 1) {
+      marks.push('<span>' + line + '</span>');
+    }
+
+    gutter.innerHTML = marks.join('');
+    gutter.scrollTop = field.scrollTop;
+  }
 
   function columnsOf(name) {
     const held = schema.find(function (table) {
@@ -196,7 +220,12 @@
     const width = 8.4;
 
     hint.style.top = (lines.length * height + 18 - field.scrollTop) + 'px';
-    hint.style.left = Math.min(lines[lines.length - 1].length * width + 16, field.clientWidth - 240) + 'px';
+    const gutterWidth = gutter ? gutter.offsetWidth : 0;
+
+    hint.style.left = Math.min(
+      lines[lines.length - 1].length * width + 16 + gutterWidth - field.scrollLeft,
+      field.clientWidth - 240
+    ) + 'px';
   }
 
   function draw() {
@@ -260,6 +289,10 @@
   field.addEventListener('scroll', function () {
     paint.scrollTop = field.scrollTop;
     paint.scrollLeft = field.scrollLeft;
+
+    if (gutter) {
+      gutter.scrollTop = field.scrollTop;
+    }
   });
 
   field.addEventListener('blur', function () {

@@ -117,6 +117,7 @@
 }
 
 .chart-key-item b {
+  min-width: 58px;
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
   font-weight: var(--fw-medium);
@@ -124,13 +125,6 @@
 
 .chart-key-item.is-live .chart-key-name {
   color: var(--foreground);
-}
-
-.chart-key-note {
-  margin-left: auto;
-  color: var(--muted-foreground);
-  font-size: 11px;
-  opacity: 0.7;
 }
 
 .chart-swatch {

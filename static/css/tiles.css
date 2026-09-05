@@ -164,18 +164,13 @@
 }
 
 .query-open svg {
-  width: 14px;
-  height: 14px;
-  transition: transform var(--ease);
+  width: 13px;
+  height: 13px;
 }
 
-.query-open.is-open svg {
-  transform: rotate(90deg);
-}
-
-.query-detail pre {
-  margin: 0;
-  white-space: pre-wrap;
+.query-open:hover {
+  background: var(--accent);
+  color: var(--foreground);
 }
 
 .sort-icon {
@@ -209,4 +204,13 @@
   color: var(--foreground);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.tiles.is-plain {
+  grid-template-columns: repeat(auto-fit, minmax(158px, 220px));
+}
+
+.tiles.is-plain .tile {
+  height: auto;
+  padding-bottom: 12px;
 }

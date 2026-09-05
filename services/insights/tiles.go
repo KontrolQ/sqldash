@@ -40,15 +40,9 @@ func tilesFor(now *analytics.Summary, before *analytics.Summary, points []analyt
 			Pick: func(point analytics.Point) float64 { return float64(point.Writes) },
 		},
 		{
-			Label: AverageLabel, Value: readableDuration(now.Average()),
-			Now: scaled(now.Average()), Before: scaled(before.Average()), Better: LessIsBetter,
-			Pick: func(point analytics.Point) float64 { return point.P50 },
-		},
-		{
-			Label: TailLabel, Value: readableDuration(now.Histogram.Percentile(0.99)),
-			Now: scaled(now.Histogram.Percentile(0.99)), Before: scaled(before.Histogram.Percentile(0.99)),
-			Better: LessIsBetter,
-			Pick:   func(point analytics.Point) float64 { return point.P99 },
+			Label: RowsReturnedLabel, Value: readableCount(now.RowsReturned),
+			Now: now.RowsReturned, Before: before.RowsReturned, Better: NeitherIsBetter,
+			Pick: func(point analytics.Point) float64 { return float64(point.Reads) },
 		},
 	}
 

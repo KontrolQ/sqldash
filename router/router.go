@@ -10,6 +10,7 @@ import (
 
 func Initialize(application *fiber.App) {
 	application.Get(StaticPrefix+"/*", static.New(StaticRoot))
+	application.Get(RobotsPath, static.New(RobotsFile))
 	urls.Attach(application)
 }
 

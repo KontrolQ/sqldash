@@ -56,6 +56,7 @@
   color: var(--foreground);
   font-family: var(--mono);
   font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
   gap: 8px;
   line-height: 20px;
 }
@@ -66,7 +67,6 @@
 
 .rail-item.is-current {
   background: var(--secondary);
-  font-weight: var(--fw-medium);
 }
 
 .rail-item svg {
@@ -102,19 +102,21 @@
 
 .workbar {
   display: flex;
+  height: 46px;
   flex-shrink: 0;
   align-items: center;
-  padding: 8px 10px;
+  padding: 0 10px;
   border-bottom: 1px solid var(--border);
   gap: 6px;
 }
 
 .workbar.is-second {
-  padding: 6px 10px;
+  height: 42px;
 }
 
 .workbar-right {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   margin-left: auto;
   gap: 6px;
@@ -124,6 +126,8 @@
   color: var(--muted-foreground);
   font-family: var(--mono);
   font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .tally {

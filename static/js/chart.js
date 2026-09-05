@@ -12,6 +12,7 @@
   const TOP_ROOM = 12;
   const TICK_LENGTH = 5;
   const TICK_GAP = 6;
+  const RESTING = '—';
 
   function make(name, attributes) {
     const node = document.createElementNS(SVG, name);
@@ -162,25 +163,20 @@
         title.textContent = name;
 
         const value = document.createElement('b');
-        value.textContent = label(summarise(band), chart.unit);
+        value.textContent = RESTING;
 
         item.appendChild(swatch);
         item.appendChild(title);
         item.appendChild(value);
         key.appendChild(item);
 
-        readings.push({ item: item, value: value, resting: value.textContent });
+        readings.push({ item: item, value: value });
       });
-
-      const note = document.createElement('span');
-      note.className = 'chart-key-note';
-      note.textContent = stacked ? 'total' : 'peak';
-      key.appendChild(note);
     }
 
     function rest() {
       readings.forEach(function (reading) {
-        reading.value.textContent = reading.resting;
+        reading.value.textContent = RESTING;
         reading.item.classList.remove('is-live');
       });
     }

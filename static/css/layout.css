@@ -19,7 +19,7 @@
   flex: 1;
   flex-direction: column;
   padding: var(--sp-6);
-  gap: var(--sp-6);
+  gap: var(--sp-4);
   scrollbar-gutter: stable;
 }
 
@@ -101,8 +101,4 @@
 .page-head.is-slim h1 {
   font-size: var(--text-lg);
   line-height: var(--text-lg-lh);
-}
-
-.content.is-tight {
-  gap: var(--sp-4);
 }

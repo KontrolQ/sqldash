@@ -22,14 +22,14 @@ Create database
 <table class="table">
 <thead>
 <tr>
-<th>Name</th>
-<th>Address</th>
-<th class="table-numeric">Tables</th>
-<th class="table-numeric">Storage</th>
-<th class="table-numeric">Rows read</th>
-<th class="table-numeric">Queries</th>
-<th>State</th>
-<th class="table-pick"></th>
+<th scope="col">Name</th>
+<th scope="col">Address</th>
+<th scope="col" class="table-numeric">Tables</th>
+<th scope="col" class="table-numeric">Storage</th>
+<th scope="col" class="table-numeric">Rows read</th>
+<th scope="col" class="table-numeric">Queries</th>
+<th scope="col">State</th>
+<th scope="col" class="table-pick"></th>
 </tr>
 </thead>
 <tbody>

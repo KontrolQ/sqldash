@@ -37,6 +37,7 @@ Prettify
 </div>
 
 <div class="editor" data-schema="{{ Schema }}">
+<div class="editor-lines" aria-hidden="true" data-editor-lines></div>
 <pre class="editor-paint" aria-hidden="true"></pre>
 <textarea class="editor-field" name="statement" rows="10" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Statement to run" data-statement>{{ Statement }}</textarea>
 <div class="editor-hint" role="listbox" aria-label="Completions" hidden></div>
@@ -54,7 +55,7 @@ Prettify
 {% if Ran and not Problem %}
 {% if Columns %}
 <table class="table is-grid">
-<thead><tr>{% for column in Columns %}<th><span class="column-name">{{ column }}</span></th>{% endfor %}</tr></thead>
+<thead><tr>{% for column in Columns %}<th scope="col"><span class="column-name">{{ column }}</span></th>{% endfor %}</tr></thead>
 <tbody>
 {% for row in Rows %}
 <tr>{% for cell in row %}<td class="cell">{{ cell }}</td>{% endfor %}</tr>

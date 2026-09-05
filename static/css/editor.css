@@ -1,9 +1,12 @@
 .editor {
+  --gutter-width: 46px;
+
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
 }
 
+.editor-lines,
 .editor-paint,
 .editor-field {
   padding: 14px 16px;
@@ -14,14 +17,34 @@
   letter-spacing: 0;
   line-height: 22px;
   tab-size: 2;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre;
+}
+
+.editor-lines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  width: var(--gutter-width);
+  padding-right: 10px;
+  padding-left: 10px;
+  border-right: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  text-align: right;
+}
+
+.editor-lines span {
+  display: block;
+  opacity: 0.55;
 }
 
 .editor-paint {
   position: absolute;
   overflow: hidden;
-  inset: 0;
+  inset: 0 0 0 var(--gutter-width);
   color: var(--foreground);
   pointer-events: none;
 }
@@ -30,10 +53,12 @@
   position: relative;
   display: block;
   width: 100%;
+  padding-left: calc(var(--gutter-width) + 16px);
   background: transparent;
   caret-color: var(--foreground);
   color: transparent;
   outline: none;
+  overflow-x: auto;
   resize: vertical;
 }
 

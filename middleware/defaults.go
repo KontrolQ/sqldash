@@ -8,6 +8,7 @@ const (
 	LoginPath  = "/login"
 	SetupPath  = "/setup"
 	StaticPath = "/static"
+	RobotsPath = "/robots.txt"
 
 	ThemeCookie = "sqldash-theme"
 	ThemeSystem = "system"
@@ -39,6 +40,6 @@ var PaletteDestinations = []meta.PaletteItem{
 	{Label: "Settings", URL: "/settings"},
 }
 
-var OpenPaths = []string{LoginPath, SetupPath}
+var OpenPaths = []string{LoginPath, SetupPath, RobotsPath}
 
 var Themes = []string{ThemeSystem, ThemeLight, ThemeDark}

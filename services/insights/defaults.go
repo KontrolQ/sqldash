@@ -105,12 +105,13 @@ const (
 	SparkPadding = 4.0
 	FillFormat   = "%s L%.2f %.2f L0 %.2f Z"
 
-	QueriesLabel     = "Queries"
-	FailuresLabel    = "Failures"
-	RowsReadLabel    = "Rows read"
-	RowsWrittenLabel = "Rows written"
-	AverageLabel     = "Average"
-	TailLabel        = "P99"
+	QueriesLabel      = "Queries"
+	FailuresLabel     = "Failures"
+	RowsReadLabel     = "Rows read"
+	RowsWrittenLabel  = "Rows written"
+	RowsReturnedLabel = "Rows returned"
+	AverageLabel      = "Average"
+	TailLabel         = "P99"
 
 	P50Name = "P50"
 	P95Name = "P95"
