@@ -22,6 +22,10 @@ func carryOf(table string, search string, filters []FilterView) string {
 	return carried.Encode()
 }
 
+func withoutSearch(table string, filters []FilterView) string {
+	return carryOf(table, "", filters)
+}
+
 func withoutFilter(table string, search string, filters []FilterView, dropped int) string {
 	kept := make([]FilterView, 0, len(filters))
 

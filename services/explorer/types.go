@@ -77,6 +77,7 @@ type BrowseContext struct {
 	Operators     []ChoiceView
 	ColumnChoices []ChoiceView
 	Carry         string
+	CarryNoSearch string
 	View          string
 	Duration      string
 	PreviousPage  int

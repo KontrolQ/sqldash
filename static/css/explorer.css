@@ -374,15 +374,6 @@
   flex-shrink: 0;
 }
 
-.workbar {
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.workbar::-webkit-scrollbar {
-  display: none;
-}
-
 .workbar-group {
   display: flex;
   flex-shrink: 0;
@@ -395,7 +386,7 @@
 }
 
 .workspace.is-shut {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .workspace.is-shut .rail {
@@ -403,7 +394,7 @@
 }
 
 .workspace.is-console.is-shut {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .result-text {

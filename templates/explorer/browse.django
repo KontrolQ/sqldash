@@ -109,7 +109,7 @@ Add record
 
 <div class="workbar is-second">
 <input class="input is-small is-search" form="search-form" name="search" value="{{ Search }}" placeholder="Search every column" aria-label="Search every column">
-{% if Search %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ Carry }}">Clear</a>{% endif %}
+{% if Search %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ CarryNoSearch }}">Clear</a>{% endif %}
 <div class="workbar-right">
 <div class="workbar-group" data-selection-bar hidden>
 <span class="selection-count" data-selection-count></span>

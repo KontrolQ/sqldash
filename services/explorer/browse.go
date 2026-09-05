@@ -77,6 +77,7 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 	shown.Operators = OperatorChoices()
 	shown.ColumnChoices = columnChoices(columns)
 	shown.Carry = carryOf(shown.Table, shown.Search, shown.Filters)
+	shown.CarryNoSearch = withoutSearch(shown.Table, shown.Filters)
 
 	for index := range shown.Filters {
 		shown.Filters[index].RemoveURL = shown.BrowsePath + "?" +

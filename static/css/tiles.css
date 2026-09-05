@@ -155,6 +155,7 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  padding: 0;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
