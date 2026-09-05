@@ -6,7 +6,5 @@ const (
 	IndexTemplate = "databases/index"
 	ShowTemplate  = "databases/show"
 
-	NameParameter    = "name"
-	ProblemParameter = "problem"
-	DoneParameter    = "done"
+	NameParameter = "name"
 )

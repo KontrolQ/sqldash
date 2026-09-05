@@ -12,7 +12,4 @@ const (
 	SortParameter      = "sort"
 	DirectionParameter = "direction"
 	SearchParameter    = "search"
-	ProblemParameter   = "problem"
-	DoneParameter      = "done"
-	StatementParameter = "statement"
 )

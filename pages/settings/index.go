@@ -15,8 +15,6 @@ func Index(context fiber.Ctx) error {
 	data, dataError := service.GetIndexData(
 		sessions.Remembered(context),
 		theme,
-		context.Query(ProblemParameter),
-		context.Query(DoneParameter),
 	)
 
 	if dataError != nil {

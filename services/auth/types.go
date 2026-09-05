@@ -1,8 +1,7 @@
 package auth
 
 type GateContext struct {
-	Title   string
-	Problem string
+	Title string
 }
 
 type AccountView struct {

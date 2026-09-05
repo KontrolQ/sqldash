@@ -13,8 +13,6 @@ func Show(context fiber.Ctx) error {
 		context.Context(),
 		context.Params(NameParameter),
 		"",
-		context.Query(ProblemParameter),
-		context.Query(DoneParameter),
 	)
 
 	if dataError != nil {

@@ -15,7 +15,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func GetShowData(requestContext context.Context, name string, secret string, problem string, done string) (*ShowContext, *fiber.Error) {
+func GetShowData(requestContext context.Context, name string, secret string) (*ShowContext, *fiber.Error) {
 	held, findError := repository.FindByName(name)
 	if findError != nil {
 		logger.Errorf(LogPrefix, ListFailedLog, findError)
@@ -34,8 +34,6 @@ func GetShowData(requestContext context.Context, name string, secret string, pro
 		Address:   address,
 		URL:       AddressScheme + address,
 		Protected: held.Protected,
-		Problem:   problem,
-		Done:      done,
 		Secret:    secret,
 	}
 

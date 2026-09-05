@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func GetIndexData(problem string) (*IndexContext, *fiber.Error) {
+func GetIndexData() (*IndexContext, *fiber.Error) {
 	records, findError := repository.All()
 	if findError != nil {
 		logger.Errorf(LogPrefix, ListFailedLog, findError)
@@ -22,7 +22,6 @@ func GetIndexData(problem string) (*IndexContext, *fiber.Error) {
 	return &IndexContext{
 		Title:     IndexTitle,
 		Databases: toDatabaseViews(records),
-		Problem:   problem,
 	}, nil
 }
 

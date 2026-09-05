@@ -7,7 +7,6 @@ import (
 type IndexContext struct {
 	Title     string
 	Databases []DatabaseView
-	Problem   string
 }
 
 type DatabaseView struct {
@@ -32,6 +31,4 @@ type ShowContext struct {
 	QueryCount  int64
 	Tokens      []tokenservice.TokenView
 	Secret      string
-	Problem     string
-	Done        string
 }

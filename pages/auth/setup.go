@@ -21,7 +21,6 @@ func Setup(context fiber.Ctx) error {
 	meta.SetPageTitle(context, service.SetupTitle)
 
 	return shortcuts.Render(context, SetupTemplate, service.GateContext{
-		Title:   service.SetupTitle,
-		Problem: context.Query(ProblemParameter),
+		Title: service.SetupTitle,
 	})
 }

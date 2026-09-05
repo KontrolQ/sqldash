@@ -26,7 +26,6 @@ func Login(context fiber.Ctx) error {
 	meta.SetPageTitle(context, service.LoginTitle)
 
 	return shortcuts.Render(context, LoginTemplate, service.GateContext{
-		Title:   service.LoginTitle,
-		Problem: context.Query(ProblemParameter),
+		Title: service.LoginTitle,
 	})
 }

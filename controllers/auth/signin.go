@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"net/url"
 
 	service "sqldash/services/auth"
 	"sqldash/sessions"
@@ -20,7 +19,8 @@ func SignIn(context fiber.Ctx) error {
 
 	held, signInError := service.SignIn(asked.Username, asked.Password)
 	if signInError != nil {
-		return shortcuts.RedirectToPath(context, LoginPath+"?problem="+url.QueryEscape(signInError.Message))
+		sessions.Complain(context, signInError.Message)
+		return shortcuts.Redirect(context, LoginRoute)
 	}
 
 	sessions.Remember(context, held.ID)

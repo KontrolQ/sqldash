@@ -2,9 +2,9 @@ package databases
 
 import (
 	"net/http"
-	"net/url"
 
 	service "sqldash/services/databases"
+	"sqldash/sessions"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -18,7 +18,8 @@ func Create(context fiber.Ctx) error {
 	}
 
 	if createError := service.Create(context.Context(), asked.Name); createError != nil {
-		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(createError.Message))
+		sessions.Complain(context, createError.Message)
+		return shortcuts.Redirect(context, IndexRoute)
 	}
 
 	return shortcuts.Redirect(context, IndexRoute)
@@ -26,7 +27,8 @@ func Create(context fiber.Ctx) error {
 
 func Delete(context fiber.Ctx) error {
 	if deleteError := service.Delete(context.Context(), context.Params(NameParameter)); deleteError != nil {
-		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(deleteError.Message))
+		sessions.Complain(context, deleteError.Message)
+		return shortcuts.Redirect(context, IndexRoute)
 	}
 
 	return shortcuts.Redirect(context, IndexRoute)

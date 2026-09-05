@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	service "sqldash/services/databases"
+	"sqldash/sessions"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -30,15 +31,14 @@ func SaveSettings(context fiber.Ctx) error {
 	)
 
 	if saveError != nil {
-		return backTo(context, name, ProblemParameter, saveError.Message)
+		sessions.Complain(context, saveError.Message)
+	} else {
+		sessions.Report(context, SettingsSaved)
 	}
 
-	return backTo(context, name, DoneParameter, SettingsSaved)
+	return backTo(context, name)
 }
 
-func backTo(context fiber.Ctx, name string, parameter string, message string) error {
-	return shortcuts.RedirectToPath(
-		context,
-		ShowPath+url.PathEscape(name)+"?"+parameter+"="+url.QueryEscape(message),
-	)
+func backTo(context fiber.Ctx, name string) error {
+	return shortcuts.RedirectToPath(context, ShowPath+url.PathEscape(name))
 }

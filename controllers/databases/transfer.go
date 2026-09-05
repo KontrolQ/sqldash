@@ -6,6 +6,7 @@ import (
 	"time"
 
 	service "sqldash/services/databases"
+	"sqldash/sessions"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -20,19 +21,22 @@ func Import(context fiber.Ctx) error {
 
 	header, fileError := context.FormFile(DumpField)
 	if fileError != nil {
-		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(FileMissing))
+		sessions.Complain(context, FileMissing)
+		return shortcuts.Redirect(context, IndexRoute)
 	}
 
 	handle, openError := header.Open()
 	if openError != nil {
-		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(FileMissing))
+		sessions.Complain(context, FileMissing)
+		return shortcuts.Redirect(context, IndexRoute)
 	}
 
 	defer handle.Close()
 
 	importError := service.CreateFromUpload(context.Context(), asked.Name, header.Filename, handle)
 	if importError != nil {
-		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(importError.Message))
+		sessions.Complain(context, importError.Message)
+		return shortcuts.Redirect(context, IndexRoute)
 	}
 
 	return shortcuts.Redirect(context, IndexRoute)
@@ -51,14 +55,16 @@ func Fork(context fiber.Ctx) error {
 	if asked.Moment != "" {
 		parsed, momentError := time.ParseInLocation(service.MomentLayout, asked.Moment, time.Local)
 		if momentError != nil {
-			return backTo(context, name, ProblemParameter, service.MomentUnusable)
+			sessions.Complain(context, service.MomentUnusable)
+			return backTo(context, name)
 		}
 
 		at = &parsed
 	}
 
 	if forkError := service.Fork(context.Context(), name, asked.Name, at); forkError != nil {
-		return backTo(context, name, ProblemParameter, forkError.Message)
+		sessions.Complain(context, forkError.Message)
+		return backTo(context, name)
 	}
 
 	return shortcuts.RedirectToPath(context, ShowPath+url.PathEscape(asked.Name))

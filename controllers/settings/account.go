@@ -2,7 +2,6 @@ package settings
 
 import (
 	"net/http"
-	"net/url"
 
 	service "sqldash/services/settings"
 	"sqldash/sessions"
@@ -19,10 +18,12 @@ func SaveDetails(context fiber.Ctx) error {
 	}
 
 	if saveError := service.SaveDetails(sessions.Remembered(context), asked.Username, asked.Email); saveError != nil {
-		return back(context, ProblemParameter, saveError.Message)
+		sessions.Complain(context, saveError.Message)
+	} else {
+		sessions.Report(context, service.DetailsSaved)
 	}
 
-	return back(context, DoneParameter, service.DetailsSaved)
+	return shortcuts.RedirectToPath(context, IndexPath)
 }
 
 func ChangePassword(context fiber.Ctx) error {
@@ -32,12 +33,10 @@ func ChangePassword(context fiber.Ctx) error {
 	}
 
 	if changeError := service.ChangePassword(sessions.Remembered(context), asked.Current, asked.Wanted); changeError != nil {
-		return back(context, ProblemParameter, changeError.Message)
+		sessions.Complain(context, changeError.Message)
+	} else {
+		sessions.Report(context, service.PasswordSaved)
 	}
 
-	return back(context, DoneParameter, service.PasswordSaved)
-}
-
-func back(context fiber.Ctx, parameter string, message string) error {
-	return shortcuts.RedirectToPath(context, IndexPath+"?"+parameter+"="+url.QueryEscape(message))
+	return shortcuts.RedirectToPath(context, IndexPath)
 }

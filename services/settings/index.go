@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func GetIndexData(accountID uint, theme string, problem string, done string) (*IndexContext, *fiber.Error) {
+func GetIndexData(accountID uint, theme string) (*IndexContext, *fiber.Error) {
 	held, findError := repository.FindByID(accountID)
 	if findError != nil {
 		logger.Errorf(LogPrefix, LookupFailedLog, findError)
@@ -26,7 +26,5 @@ func GetIndexData(accountID uint, theme string, problem string, done string) (*I
 		Username: held.Username,
 		Email:    held.Email,
 		Theme:    theme,
-		Problem:  problem,
-		Done:     done,
 	}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	service "sqldash/services/explorer"
+	"sqldash/sessions"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -24,10 +25,12 @@ func SaveCell(context fiber.Ctx) error {
 	)
 
 	if saveError != nil {
-		return backTo(context, name, asked.Back, ProblemParameter, saveError.Message)
+		sessions.Complain(context, saveError.Message)
+	} else {
+		sessions.Report(context, service.CellSaved)
 	}
 
-	return backTo(context, name, asked.Back, DoneParameter, service.CellSaved)
+	return backTo(context, name, asked.Back)
 }
 
 func DeleteRow(context fiber.Ctx) error {
@@ -39,10 +42,12 @@ func DeleteRow(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
 	if deleteError := service.DeleteRow(context.Context(), name, asked.Table, asked.Key); deleteError != nil {
-		return backTo(context, name, asked.Back, ProblemParameter, deleteError.Message)
+		sessions.Complain(context, deleteError.Message)
+	} else {
+		sessions.Report(context, service.RowDeleted)
 	}
 
-	return backTo(context, name, asked.Back, DoneParameter, service.RowDeleted)
+	return backTo(context, name, asked.Back)
 }
 
 func RunConsole(context fiber.Ctx) error {
@@ -53,20 +58,22 @@ func RunConsole(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	return shortcuts.RedirectToPath(
-		context,
-		ExplorePath+url.PathEscape(name)+ConsoleSuffix+"?statement="+url.QueryEscape(asked.Statement),
-	)
+	data, dataError := service.RunConsole(context.Context(), name, asked.Statement)
+	if dataError != nil {
+		return dataError
+	}
+
+	meta.SetPageTitle(context, data.Title)
+
+	return shortcuts.Render(context, ConsoleTemplate, data)
 }
 
-func backTo(context fiber.Ctx, name string, back string, parameter string, message string) error {
+func backTo(context fiber.Ctx, name string, back string) error {
 	target := ExplorePath + url.PathEscape(name) + BrowseSuffix
 
 	if back != "" {
-		target += "?" + back + "&"
-	} else {
-		target += "?"
+		target += "?" + back
 	}
 
-	return shortcuts.RedirectToPath(context, target+parameter+"="+url.QueryEscape(message))
+	return shortcuts.RedirectToPath(context, target)
 }

@@ -20,8 +20,6 @@ func Browse(context fiber.Ctx) error {
 		Sort:      context.Query(SortParameter),
 		Direction: context.Query(DirectionParameter),
 		Search:    context.Query(SearchParameter),
-		Problem:   context.Query(ProblemParameter),
-		Done:      context.Query(DoneParameter),
 	})
 
 	if dataError != nil {
@@ -34,11 +32,7 @@ func Browse(context fiber.Ctx) error {
 }
 
 func Console(context fiber.Ctx) error {
-	data, dataError := service.RunConsole(
-		context.Context(),
-		context.Params(NameParameter),
-		context.Query(StatementParameter),
-	)
+	data, dataError := service.RunConsole(context.Context(), context.Params(NameParameter), "")
 
 	if dataError != nil {
 		return dataError

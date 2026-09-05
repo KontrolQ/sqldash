@@ -6,8 +6,7 @@ const (
 	LoginTemplate = "auth/login"
 	SetupTemplate = "auth/setup"
 
-	HomeRoute        = "databases"
-	LoginRoute       = "auth.login"
-	SetupRoute       = "auth.setup"
-	ProblemParameter = "problem"
+	HomeRoute  = "databases"
+	LoginRoute = "auth.login"
+	SetupRoute = "auth.setup"
 )

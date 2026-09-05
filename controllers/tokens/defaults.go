@@ -8,7 +8,4 @@ const (
 
 	NameParameter       = "name"
 	IdentifierParameter = "identifier"
-
-	ProblemParameter = "problem"
-	DoneParameter    = "done"
 )

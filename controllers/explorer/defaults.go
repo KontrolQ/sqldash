@@ -7,8 +7,7 @@ const (
 	BrowseSuffix  = "/explore"
 	ConsoleSuffix = "/console"
 
-	NameParameter    = "name"
-	CheckedValue     = "on"
-	ProblemParameter = "problem"
-	DoneParameter    = "done"
+	NameParameter   = "name"
+	CheckedValue    = "on"
+	ConsoleTemplate = "explorer/console"
 )

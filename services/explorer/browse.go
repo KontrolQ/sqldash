@@ -20,8 +20,6 @@ type Ask struct {
 	Sort      string
 	Direction string
 	Search    string
-	Problem   string
-	Done      string
 }
 
 func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.Error) {
@@ -36,8 +34,6 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 		Tables:   tables,
 		PageSize: DefaultPageSize,
 		Page:     1,
-		Problem:  asked.Problem,
-		Done:     asked.Done,
 	}
 
 	if asked.Table == "" {

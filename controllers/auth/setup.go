@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"net/url"
 
 	service "sqldash/services/auth"
 	"sqldash/sessions"
@@ -20,7 +19,8 @@ func CreateAccount(context fiber.Ctx) error {
 
 	held, createError := service.CreateFirstAccount(asked.Username, asked.Email, asked.Password)
 	if createError != nil {
-		return shortcuts.RedirectToPath(context, SetupPath+"?problem="+url.QueryEscape(createError.Message))
+		sessions.Complain(context, createError.Message)
+		return shortcuts.Redirect(context, SetupRoute)
 	}
 
 	sessions.Remember(context, held.ID)

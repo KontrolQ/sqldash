@@ -11,9 +11,6 @@ const (
 	NameParameter = "name"
 	CheckedValue  = "on"
 
-	ProblemParameter = "problem"
-	DoneParameter    = "done"
-
 	DumpField         = "dump"
 	DispositionHeader = "content-disposition"
 	ContentTypeHeader = "content-type"

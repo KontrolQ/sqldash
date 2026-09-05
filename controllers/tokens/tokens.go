@@ -6,6 +6,7 @@ import (
 
 	databaseservice "sqldash/services/databases"
 	service "sqldash/services/tokens"
+	"sqldash/sessions"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -22,10 +23,11 @@ func Mint(context fiber.Ctx) error {
 
 	secret, mintError := service.Mint(name, asked.Label, asked.Scope)
 	if mintError != nil {
-		return backTo(context, name, ProblemParameter, mintError.Message)
+		sessions.Complain(context, mintError.Message)
+		return backTo(context, name)
 	}
 
-	data, dataError := databaseservice.GetShowData(context.Context(), name, secret, "", "")
+	data, dataError := databaseservice.GetShowData(context.Context(), name, secret)
 	if dataError != nil {
 		return dataError
 	}
@@ -39,15 +41,14 @@ func Revoke(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
 	if revokeError := service.Revoke(context.Params(IdentifierParameter)); revokeError != nil {
-		return backTo(context, name, ProblemParameter, revokeError.Message)
+		sessions.Complain(context, revokeError.Message)
+	} else {
+		sessions.Report(context, TokenRevoked)
 	}
 
-	return backTo(context, name, DoneParameter, TokenRevoked)
+	return backTo(context, name)
 }
 
-func backTo(context fiber.Ctx, name string, parameter string, value string) error {
-	return shortcuts.RedirectToPath(
-		context,
-		ShowPath+url.PathEscape(name)+"?"+parameter+"="+url.QueryEscape(value),
-	)
+func backTo(context fiber.Ctx, name string) error {
+	return shortcuts.RedirectToPath(context, ShowPath+url.PathEscape(name))
 }
