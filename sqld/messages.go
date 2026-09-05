@@ -8,3 +8,7 @@ const (
 	DecodeFailed  = "The answer from the database server could not be understood."
 	RefusedFormat = "The database server refused the request: %s %s"
 )
+
+const (
+	QueryRefused = "The database refused that query."
+)
