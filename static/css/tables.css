@@ -323,3 +323,33 @@ tr.is-picked td {
 .table.is-peek {
   width: auto;
 }
+
+.event-when {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.event-ago {
+  color: var(--foreground);
+}
+
+.event-stamp {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.event-detail {
+  max-width: 380px;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+}
+
+.inline-form {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}

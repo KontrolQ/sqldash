@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"sqldash/services/audit"
 	service "sqldash/services/explorer"
 	"sqldash/sessions"
 	"sqldash/utils/meta"
@@ -39,6 +40,7 @@ func SaveCells(context fiber.Ctx) error {
 		sessions.Complain(context, saveError.Message)
 	} else {
 		sessions.Report(context, savedMessage(len(edits)))
+		audit.Note(context, name, audit.RowsChanged, countedAs(len(edits), OneChangedFormat, ChangedFormat, asked.Table))
 	}
 
 	return backTo(context, name, asked.Back)
@@ -56,6 +58,7 @@ func DeleteRows(context fiber.Ctx) error {
 		sessions.Complain(context, deleteError.Message)
 	} else {
 		sessions.Report(context, fmt.Sprintf(service.RowsDeleted, len(asked.Keys)))
+		audit.Note(context, name, audit.RowsDeleted, countedAs(len(asked.Keys), OneDeletedFormat, DeletedFormat, asked.Table))
 	}
 
 	return backTo(context, name, asked.Back)
@@ -73,6 +76,8 @@ func RunConsole(context fiber.Ctx) error {
 	if dataError != nil {
 		return dataError
 	}
+
+	audit.Note(context, name, audit.StatementRun, shortened(asked.Statement))
 
 	data.SnippetID = asked.Snippet
 
@@ -160,7 +165,26 @@ func InsertRow(context fiber.Ctx) error {
 		sessions.Complain(context, insertError.Message)
 	} else {
 		sessions.Report(context, service.RowAdded)
+		audit.Note(context, name, audit.RowInserted, fmt.Sprintf(InsertedFormat, asked.Table))
 	}
 
 	return backTo(context, name, asked.Back)
+}
+
+func shortened(statement string) string {
+	trimmed := strings.Join(strings.Fields(statement), " ")
+
+	if len(trimmed) > StatementLength {
+		return trimmed[:StatementLength] + Ellipsis
+	}
+
+	return trimmed
+}
+
+func countedAs(count int, one string, many string, table string) string {
+	if count == 1 {
+		return fmt.Sprintf(one, table)
+	}
+
+	return fmt.Sprintf(many, count, table)
 }

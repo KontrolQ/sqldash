@@ -1,10 +1,12 @@
 package databases
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
 
+	"sqldash/services/audit"
 	service "sqldash/services/databases"
 	"sqldash/sessions"
 	"sqldash/utils/logger"
@@ -40,6 +42,8 @@ func Import(context fiber.Ctx) error {
 		return shortcuts.Redirect(context, IndexRoute)
 	}
 
+	audit.Note(context, asked.Name, audit.DatabaseImported, fmt.Sprintf(LoadedFrom, header.Filename))
+
 	return shortcuts.Redirect(context, IndexRoute)
 }
 
@@ -68,6 +72,13 @@ func Fork(context fiber.Ctx) error {
 		return backTo(context, name)
 	}
 
+	detail := fmt.Sprintf(CopiedFrom, name)
+	if at != nil {
+		detail = fmt.Sprintf(CopiedAsAtWhen, name, asked.Moment)
+	}
+
+	audit.Note(context, asked.Name, audit.DatabaseForked, detail)
+
 	return shortcuts.RedirectToPath(context, ShowPath+url.PathEscape(asked.Name))
 }
 
@@ -82,6 +93,8 @@ func ExportFile(context fiber.Ctx) error {
 		return shortcuts.ServiceError(http.StatusBadGateway, service.ExportRefused)
 	}
 
+	audit.Note(context, name, audit.DatabaseExported, SQLiteFileKind)
+
 	return nil
 }
 
@@ -94,6 +107,8 @@ func Export(context fiber.Ctx) error {
 	if writeError := service.WriteDump(context.Context(), name, context.Response().BodyWriter()); writeError != nil {
 		return shortcuts.ServiceError(http.StatusBadGateway, service.ExportRefused)
 	}
+
+	audit.Note(context, name, audit.DatabaseExported, DumpKind)
 
 	return nil
 }

@@ -18,3 +18,19 @@ const (
 	FileContentType   = "application/vnd.sqlite3"
 	DumpContentType   = "application/sql"
 )
+
+const (
+	StartedEmpty   = "Started empty"
+	LoadedFrom     = "Loaded from %s"
+	CopiedFrom     = "Copied from %s"
+	CopiedAsAtWhen = "Copied from %s as it stood at %s"
+	RangeAllowed   = "Allowed %s"
+	RangeRemoved   = "Removed %s"
+	SQLiteFileKind = "SQLite file"
+	DumpKind       = "SQL dump"
+	BlockedReads   = "reads blocked"
+	BlockedWrites  = "writes blocked"
+	AllowedAttach  = "ATTACH allowed"
+	Protected      = "delete protection on"
+	NothingBlocked = "nothing blocked"
+)

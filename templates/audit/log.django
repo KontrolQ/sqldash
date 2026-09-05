@@ -1,0 +1,85 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head is-slim">
+<div class="page-title">
+<h1>{{ Heading }}</h1>
+<p class="page-subtitle">Everything done through this panel, newest first.</p>
+</div>
+<div class="page-actions">
+<form class="inline-form" method="get" action="{% url "audit" %}">
+{% include "partials/select.django" with select_name="action" select_label="Action" select_chosen=Action select_options=Choices select_small=1 %}
+{% if Database %}<input type="hidden" name="database" value="{{ Database }}">{% endif %}
+<button class="button is-outline is-small" type="submit">Filter</button>
+</form>
+{% if Database or Action %}<a class="button is-ghost is-small" href="{% url "audit" %}">Clear</a>{% endif %}
+</div>
+</div>
+
+{% if Database %}
+<div class="alert" role="status">
+<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+<div class="alert-title">Showing {{ Database }} only. <a class="link" href="{% url "audit" %}">Show every database</a>.</div>
+</div>
+{% endif %}
+
+<div class="card is-panel is-table">
+<div class="card-head">
+<div class="card-title">Activity</div>
+{% include "partials/hint.django" with hint_text="Every action taken in this panel, with the account that took it." %}
+<div class="card-tools">
+<span class="tally">{% if Total %}{{ FirstRow }} &ndash; {{ LastRow }} of {{ Total }}{% else %}Nothing yet{% endif %}</span>
+</div>
+</div>
+
+{% if Entries %}
+<div class="table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th scope="col">When</th>
+<th scope="col">Action</th>
+<th scope="col">Database</th>
+<th scope="col">Detail</th>
+<th scope="col">By</th>
+</tr>
+</thead>
+<tbody>
+{% for entry in Entries %}
+<tr>
+<td class="event-when">
+<span class="event-ago">{{ entry.Ago }}</span>
+<span class="event-stamp">{{ entry.When }}</span>
+</td>
+<td><span class="badge is-{{ entry.Tone }}">{{ entry.Label }}</span></td>
+<td>{% if entry.Database %}<a class="table-name" href="{% url "audit" %}?database={{ entry.Database }}">{{ entry.Database }}</a>{% else %}<span class="null">&mdash;</span>{% endif %}</td>
+<td class="event-detail">{% if entry.Detail %}{{ entry.Detail }}{% else %}<span class="null">&mdash;</span>{% endif %}</td>
+<td>{{ entry.Actor }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<div class="card-foot is-split">
+<span class="tally">Page {{ Page }} of {{ Pages }}</span>
+<div class="steps">
+<a class="step {% if Page <= 1 %}is-off{% endif %}" href="{% url "audit" %}?{{ Carry }}page={{ PreviousPage }}" aria-label="Previous page">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+</a>
+<span class="step is-page">{{ Page }}</span>
+<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{% url "audit" %}?{{ Carry }}page={{ NextPage }}" aria-label="Next page">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+</a>
+</div>
+</div>
+{% else %}
+<div class="card-body">
+<div class="empty">
+<span class="empty-title">Nothing recorded yet</span>
+<span>Actions show here as soon as you create a database, mint a token or change a row.</span>
+</div>
+</div>
+{% endif %}
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	"sqldash/services/audit"
 	service "sqldash/services/auth"
 	"sqldash/sessions"
 	"sqldash/utils/meta"
@@ -24,11 +25,13 @@ func SignIn(context fiber.Ctx) error {
 	}
 
 	sessions.Remember(context, held.ID)
+	audit.Record(held.Username, "", audit.SignedIn, "")
 
 	return shortcuts.Redirect(context, HomeRoute)
 }
 
 func SignOut(context fiber.Ctx) error {
+	audit.Note(context, "", audit.SignedOut, "")
 	sessions.Forget(context)
 
 	return shortcuts.Redirect(context, LoginRoute)

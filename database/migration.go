@@ -17,6 +17,7 @@ func migrate() {
 		&models.Rollup{},
 		&models.Marker{},
 		&models.Snippet{},
+		&models.Event{},
 	)
 
 	if migrationError != nil {

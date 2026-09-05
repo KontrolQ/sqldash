@@ -1,9 +1,11 @@
 package databases
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"sqldash/services/audit"
 	service "sqldash/services/databases"
 	"sqldash/sessions"
 	"sqldash/utils/meta"
@@ -24,6 +26,7 @@ func AllowNetwork(context fiber.Ctx) error {
 		sessions.Complain(context, allowError.Message)
 	} else {
 		sessions.Report(context, service.NetworkAllowed)
+		audit.Note(context, name, audit.NetworkAllowed, fmt.Sprintf(RangeAllowed, asked.Network))
 	}
 
 	return backTo(context, name)
@@ -42,6 +45,7 @@ func RemoveNetwork(context fiber.Ctx) error {
 		sessions.Complain(context, removeError.Message)
 	} else {
 		sessions.Report(context, service.NetworkRemoved)
+		audit.Note(context, name, audit.NetworkRemoved, "")
 	}
 
 	return backTo(context, name)

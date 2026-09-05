@@ -38,3 +38,21 @@
   background: var(--destructive);
   color: oklch(1 0 0);
 }
+
+.badge.is-good {
+  border-color: color-mix(in oklab, var(--success) 40%, transparent);
+  background: color-mix(in oklab, var(--success) 14%, transparent);
+  color: var(--success);
+}
+
+.badge.is-bad {
+  border-color: color-mix(in oklab, var(--destructive) 40%, transparent);
+  background: color-mix(in oklab, var(--destructive) 14%, transparent);
+  color: var(--destructive);
+}
+
+.badge.is-plain {
+  border-color: var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+}

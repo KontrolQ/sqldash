@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"sqldash/services/audit"
 	databaseservice "sqldash/services/databases"
 	service "sqldash/services/tokens"
 	"sqldash/sessions"
@@ -27,6 +28,8 @@ func Mint(context fiber.Ctx) error {
 		return backTo(context, name)
 	}
 
+	audit.Note(context, name, audit.TokenMinted, asked.Label+MintedSuffix+asked.Scope)
+
 	data, dataError := databaseservice.GetShowData(context.Context(), name, secret)
 	if dataError != nil {
 		return dataError
@@ -44,6 +47,7 @@ func Revoke(context fiber.Ctx) error {
 		sessions.Complain(context, revokeError.Message)
 	} else {
 		sessions.Report(context, TokenRevoked)
+		audit.Note(context, name, audit.TokenRevoked, "")
 	}
 
 	return backTo(context, name)

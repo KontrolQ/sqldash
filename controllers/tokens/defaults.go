@@ -9,3 +9,7 @@ const (
 	NameParameter       = "name"
 	IdentifierParameter = "identifier"
 )
+
+const (
+	MintedSuffix = " · "
+)

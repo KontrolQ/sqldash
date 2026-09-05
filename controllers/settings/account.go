@@ -3,6 +3,7 @@ package settings
 import (
 	"net/http"
 
+	"sqldash/services/audit"
 	service "sqldash/services/settings"
 	"sqldash/sessions"
 	"sqldash/utils/meta"
@@ -21,6 +22,7 @@ func SaveDetails(context fiber.Ctx) error {
 		sessions.Complain(context, saveError.Message)
 	} else {
 		sessions.Report(context, service.DetailsSaved)
+		audit.Note(context, "", audit.AccountChanged, asked.Username)
 	}
 
 	return shortcuts.RedirectToPath(context, IndexPath)
@@ -36,6 +38,7 @@ func ChangePassword(context fiber.Ctx) error {
 		sessions.Complain(context, changeError.Message)
 	} else {
 		sessions.Report(context, service.PasswordSaved)
+		audit.Note(context, "", audit.PasswordChanged, "")
 	}
 
 	return shortcuts.RedirectToPath(context, IndexPath)
