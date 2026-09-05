@@ -24,8 +24,14 @@ func SignIn(context fiber.Ctx) error {
 		return shortcuts.Redirect(context, LoginRoute)
 	}
 
+	wanted := sessions.Intended(context)
+
 	sessions.Remember(context, held.ID)
 	audit.Record(held.Username, "", audit.SignedIn, "")
+
+	if wanted != "" {
+		return shortcuts.RedirectToPath(context, wanted)
+	}
 
 	return shortcuts.Redirect(context, HomeRoute)
 }

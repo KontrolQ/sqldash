@@ -41,3 +41,11 @@ func take(context fiber.Ctx, key string) string {
 
 	return message
 }
+
+func Intend(context fiber.Ctx, path string) {
+	remember(context, IntendedKey, path)
+}
+
+func Intended(context fiber.Ctx) string {
+	return take(context, IntendedKey)
+}

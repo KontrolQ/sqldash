@@ -49,7 +49,31 @@ func account(context fiber.Ctx) error {
 		return shortcuts.RedirectToPath(context, SetupPath)
 	}
 
+	remember(context)
+
 	return shortcuts.RedirectToPath(context, LoginPath)
+}
+
+func remember(context fiber.Ctx) {
+	if context.Method() != fiber.MethodGet {
+		return
+	}
+
+	if !strings.Contains(context.Get(fiber.HeaderAccept), HTMLContent) {
+		return
+	}
+
+	wanted := context.OriginalURL()
+
+	if !strings.HasPrefix(wanted, "/") || strings.HasPrefix(wanted, "//") {
+		return
+	}
+
+	if wanted == LoginPath || wanted == SetupPath {
+		return
+	}
+
+	sessions.Intend(context, wanted)
 }
 
 func isOpen(path string) bool {

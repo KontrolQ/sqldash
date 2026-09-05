@@ -5,10 +5,11 @@ import "sqldash/utils/meta"
 const (
 	LogPrefix = "Middleware"
 
-	LoginPath  = "/login"
-	SetupPath  = "/setup"
-	StaticPath = "/static"
-	RobotsPath = "/robots.txt"
+	LoginPath   = "/login"
+	SetupPath   = "/setup"
+	StaticPath  = "/static"
+	RobotsPath  = "/robots.txt"
+	HTMLContent = "text/html"
 
 	ThemeCookie = "sqldash-theme"
 	ThemeSystem = "system"
