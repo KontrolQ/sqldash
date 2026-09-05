@@ -22,6 +22,7 @@ const (
 	NothingChanged = "Nothing was changed."
 	OneCellSaved   = "One change saved."
 	CellsSaved     = "%d changes saved."
+	OneRowDeleted  = "That row was deleted."
 	RowsDeleted    = "%d rows were deleted."
 	NothingChosen  = "Pick at least one row first."
 )

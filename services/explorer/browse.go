@@ -183,7 +183,7 @@ func cellFor(value any, column ColumnView) CellView {
 	text := fmt.Sprint(value)
 
 	if held, isBytes := value.([]byte); isBytes {
-		text = fmt.Sprintf("%d bytes", len(held))
+		text = fmt.Sprintf(BytesFormat, len(held))
 	}
 
 	cell := CellView{Column: column.Name, Text: text}

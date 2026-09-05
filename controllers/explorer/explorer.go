@@ -57,7 +57,7 @@ func DeleteRows(context fiber.Ctx) error {
 	if deleteError := service.DeleteRows(context.Context(), name, asked.Table, asked.Keys); deleteError != nil {
 		sessions.Complain(context, deleteError.Message)
 	} else {
-		sessions.Report(context, fmt.Sprintf(service.RowsDeleted, len(asked.Keys)))
+		sessions.Report(context, deletedMessage(len(asked.Keys)))
 		audit.Note(context, name, audit.RowsDeleted, countedAs(len(asked.Keys), OneDeletedFormat, DeletedFormat, asked.Table))
 	}
 
@@ -187,4 +187,12 @@ func countedAs(count int, one string, many string, table string) string {
 	}
 
 	return fmt.Sprintf(many, count, table)
+}
+
+func deletedMessage(count int) string {
+	if count == 1 {
+		return service.OneRowDeleted
+	}
+
+	return fmt.Sprintf(service.RowsDeleted, count)
 }
