@@ -1,10 +1,16 @@
 {% extends "layouts/base.django" %}
 
 {% block content %}
-<div class="page-head">
+<div class="page-head is-slim">
 <div class="page-title">
 <h1>{{ Name }}</h1>
 <p class="page-subtitle">{{ Address }}</p>
+</div>
+<div class="page-actions">
+<a class="button is-outline is-small" href="{% url "databases.export.file" name=Name %}">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+Download SQLite file
+</a>
 </div>
 </div>
 
@@ -190,10 +196,22 @@
 </div>
 </div>
 <div class="actions">
-<a class="button is-outline" href="{% url "databases.export" name=Name %}">Download a dump</a>
 <button class="button" type="submit">Make a copy</button>
 </div>
 </form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Export</div>
+<div class="card-note">Take a copy away with you.</div>
+</div>
+<div class="card-body">
+<div class="actions is-left">
+<a class="button is-outline" href="{% url "databases.export.file" name=Name %}">Download SQLite file</a>
+<a class="button is-outline" href="{% url "databases.export" name=Name %}">Download SQL dump</a>
+</div>
 </div>
 </div>
 
