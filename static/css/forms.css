@@ -1,44 +1,313 @@
-.field {
-  height: var(--field-h);
-  padding: 0 var(--sp-6);
-  border: var(--bw) solid var(--border2);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: var(--fs-sm);
-}
-
-.field:focus {
-  border-color: var(--tealdim);
-  outline: none;
-}
-
 .button {
-  height: var(--field-h);
-  padding: 0 var(--sp-10);
-  border: var(--bw) solid var(--border2);
-  background: var(--head);
-  color: var(--text);
+  display: inline-flex;
+  height: var(--size-9);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  border: var(--bw) solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
   cursor: pointer;
-  font-family: var(--mono);
-  font-size: var(--fs-sm);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  gap: var(--sp-2);
+  line-height: var(--text-sm-lh);
+  outline: none;
+  transition: all var(--ease);
+  white-space: nowrap;
 }
 
 .button:hover {
-  border-color: var(--tealdim);
-  color: var(--teal);
+  background: color-mix(in oklab, var(--primary) 90%, transparent);
 }
 
-.tag {
-  padding: var(--sp-1) var(--sp-4);
-  border: var(--bw) solid var(--border2);
-  color: var(--dim);
-  font-size: var(--fs-tiny);
-  letter-spacing: var(--ls-1);
-  text-transform: uppercase;
+.button:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+  outline: none;
 }
 
-.tag.is-protected {
-  border-color: var(--tealdim);
-  color: var(--teal);
+.button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.button svg {
+  width: var(--size-4);
+  height: var(--size-4);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.button.is-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.button.is-secondary:hover {
+  background: color-mix(in oklab, var(--secondary) 80%, transparent);
+}
+
+.button.is-outline {
+  border-color: var(--border);
+  background: var(--background);
+  box-shadow: var(--shadow-xs);
+  color: var(--foreground);
+}
+
+.button.is-outline:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.button.is-ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.button.is-ghost:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.button.is-destructive {
+  background: var(--destructive);
+  color: oklch(1 0 0);
+}
+
+.button.is-destructive:hover {
+  background: color-mix(in oklab, var(--destructive) 90%, transparent);
+}
+
+.button.is-small {
+  height: var(--size-8);
+  padding: 0 var(--sp-3);
+  gap: var(--sp-1-5);
+}
+
+.button.is-block {
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  height: var(--size-9);
+  padding: var(--sp-1) var(--sp-3);
+  border: var(--bw) solid var(--input);
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-shadow: var(--shadow-xs);
+  color: var(--foreground);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-lh);
+  outline: none;
+  transition: color var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.input:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  gap: var(--sp-2);
+  line-height: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--sp-0-5) var(--sp-2);
+  border: var(--bw) solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  gap: var(--sp-1);
+  line-height: var(--text-xs-lh);
+  white-space: nowrap;
+}
+
+.badge.is-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.badge.is-outline {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.notice {
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-lh);
+}
+
+.notice.is-bad {
+  border-color: color-mix(in oklab, var(--destructive) 40%, transparent);
+  background: color-mix(in oklab, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+}
+
+.notice.is-good {
+  border-color: color-mix(in oklab, var(--success) 40%, transparent);
+  background: color-mix(in oklab, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.inline-form {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.input.is-inline {
+  width: 220px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.row {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
+.password {
+  position: relative;
+  display: flex;
+}
+
+.password .input {
+  padding-right: var(--sp-10);
+}
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: var(--size-9);
+  height: var(--size-9);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  place-items: center;
+  transition: color var(--ease);
+}
+
+.password-toggle:hover {
+  color: var(--foreground);
+}
+
+.password-toggle svg {
+  width: var(--size-4);
+  height: var(--size-4);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.password-toggle .icon-hide,
+.password.is-showing .icon-show {
+  display: none;
+}
+
+.password.is-showing .icon-hide {
+  display: block;
+}
+
+.themes {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.theme-choice {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-2);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  gap: var(--sp-2);
+  transition: border-color var(--ease), background var(--ease);
+}
+
+.theme-choice:hover {
+  background: var(--accent);
+}
+
+.theme-choice.is-chosen {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.theme-swatch {
+  height: 56px;
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.theme-swatch.is-light {
+  background: oklch(1 0 0);
+}
+
+.theme-swatch.is-dark {
+  background: oklch(0.145 0 0);
+}
+
+.theme-swatch.is-system {
+  background: linear-gradient(to right, oklch(1 0 0) 50%, oklch(0.145 0 0) 50%);
+}
+
+.theme-name {
+  font-weight: var(--fw-medium);
+  text-align: left;
 }

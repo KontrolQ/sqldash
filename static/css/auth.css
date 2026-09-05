@@ -1,0 +1,49 @@
+.gate {
+  display: grid;
+  min-height: 100vh;
+  padding: var(--sp-6);
+  place-items: center;
+}
+
+.gate-panel {
+  width: 100%;
+  max-width: 384px;
+}
+
+.gate-brand {
+  justify-content: center;
+  margin-bottom: var(--sp-6);
+}
+
+.gate-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-6);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  gap: var(--sp-6);
+}
+
+.gate-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.025em;
+  line-height: var(--text-2xl-lh);
+  text-align: center;
+}
+
+.gate-note {
+  margin-top: calc(var(--sp-6) * -1 + var(--sp-1-5));
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-lh);
+  text-align: center;
+}
+
+.gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}

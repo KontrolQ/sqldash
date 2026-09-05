@@ -1,8 +1,9 @@
-<nav class="topbar">
-<a class="topbar-brand" href="{% url "home" %}">sqldash</a>
-<div class="topbar-nav">
-<a class="topbar-link {% if "home"|active:Request.Path %}is-active{% endif %}" href="{% url "home" %}">Databases</a>
-</div>
-<div class="topbar-spacer"></div>
-<span class="topbar-version">{{ Version }}</span>
+<header class="topbar">
+<nav class="crumbs">
+<span>sqldash</span>
+<span class="crumb-divider">/</span>
+<span class="crumb-current">{{ Title }}</span>
 </nav>
+<div class="topbar-spacer"></div>
+<span class="topbar-meta">{{ Version }}</span>
+</header>

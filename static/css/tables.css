@@ -1,36 +1,74 @@
+.table-wrap {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-sm);
+  caption-side: bottom;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-lh);
+}
+
+.table thead tr {
+  border-bottom: var(--bw) solid var(--border);
 }
 
 .table th {
-  padding: var(--sp-4) var(--sp-8);
-  border-bottom: var(--bw) solid var(--border);
-  background: var(--head);
-  color: var(--dim);
-  font-weight: 400;
-  letter-spacing: var(--ls-1);
+  height: var(--size-10);
+  padding: 0 var(--sp-4);
+  color: var(--foreground);
+  font-weight: var(--fw-medium);
   text-align: left;
-  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  border-bottom: var(--bw) solid var(--border);
+  transition: background var(--ease);
+}
+
+.table tbody tr:hover {
+  background: color-mix(in oklab, var(--muted) 50%, transparent);
+}
+
+.table tbody tr:last-child {
+  border-bottom: 0;
 }
 
 .table td {
-  height: var(--row-h);
-  padding: var(--sp-3) var(--sp-8);
-  border-bottom: var(--bw) solid var(--border);
-  background: var(--row);
+  padding: var(--sp-3) var(--sp-4);
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-.table tr:nth-child(even) td {
-  background: var(--rowalt);
-}
-
-.table tr:hover td {
-  background: var(--sel);
+.table-name {
+  display: flex;
+  align-items: center;
+  font-family: var(--mono);
+  gap: var(--sp-2);
 }
 
 .table-numeric {
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table-actions {
+  text-align: right;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted-foreground);
+}
+
+.dot.is-live {
+  background: var(--success);
 }
