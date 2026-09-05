@@ -1,0 +1,26 @@
+{% extends "layouts/gate.django" %}
+
+{% block content %}
+<div class="gate-card">
+<h1 class="gate-title">Create your account</h1>
+<p class="gate-note">Choose the details you will sign in with.</p>
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+
+<form class="gate-form" method="post" action="{% url "auth.create" %}">
+<div class="field">
+<label class="label" for="username">Username</label>
+<input class="input" id="username" name="username" autocomplete="username" autofocus required>
+</div>
+<div class="field">
+<label class="label" for="email">Email</label>
+<input class="input" id="email" name="email" type="email" autocomplete="email" required>
+</div>
+<div class="field">
+<label class="label" for="password">Password</label>
+{% include "partials/password.django" with field_id="password" field_name="password" field_autocomplete="new-password" %}
+</div>
+<button class="button is-block" type="submit">Create account</button>
+</form>
+</div>
+{% endblock %}

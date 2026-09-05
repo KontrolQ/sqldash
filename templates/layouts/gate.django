@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ Theme }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ Title }} · sqldash</title>
+<link rel="icon" href="{% static "favicon.ico" %}" sizes="any">
+<link rel="icon" href="{% static "logo.svg" %}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{% static "apple-touch-icon.png" %}">
+<link rel="stylesheet" href="{% static "css/tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/theme.css" %}">
+<link rel="stylesheet" href="{% static "css/base.css" %}">
+<link rel="stylesheet" href="{% static "css/forms.css" %}">
+<link rel="stylesheet" href="{% static "css/auth.css" %}">
+</head>
+<body>
+<div class="gate">
+<div class="gate-panel">
+<div class="gate-brand brand">
+<img class="brand-mark" src="{% static "logo.svg" %}" alt="" width="26" height="26">
+<span class="brand-name">sqldash</span>
+</div>
+{% block content %}{% endblock %}
+</div>
+</div>
+<script src="{% static "js/password.js" %}" defer></script>
+</body>
+</html>
