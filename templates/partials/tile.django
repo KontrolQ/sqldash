@@ -1,0 +1,17 @@
+<div class="tile">
+<span class="tile-label">{{ tile.Label }}</span>
+<div class="tile-line">
+<span class="tile-value">{{ tile.Value }}</span>
+{% if tile.Change %}<span class="tile-change is-{{ tile.Kind }}">
+{% if tile.Kind == "up" %}<svg viewBox="0 0 24 24"><path d="m7 17 10-10M9 7h8v8"/></svg>{% endif %}
+{% if tile.Kind == "down" %}<svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 9v8H9"/></svg>{% endif %}
+{{ tile.Change }}</span>{% endif %}
+</div>
+{% if tile.Spark %}
+<svg class="tile-spark" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
+<path d="{{ tile.Spark }}"/>
+</svg>
+{% else %}
+<span class="tile-quiet">No data</span>
+{% endif %}
+</div>

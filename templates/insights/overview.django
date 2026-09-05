@@ -7,20 +7,15 @@
 <p class="page-subtitle">Measured across {{ Scope }} over the last {{ Window }}.</p>
 </div>
 <div class="page-actions">
-<form class="inline-form" method="get" action="{{ FormAction }}">
-{% include "partials/select.django" with select_name="window" select_label="Period to report on" select_chosen=Window select_options=WindowOptions select_submits=1 %}
-<noscript><button class="button" type="submit">Show</button></noscript>
-</form>
+{% include "partials/period.django" with period_base=FormAction %}
+<a class="button is-outline is-small" href="{{ QueriesPath }}?window={{ Window }}">Top queries</a>
 </div>
 </div>
 
 {% include "partials/databasetabs.django" %}
 
-<div class="stats">
-<div class="stat"><span class="stat-label">Queries</span><span class="stat-value">{{ Queries }}</span><span class="stat-note">{{ Failures }} failed</span></div>
-<div class="stat"><span class="stat-label">Rows read</span><span class="stat-value">{{ RowsRead }}</span></div>
-<div class="stat"><span class="stat-label">Rows written</span><span class="stat-value">{{ RowsWritten }}</span></div>
-<div class="stat"><span class="stat-label">Average</span><span class="stat-value">{{ Average }}</span></div>
+<div class="tiles">
+{% for tile in Tiles %}{% include "partials/tile.django" %}{% endfor %}
 </div>
 
 <div class="card">
@@ -45,16 +40,17 @@
 
 <div class="card">
 <div class="card-head has-border">
-<div class="card-title">Latency</div>
-<div class="card-note">Percentiles are read from a histogram, so they are close rather than exact.</div>
+<div class="card-title">Latency spread</div>
+<div class="card-note">Across every query in the period.</div>
 </div>
 <div class="card-body">
-<div class="stats is-five">
-<div class="stat"><span class="stat-label">P50</span><span class="stat-value">{{ P50 }}</span></div>
-<div class="stat"><span class="stat-label">P75</span><span class="stat-value">{{ P75 }}</span></div>
-<div class="stat"><span class="stat-label">P90</span><span class="stat-value">{{ P90 }}</span></div>
-<div class="stat"><span class="stat-label">P95</span><span class="stat-value">{{ P95 }}</span></div>
-<div class="stat"><span class="stat-label">P99</span><span class="stat-value">{{ P99 }}</span></div>
+<div class="spread">
+<div class="spread-part"><span class="spread-label">P50</span><span class="spread-value">{{ P50 }}</span></div>
+<div class="spread-part"><span class="spread-label">P75</span><span class="spread-value">{{ P75 }}</span></div>
+<div class="spread-part"><span class="spread-label">P90</span><span class="spread-value">{{ P90 }}</span></div>
+<div class="spread-part"><span class="spread-label">P95</span><span class="spread-value">{{ P95 }}</span></div>
+<div class="spread-part"><span class="spread-label">P99</span><span class="spread-value">{{ P99 }}</span></div>
+<div class="spread-part"><span class="spread-label">Average</span><span class="spread-value">{{ Average }}</span></div>
 </div>
 </div>
 </div>
@@ -62,41 +58,10 @@
 <div class="card is-table">
 <div class="card-head has-border is-padded">
 <div class="card-title">Top queries</div>
-<div class="card-note">Ordered by how much time they took in total.</div>
+<div class="card-note">The heaviest {{ Top|length }} by total time. <a class="link" href="{{ QueriesPath }}?window={{ Window }}">See them all</a>.</div>
 </div>
 {% if Top %}
-<div class="table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th>Query</th>
-<th class="table-numeric">Share</th>
-<th class="table-numeric">Count</th>
-<th class="table-numeric">Total</th>
-<th class="table-numeric">P50</th>
-<th class="table-numeric">P99</th>
-<th class="table-numeric">Read</th>
-<th class="table-numeric">Read / returned</th>
-<th class="table-numeric">Written</th>
-</tr>
-</thead>
-<tbody>
-{% for query in Top %}
-<tr>
-<td class="statement" title="{{ query.Statement }}">{{ query.Statement }}</td>
-<td class="table-numeric">{{ query.Share }}</td>
-<td class="table-numeric">{{ query.Count }}</td>
-<td class="table-numeric">{{ query.TotalTime }}</td>
-<td class="table-numeric">{{ query.P50 }}</td>
-<td class="table-numeric">{{ query.P99 }}</td>
-<td class="table-numeric">{{ query.RowsRead }}</td>
-<td class="table-numeric">{{ query.ReadPerRow }}</td>
-<td class="table-numeric">{{ query.RowsWritten }}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
+{% include "partials/querytable.django" with query_rows=Top query_sortable=0 %}
 {% else %}
 <div class="card-body">
 <div class="empty">

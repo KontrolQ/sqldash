@@ -1,0 +1,46 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>Top queries</h1>
+<p class="page-subtitle">Across {{ Scope }} over the last {{ Window }}.</p>
+</div>
+<div class="page-actions">
+{% include "partials/period.django" with period_base=QueriesPath %}
+</div>
+</div>
+
+{% include "partials/databasetabs.django" %}
+
+<div class="card is-table">
+{% if Rows %}
+{% include "partials/querytable.django" with query_rows=Rows query_columns=Columns %}
+<div class="card-foot is-split">
+<span class="tally">Showing {{ FirstRow }}-{{ LastRow }} of {{ Total }}</span>
+<div class="steps">
+<a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page=1" aria-label="First page">
+<svg viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
+</a>
+<a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ PreviousPage }}" aria-label="Previous page">
+<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+</a>
+<span class="step is-page">{{ Page }}</span>
+<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ NextPage }}" aria-label="Next page">
+<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+</a>
+<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ Pages }}" aria-label="Last page">
+<svg viewBox="0 0 24 24"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
+</a>
+</div>
+</div>
+{% else %}
+<div class="card-body">
+<div class="empty">
+<span class="empty-title">Nothing measured yet</span>
+<span>Queries appear here once clients start using a database.</span>
+</div>
+</div>
+{% endif %}
+</div>
+{% endblock %}

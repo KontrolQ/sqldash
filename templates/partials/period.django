@@ -1,0 +1,14 @@
+<div class="menu" data-menu>
+<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<svg class="button-icon" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+Last {{ Window }}
+</button>
+<div class="menu-content" data-menu-content hidden>
+{% for option in WindowOptions %}
+<a class="menu-check" role="menuitemradio" aria-checked="{% if option.Value == Window %}true{% else %}false{% endif %}" href="{{ period_base }}?window={{ option.Value }}">
+<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+{{ option.Label }}
+</a>
+{% endfor %}
+</div>
+</div>

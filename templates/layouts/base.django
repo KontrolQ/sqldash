@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="{% static "css/checkbox.css" %}">
 <link rel="stylesheet" href="{% static "css/explorer.css" %}">
 <link rel="stylesheet" href="{% static "css/editor.css" %}">
+<link rel="stylesheet" href="{% static "css/tiles.css" %}">
 {% block styles %}{% endblock %}
 </head>
 <body>
@@ -57,6 +58,7 @@
 <script src="{% static "js/rail.js" %}" defer></script>
 <script src="{% static "js/console.js" %}" defer></script>
 <script src="{% static "js/editor.js" %}" defer></script>
+<script src="{% static "js/rows.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

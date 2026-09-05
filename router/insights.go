@@ -9,4 +9,5 @@ func init() {
 	urls.SetNamespace("")
 
 	urls.Path(urls.Get, "/insights", page.Overview, "insights")
+	urls.Path(urls.Get, "/insights/queries", page.Queries, "insights.queries")
 }

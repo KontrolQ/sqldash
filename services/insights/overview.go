@@ -27,21 +27,18 @@ func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fi
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
 	}
 
-	scope := databaseName
-	heading := databaseName
 	action := DatabasePath + databaseName + InsightsSuffix
 
 	if databaseName == "" {
-		scope = EveryDatabase
-		heading = OverviewTitle
 		action = OverviewPath
 	}
 
 	shown := &OverviewContext{
-		Title:         heading,
-		Heading:       heading,
+		Title:         headingFor(databaseName),
+		Heading:       headingFor(databaseName),
 		FormAction:    action,
-		Scope:         scope,
+		QueriesPath:   queriesPathFor(databaseName),
+		Scope:         scopeFor(databaseName),
 		Window:        window.Label,
 		Windows:       windowLabels(),
 		WindowOptions: windowOptions(),
@@ -60,7 +57,19 @@ func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fi
 
 	shown.Top = toQueryViews(top, summary.TotalDuration)
 
-	if points, seriesError := analytics.SeriesFor(databaseName, window); seriesError == nil {
+	before, beforeError := analytics.Preceding(databaseName, window)
+	if beforeError != nil {
+		before = &analytics.Summary{}
+	}
+
+	points, seriesError := analytics.SeriesFor(databaseName, window)
+	if seriesError != nil {
+		points = nil
+	}
+
+	shown.Tiles = tilesFor(summary, before, points)
+
+	if points != nil {
 		shown.TrafficChart = trafficChart(points)
 		shown.LatencyChart = latencyChart(points)
 		shown.TrafficSeries = []string{ReadsName, WritesName}
@@ -81,13 +90,14 @@ func toQueryViews(summaries []analytics.QuerySummary, allTime float64) []QueryVi
 
 		views = append(views, QueryView{
 			Statement:   statementOf(summary),
-			Count:       summary.Count,
+			Example:     summary.Example,
+			Count:       readableCount(summary.Count),
 			TotalTime:   readableDuration(summary.TotalDuration),
 			Share:       fmt.Sprintf(ShareFormat, share),
 			P50:         readableDuration(summary.Histogram.Percentile(0.50)),
 			P99:         readableDuration(summary.Histogram.Percentile(0.99)),
-			RowsRead:    summary.RowsRead,
-			RowsWritten: summary.RowsWritten,
+			RowsRead:    readableCount(summary.RowsRead),
+			RowsWritten: readableCount(summary.RowsWritten),
 			ReadPerRow:  ratioOf(summary.RowsRead, summary.RowsReturned),
 		})
 	}
@@ -113,10 +123,10 @@ func ratioOf(read int64, returned int64) string {
 
 func readableDuration(milliseconds float64) string {
 	if milliseconds >= MillisecondsInSecond {
-		return fmt.Sprintf(SecondFormat, milliseconds/MillisecondsInSecond)
+		return trimZeros(milliseconds/MillisecondsInSecond) + SecondSuffix
 	}
 
-	return fmt.Sprintf(MillisecondFormat, milliseconds)
+	return trimZeros(milliseconds) + MillisecondSuffix
 }
 
 func windowLabels() []string {

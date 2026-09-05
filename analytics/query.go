@@ -59,10 +59,16 @@ func WindowNamed(label string) Window {
 }
 
 func rollupsIn(databaseName string, window Window) ([]models.Rollup, error) {
+	ends := time.Now()
+
+	return rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends)
+}
+
+func rollupsBetween(databaseName string, resolution models.Resolution, from time.Time, to time.Time) ([]models.Rollup, error) {
 	records := make([]models.Rollup, 0)
 
 	query := database.DB.
-		Where("resolution = ? AND bucket_start >= ?", window.Resolution, time.Now().Add(-window.Since))
+		Where("resolution = ? AND bucket_start >= ? AND bucket_start < ?", resolution, from, to)
 
 	if databaseName != "" {
 		query = query.Where("database_name = ?", databaseName)
@@ -90,7 +96,39 @@ func Overall(databaseName string, window Window) (*Summary, error) {
 	return summary, nil
 }
 
+func Preceding(databaseName string, window Window) (*Summary, error) {
+	ends := time.Now().Add(-window.Since)
+
+	records, findError := rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends)
+	if findError != nil {
+		return nil, findError
+	}
+
+	summary := &Summary{}
+
+	for _, record := range records {
+		summary.absorb(record)
+	}
+
+	return summary, nil
+}
+
 func TopQueries(databaseName string, window Window, limit int) ([]QuerySummary, error) {
+	summaries, findError := EveryQuery(databaseName, window)
+	if findError != nil {
+		return nil, findError
+	}
+
+	if limit > 0 && len(summaries) > limit {
+		summaries = summaries[:limit]
+	}
+
+	nameThem(databaseName, summaries)
+
+	return summaries, nil
+}
+
+func EveryQuery(databaseName string, window Window) ([]QuerySummary, error) {
 	records, findError := rollupsIn(databaseName, window)
 	if findError != nil {
 		return nil, findError
@@ -115,13 +153,11 @@ func TopQueries(databaseName string, window Window, limit int) ([]QuerySummary, 
 
 	sortByTotalDuration(summaries)
 
-	if len(summaries) > limit {
-		summaries = summaries[:limit]
-	}
-
-	nameThem(databaseName, summaries)
-
 	return summaries, nil
+}
+
+func Name(databaseName string, summaries []QuerySummary) {
+	nameThem(databaseName, summaries)
 }
 
 func (self *Summary) absorb(record models.Rollup) {

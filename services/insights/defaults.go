@@ -4,14 +4,57 @@ const (
 	LogPrefix = "Insights"
 
 	OverviewTitle = "Insights"
+	QueriesTitle  = "Top queries"
 	TopQueryLimit = 20
+	QueryPageSize = 10
 
-	MillisecondFormat    = "%.2f ms"
-	SecondFormat         = "%.2f s"
+	ShareSort   = "share"
+	CountSort   = "count"
+	TotalSort   = "total"
+	MedianSort  = "median"
+	TailSort    = "tail"
+	ReadSort    = "read"
+	RatioSort   = "ratio"
+	WrittenSort = "written"
+
+	ShareHeading   = "% of runtime"
+	CountHeading   = "Count"
+	TotalHeading   = "Total time"
+	MedianHeading  = "P50"
+	TailHeading    = "P99"
+	ReadHeading    = "Rows read"
+	RatioHeading   = "Rows read / rows returned"
+	WrittenHeading = "Rows written"
+
+	AscendingOrder  = "asc"
+	DescendingOrder = "desc"
+
+	MillisecondSuffix    = " ms"
+	SecondSuffix         = " sec"
 	ShareFormat          = "%.1f%%"
 	RatioFormat          = "%.1f"
 	NoRatio              = "—"
 	MillisecondsInSecond = 1000.0
+
+	Thousand = 1_000.0
+	Million  = 1_000_000.0
+	Billion  = 1_000_000_000.0
+
+	ThousandSuffix = "k"
+	MillionSuffix  = "M"
+	BillionSuffix  = "B"
+
+	CompactFormat = "%.2f"
+	TightFormat   = "%.1f"
+	TightAbove    = 10.0
+	RiseFormat    = "+%.1f%%"
+	FallFormat    = "-%.1f%%"
+	SteadyChange  = "no change"
+	NewChange     = "new"
+
+	ChangeUp     = "up"
+	ChangeDown   = "down"
+	ChangeSteady = "steady"
 )
 
 const (
@@ -21,8 +64,10 @@ const (
 
 const (
 	OverviewPath   = "/insights"
+	QueriesPath    = "/insights/queries"
 	DatabasePath   = "/databases/"
 	InsightsSuffix = "/insights"
+	QueriesSuffix  = "/queries"
 )
 
 const (
@@ -43,6 +88,17 @@ const (
 	MillisecondUnit = "ms"
 	ReadsName       = "Reads"
 	WritesName      = "Writes"
+
+	SparkWidth   = 120.0
+	SparkHeight  = 32.0
+	SparkPadding = 6.0
+
+	QueriesLabel     = "Queries"
+	FailuresLabel    = "Failures"
+	RowsReadLabel    = "Rows read"
+	RowsWrittenLabel = "Rows written"
+	AverageLabel     = "Average"
+	TailLabel        = "P99"
 
 	P50Name = "P50"
 	P95Name = "P95"

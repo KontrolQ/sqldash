@@ -1,0 +1,54 @@
+<div class="table-wrap">
+<table class="table is-queries">
+<thead>
+<tr>
+<th>Query</th>
+{% for column in query_columns %}
+<th class="table-numeric">
+<a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}&sort={{ column.Key }}&direction={% if Sort == column.Key and Direction == "desc" %}asc{% else %}desc{% endif %}">
+{{ column.Label }}
+{% if Sort == column.Key %}<svg class="sort-icon" viewBox="0 0 24 24">{% if Direction == "asc" %}<path d="m5 12 7-7 7 7M12 5v14"/>{% else %}<path d="m19 12-7 7-7-7M12 19V5"/>{% endif %}</svg>{% endif %}
+</a>
+</th>
+{% endfor %}
+{% if not query_columns %}
+<th class="table-numeric">% of runtime</th>
+<th class="table-numeric">Count</th>
+<th class="table-numeric">Total time</th>
+<th class="table-numeric">P50</th>
+<th class="table-numeric">P99</th>
+<th class="table-numeric">Rows read</th>
+<th class="table-numeric">Rows read / rows returned</th>
+<th class="table-numeric">Rows written</th>
+{% endif %}
+</tr>
+</thead>
+<tbody>
+{% for query in query_rows %}
+<tr class="query-row">
+<td class="statement">
+{% if query.Example %}
+<button class="query-open" type="button" data-open="query-{{ forloop.Counter }}" aria-label="Show the whole statement">
+<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+</button>
+{% endif %}
+<code>{{ query.Statement }}</code>
+</td>
+<td class="table-numeric">{{ query.Share }}</td>
+<td class="table-numeric">{{ query.Count }}</td>
+<td class="table-numeric">{{ query.TotalTime }}</td>
+<td class="table-numeric">{{ query.P50 }}</td>
+<td class="table-numeric">{{ query.P99 }}</td>
+<td class="table-numeric">{{ query.RowsRead }}</td>
+<td class="table-numeric">{{ query.ReadPerRow }}</td>
+<td class="table-numeric">{{ query.RowsWritten }}</td>
+</tr>
+{% if query.Example %}
+<tr class="query-detail" id="query-{{ forloop.Counter }}" hidden>
+<td colspan="9"><pre class="code is-block">{{ query.Example }}</pre></td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+</div>

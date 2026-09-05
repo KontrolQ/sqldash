@@ -15,6 +15,7 @@ func init() {
 	urls.Path(urls.Post, "/databases", controller.Create, "databases.create")
 	urls.Path(urls.Get, "/databases/:name", page.Show, "databases.show")
 	urls.Path(urls.Get, "/databases/:name/insights", insightpage.ForDatabase, "databases.insights")
+	urls.Path(urls.Get, "/databases/:name/queries", insightpage.QueriesForDatabase, "databases.queries")
 	urls.Path(urls.Post, "/databases/:name/settings", controller.SaveSettings, "databases.settings")
 	urls.Path(urls.Post, "/databases/import", controller.Import, "databases.import")
 	urls.Path(urls.Get, "/databases/:name/export", controller.Export, "databases.export")
