@@ -311,3 +311,44 @@
   font-weight: var(--fw-medium);
   text-align: left;
 }
+
+.check {
+  display: flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  gap: var(--sp-2);
+  line-height: var(--text-sm-lh);
+}
+
+.check input {
+  width: var(--size-4);
+  height: var(--size-4);
+  accent-color: var(--primary);
+  margin: 0;
+}
+
+select.input {
+  width: auto;
+  padding-right: var(--sp-2);
+}
+
+.secret {
+  display: block;
+  overflow-x: auto;
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.notice .secret {
+  margin-top: var(--sp-2);
+  background: transparent;
+}
+
+a.table-name:hover {
+  text-decoration: underline;
+}
