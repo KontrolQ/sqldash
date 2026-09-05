@@ -1,0 +1,6 @@
+<div class="tabs">
+<a class="tab {% if Browsing %}is-current{% endif %}" href="{% url "databases.explore" name=Database %}">Data</a>
+<a class="tab {% if not Browsing %}is-current{% endif %}" href="{% url "databases.console" name=Database %}">Console</a>
+<span class="tabs-spacer"></span>
+<a class="button is-outline is-small" href="{% url "databases.show" name=Database %}">Manage</a>
+</div>

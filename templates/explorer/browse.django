@@ -1,0 +1,109 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>{{ Database }}</h1>
+<p class="page-subtitle">{% if Table %}{{ Total }} rows in {{ Table }}{% else %}Pick a table to browse{% endif %}</p>
+</div>
+</div>
+
+{% include "partials/explorertabs.django" with Browsing=1 %}
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+
+<div class="explorer">
+<aside class="explorer-list">
+{% for one in Tables %}
+<a class="explorer-item {% if one.Name == Table %}is-current{% endif %}" href="{% url "databases.explore" name=Database %}?table={{ one.Name }}">
+<span class="explorer-name">{{ one.Name }}</span>
+{% if one.IsView %}<span class="badge is-outline">view</span>{% endif %}
+</a>
+{% empty %}
+<div class="explorer-empty">No tables yet.</div>
+{% endfor %}
+</aside>
+
+<div class="explorer-main">
+{% if Table %}
+<form class="inline-form explorer-search" method="get" action="{% url "databases.explore" name=Database %}">
+<input type="hidden" name="table" value="{{ Table }}">
+<input class="input" name="search" value="{{ Search }}" placeholder="Search every column">
+<button class="button is-outline" type="submit">Search</button>
+{% if Search %}<a class="button is-ghost" href="{% url "databases.explore" name=Database %}?table={{ Table }}">Clear</a>{% endif %}
+</form>
+
+{% if not Editable %}
+<div class="notice">This table has no single primary key and no rowid, so rows here are read-only.</div>
+{% endif %}
+
+<div class="card is-table">
+<div class="table-wrap">
+<table class="table is-grid">
+<thead>
+<tr>
+{% for column in Columns %}
+<th>
+<a class="column-sort" href="{% url "databases.explore" name=Database %}?table={{ Table }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}{% if Search %}&search={{ Search }}{% endif %}">
+{{ column.Name }}{% if Sort == column.Name %}<span class="sort-mark">{% if Direction == "asc" %}&uarr;{% else %}&darr;{% endif %}</span>{% endif %}
+</a>
+<div class="column-kind">{{ column.Kind }}{% if column.PrimaryKey %} · pk{% endif %}{% if column.References %} · &rarr; {{ column.References }}{% endif %}</div>
+</th>
+{% endfor %}
+{% if Editable %}<th></th>{% endif %}
+</tr>
+</thead>
+<tbody>
+{% for row in Rows %}
+<tr>
+{% for cell in row.Cells %}
+<td class="cell">
+{% if Editable %}
+<form class="cell-form" method="post" action="{% url "databases.explore.cell" name=Database %}">
+<input type="hidden" name="table" value="{{ Table }}">
+<input type="hidden" name="column" value="{{ cell.Column }}">
+<input type="hidden" name="key" value="{{ row.Key }}">
+<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
+<input class="cell-input" name="value" value="{{ cell.Text }}">
+</form>
+{% else %}
+{% if cell.IsNull %}<span class="null">NULL</span>{% else %}{{ cell.Text }}{% endif %}
+{% endif %}
+</td>
+{% endfor %}
+{% if Editable %}
+<td class="table-actions">
+<form method="post" action="{% url "databases.explore.row" name=Database %}">
+<input type="hidden" name="table" value="{{ Table }}">
+<input type="hidden" name="key" value="{{ row.Key }}">
+<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
+<button class="button is-ghost is-small" type="submit">Delete</button>
+</form>
+</td>
+{% endif %}
+</tr>
+{% empty %}
+<tr><td colspan="99" class="cell-empty">No rows.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+{% if Pages > 1 %}
+<div class="pager">
+{% if Page > 1 %}<a class="button is-outline is-small" href="{% url "databases.explore" name=Database %}?table={{ Table }}&page={{ PreviousPage }}{% if Search %}&search={{ Search }}{% endif %}">Previous</a>{% endif %}
+<span class="pager-note">Page {{ Page }} of {{ Pages }}</span>
+{% if Page < Pages %}<a class="button is-outline is-small" href="{% url "databases.explore" name=Database %}?table={{ Table }}&page={{ NextPage }}{% if Search %}&search={{ Search }}{% endif %}">Next</a>{% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="empty">
+<span class="empty-title">Nothing selected</span>
+<span>Choose a table on the left.</span>
+</div>
+{% endif %}
+</div>
+</div>
+{% endblock %}

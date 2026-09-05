@@ -1,0 +1,50 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>{{ Database }}</h1>
+<p class="page-subtitle">Run a statement against this database.</p>
+</div>
+</div>
+
+{% include "partials/explorertabs.django" %}
+
+<div class="card">
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.console.run" name=Database %}">
+<textarea class="input is-area" name="statement" rows="6" spellcheck="false" placeholder="SELECT * FROM sqlite_master">{{ Statement }}</textarea>
+<div class="actions">
+<button class="button" type="submit">Run</button>
+</div>
+</form>
+</div>
+</div>
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+
+{% if Ran and not Problem %}
+<div class="card is-table">
+<div class="card-head has-border" style="padding-top: var(--sp-6)">
+<div class="card-title">Result</div>
+<div class="card-note">{{ Rows|length }} rows returned · {{ Affected }} affected · {{ RowsRead }} read · {{ Duration }}</div>
+</div>
+{% if Columns %}
+<div class="table-wrap">
+<table class="table is-grid">
+<thead><tr>{% for column in Columns %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in Rows %}
+<tr>{% for cell in row %}<td class="cell">{{ cell }}</td>{% endfor %}</tr>
+{% empty %}
+<tr><td colspan="99" class="cell-empty">No rows.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="card-body"><div class="empty"><span class="empty-title">Done</span><span>{{ Affected }} rows affected.</span></div></div>
+{% endif %}
+</div>
+{% endif %}
+{% endblock %}
