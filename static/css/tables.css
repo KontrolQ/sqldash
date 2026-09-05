@@ -72,3 +72,11 @@
 .dot.is-live {
   background: var(--success);
 }
+
+.statement {
+  max-width: 420px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+}

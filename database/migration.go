@@ -15,6 +15,7 @@ func migrate() {
 		&models.Fingerprint{},
 		&models.Statement{},
 		&models.Rollup{},
+		&models.Marker{},
 	)
 
 	if migrationError != nil {

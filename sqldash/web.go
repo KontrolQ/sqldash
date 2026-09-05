@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sqldash/analytics"
 	"sqldash/config"
 	"sqldash/middleware"
 	"sqldash/router"
@@ -13,6 +14,7 @@ import (
 
 func runWeb() {
 	tags.Initialize()
+	analytics.Start()
 
 	engine := django.New(TemplateRoot, TemplateExtension)
 	engine.Reload(config.Server.Debug)

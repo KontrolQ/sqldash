@@ -1,0 +1,91 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>{{ Heading }}</h1>
+<p class="page-subtitle">Measured across {{ Scope }} over the last {{ Window }}.</p>
+</div>
+<div class="page-actions">
+<form class="inline-form" method="get" action="{{ FormAction }}">
+<select class="input is-inline" name="window" aria-label="Period to report on" onchange="this.form.submit()">
+{% for option in Windows %}
+<option value="{{ option }}" {% if option == Window %}selected{% endif %}>Last {{ option }}</option>
+{% endfor %}
+</select>
+<noscript><button class="button" type="submit">Show</button></noscript>
+</form>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat"><span class="stat-label">Queries</span><span class="stat-value">{{ Queries }}</span><span class="stat-note">{{ Failures }} failed</span></div>
+<div class="stat"><span class="stat-label">Rows read</span><span class="stat-value">{{ RowsRead }}</span></div>
+<div class="stat"><span class="stat-label">Rows written</span><span class="stat-value">{{ RowsWritten }}</span></div>
+<div class="stat"><span class="stat-label">Average</span><span class="stat-value">{{ Average }}</span></div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Latency</div>
+<div class="card-note">Percentiles are read from a histogram, so they are close rather than exact.</div>
+</div>
+<div class="card-body">
+<div class="stats is-five">
+<div class="stat"><span class="stat-label">P50</span><span class="stat-value">{{ P50 }}</span></div>
+<div class="stat"><span class="stat-label">P75</span><span class="stat-value">{{ P75 }}</span></div>
+<div class="stat"><span class="stat-label">P90</span><span class="stat-value">{{ P90 }}</span></div>
+<div class="stat"><span class="stat-label">P95</span><span class="stat-value">{{ P95 }}</span></div>
+<div class="stat"><span class="stat-label">P99</span><span class="stat-value">{{ P99 }}</span></div>
+</div>
+</div>
+</div>
+
+<div class="card is-table">
+<div class="card-head has-border" style="padding-top: var(--sp-6)">
+<div class="card-title">Top queries</div>
+<div class="card-note">Ordered by how much time they took in total.</div>
+</div>
+{% if Top %}
+<div class="table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th>Query</th>
+<th class="table-numeric">Share</th>
+<th class="table-numeric">Count</th>
+<th class="table-numeric">Total</th>
+<th class="table-numeric">P50</th>
+<th class="table-numeric">P99</th>
+<th class="table-numeric">Read</th>
+<th class="table-numeric">Read / returned</th>
+<th class="table-numeric">Written</th>
+</tr>
+</thead>
+<tbody>
+{% for query in Top %}
+<tr>
+<td class="statement" title="{{ query.Statement }}">{{ query.Statement }}</td>
+<td class="table-numeric">{{ query.Share }}</td>
+<td class="table-numeric">{{ query.Count }}</td>
+<td class="table-numeric">{{ query.TotalTime }}</td>
+<td class="table-numeric">{{ query.P50 }}</td>
+<td class="table-numeric">{{ query.P99 }}</td>
+<td class="table-numeric">{{ query.RowsRead }}</td>
+<td class="table-numeric">{{ query.ReadPerRow }}</td>
+<td class="table-numeric">{{ query.RowsWritten }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="card-body">
+<div class="empty">
+<span class="empty-title">Nothing measured yet</span>
+<span>Queries appear here once clients start using a database.</span>
+</div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
