@@ -35,6 +35,15 @@ type Statement struct {
 	Arguments []any
 }
 
+type StatementError struct {
+	At      int
+	Message string
+}
+
+func (self *StatementError) Error() string {
+	return self.Message
+}
+
 func Query(requestContext context.Context, database string, sql string, arguments ...any) (*Result, error) {
 	held, runError := Run(requestContext, database, Statement{SQL: sql, Arguments: arguments})
 	if runError != nil {
@@ -138,7 +147,7 @@ func readResults(body []byte, wanted int) ([]*Result, error) {
 				message = one.Error.Message
 			}
 
-			return nil, errors.New(message)
+			return nil, &StatementError{At: index, Message: message}
 		}
 
 		result := &Result{}

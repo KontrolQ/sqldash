@@ -78,12 +78,12 @@ Create database
 <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
 <div class="dialog-head">
 <div class="dialog-title" id="new-database-title">Create a database</div>
-<div class="dialog-note">Start empty, or build one from a dump you already have.</div>
+<div class="dialog-note">Start empty, or build one from a file you already have.</div>
 </div>
 
 <div class="tabs" data-swap>
 <button class="tab is-current" type="button" data-swap-to="make-empty">Empty</button>
-<button class="tab" type="button" data-swap-to="make-dump">From a dump</button>
+<button class="tab" type="button" data-swap-to="make-dump">From a file</button>
 </div>
 
 <form class="stack" method="post" action="{% url "databases.create" %}" data-swap-panel="make-empty">
@@ -104,9 +104,9 @@ Create database
 <input class="input" id="import-name" name="name" required>
 </div>
 <div class="field">
-<label class="label" for="import-dump">Dump</label>
-<input class="file" id="import-dump" type="file" name="dump" accept=".sql" required>
-<span class="field-note">A .sql file of statements.</span>
+<label class="label" for="import-dump">File</label>
+<input class="file" id="import-dump" type="file" name="dump" accept=".sql,.db,.sqlite,.sqlite3" required>
+<span class="field-note">A SQLite file, or a .sql file of statements.</span>
 </div>
 <div class="dialog-foot">
 <button class="button is-outline" type="button" data-sheet-close>Cancel</button>

@@ -4,20 +4,21 @@ go 1.26.0
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
+	github.com/coder/websocket v1.8.15
 	github.com/flosch/pongo2/v6 v6.1.0
+	github.com/glebarez/go-sqlite v1.21.2
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v3 v3.5.0
 	github.com/gofiber/template/django/v3 v3.1.14
 	github.com/joho/godotenv v1.5.1
 	go.uber.org/zap v1.28.0
+	golang.org/x/crypto v0.56.0
 	gorm.io/gorm v1.31.2
 )
 
 require (
 	github.com/andybalholm/brotli v1.2.2 // indirect
-	github.com/coder/websocket v1.8.15 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/gofiber/fiber/v2 v2.52.8 // indirect
 	github.com/gofiber/schema v1.8.3 // indirect
 	github.com/gofiber/template v1.8.3 // indirect
@@ -37,7 +38,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.73.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect

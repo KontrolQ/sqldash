@@ -41,6 +41,12 @@ const (
 	ExportRefused   = "The database could not be exported."
 	OnlyDumpsFormat = "only a .sql dump can be loaded, not %s"
 	MomentUnusable  = "That is not a moment this database can be restored to."
+	MomentAhead     = "A database cannot be restored to a moment that has not happened yet."
+	OnlyKnownFormat = "only a .sql dump or a SQLite file can be loaded, not %s"
+
+	ImportRefusedFormat    = "That file could not be loaded: %v."
+	StatementRefusedFormat = "the server refused %q: %w"
+	NothingToReplay        = "the file holds no statements"
 )
 
 const (

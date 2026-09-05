@@ -27,12 +27,6 @@ func Create(requestContext context.Context, database string) error {
 	return send(requestContext, http.MethodPost, namespacePath(database, CreateAction), map[string]any{}, nil)
 }
 
-func CreateFromDump(requestContext context.Context, database string, dumpPath string) error {
-	body := map[string]any{DumpField: dumpAddress(dumpPath)}
-
-	return send(requestContext, http.MethodPost, namespacePath(database, CreateAction), body, nil)
-}
-
 func Delete(requestContext context.Context, database string) error {
 	return send(requestContext, http.MethodDelete, namespacePath(database), nil, nil)
 }

@@ -7,6 +7,7 @@ import (
 
 	service "sqldash/services/databases"
 	"sqldash/sessions"
+	"sqldash/utils/logger"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
 
@@ -68,6 +69,20 @@ func Fork(context fiber.Ctx) error {
 	}
 
 	return shortcuts.RedirectToPath(context, ShowPath+url.PathEscape(asked.Name))
+}
+
+func ExportFile(context fiber.Ctx) error {
+	name := context.Params(NameParameter)
+
+	context.Set(DispositionHeader, `attachment; filename="`+name+`.db"`)
+	context.Set(ContentTypeHeader, FileContentType)
+
+	if writeError := service.WriteFile(context.Context(), name, context.Response().BodyWriter()); writeError != nil {
+		logger.Errorf(LogPrefix, service.ExportFailedLog, name, writeError)
+		return shortcuts.ServiceError(http.StatusBadGateway, service.ExportRefused)
+	}
+
+	return nil
 }
 
 func Export(context fiber.Ctx) error {

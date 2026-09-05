@@ -2,7 +2,6 @@ package sqld
 
 import (
 	"net/url"
-	"path/filepath"
 	"strings"
 )
 
@@ -14,14 +13,4 @@ func namespacePath(parts ...string) string {
 	}
 
 	return NamespacePrefix + "/" + strings.Join(escaped, "/")
-}
-
-func dumpAddress(path string) string {
-	held := filepath.ToSlash(path)
-
-	if !strings.HasPrefix(held, "/") {
-		held = "/" + held
-	}
-
-	return DumpScheme + held
 }

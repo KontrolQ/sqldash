@@ -17,8 +17,6 @@ const (
 	ConfigAction = "config"
 
 	TimestampParameter = "timestamp"
-	DumpField          = "dump_url"
-	DumpScheme         = "file://"
 
 	ContentTypeHeader = "content-type"
 	ApplicationJSON   = "application/json"

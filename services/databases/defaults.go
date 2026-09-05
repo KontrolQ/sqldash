@@ -38,10 +38,26 @@ const (
 
 const (
 	StagedNameFormat = "%s-%d.sql"
+	FileNameFormat   = "%s-%d.db"
 	DumpSuffix       = ".sql"
 	ExportSuffix     = ".sql"
-	ForkPrefix       = "restored-"
-	MomentLayout     = "2006-01-02T15:04"
+	FileSuffix       = ".db"
+
+	SQLiteMagic    = "SQLite format 3\x00"
+	SQLiteDriver   = "sqlite"
+	ReadOnlySource = "file:"
+	ReadBufferSize = 1 << 16
+	ReplayBatch    = 128
+	ReplayGuard    = "PRAGMA foreign_keys=OFF"
+	CommentMarker  = "--"
+	SequenceTable  = "SQLITE_SEQUENCE"
+	SnippetLength  = 80
+	Ellipsis       = "…"
+
+	EveryRowSQL        = "SELECT * FROM %s"
+	ReplayFailedFormat = "%s: %w"
+	ForkPrefix         = "restored-"
+	MomentLayout       = "2006-01-02T15:04"
 )
 
 const (
@@ -67,3 +83,5 @@ const (
 	ReadOnlyValue  = "read-only"
 	ReadOnlyLabel  = "Read only"
 )
+
+var SkippedPrefixes = []string{"BEGIN", "COMMIT", "ROLLBACK", "PRAGMA", "VACUUM", "ANALYZE"}

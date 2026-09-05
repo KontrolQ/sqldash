@@ -15,5 +15,6 @@ const (
 	DumpField         = "dump"
 	DispositionHeader = "content-disposition"
 	ContentTypeHeader = "content-type"
+	FileContentType   = "application/vnd.sqlite3"
 	DumpContentType   = "application/sql"
 )

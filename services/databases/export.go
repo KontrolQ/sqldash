@@ -4,10 +4,50 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
+	"sqldash/config"
 	"sqldash/sqld"
 )
+
+func WriteFile(requestContext context.Context, databaseName string, writer io.Writer) error {
+	stamp := time.Now().UnixNano()
+	staged := filepath.Join(config.ImportsPath(), fmt.Sprintf(StagedNameFormat, databaseName, stamp))
+	built := filepath.Join(config.ImportsPath(), fmt.Sprintf(FileNameFormat, databaseName, stamp))
+
+	defer os.Remove(staged)
+	defer os.Remove(built)
+
+	dump, createError := os.Create(staged)
+	if createError != nil {
+		return createError
+	}
+
+	if dumpError := WriteDump(requestContext, databaseName, dump); dumpError != nil {
+		dump.Close()
+		return dumpError
+	}
+
+	dump.Close()
+
+	if buildError := fileFromDump(staged, built); buildError != nil {
+		return buildError
+	}
+
+	handle, openError := os.Open(built)
+	if openError != nil {
+		return openError
+	}
+
+	defer handle.Close()
+
+	_, copyError := io.Copy(writer, handle)
+
+	return copyError
+}
 
 func WriteDump(requestContext context.Context, databaseName string, writer io.Writer) error {
 	if _, writeError := io.WriteString(writer, DumpHeader); writeError != nil {
