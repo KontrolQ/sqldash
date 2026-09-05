@@ -80,3 +80,82 @@
   font-size: var(--text-xs);
   text-overflow: ellipsis;
 }
+
+.table.is-grid td,
+.table.is-grid th {
+  padding: 0 var(--sp-3);
+  border-right: var(--bw) solid var(--border);
+}
+
+.table.is-grid th {
+  height: auto;
+  padding: var(--sp-2) var(--sp-3);
+  vertical-align: top;
+}
+
+.table.is-grid td:last-child,
+.table.is-grid th:last-child {
+  border-right: 0;
+}
+
+.table.is-grid td {
+  height: 34px;
+  max-width: 280px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+}
+
+.column-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  white-space: nowrap;
+}
+
+.column-sort:hover {
+  text-decoration: underline;
+}
+
+.sort-mark {
+  color: var(--muted-foreground);
+}
+
+.column-kind {
+  color: var(--muted-foreground);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.cell-form {
+  display: block;
+}
+
+.cell-input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  outline: none;
+}
+
+.cell-input:focus {
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.cell-empty {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.null {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
