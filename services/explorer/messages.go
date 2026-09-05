@@ -19,7 +19,8 @@ const (
 const (
 	ColumnMissing = "No such column."
 	CellSaved     = "Saved."
-	RowDeleted    = "That row was deleted."
+	RowsDeleted   = "%d rows were deleted."
+	NothingChosen = "Pick at least one row first."
 )
 
 const (

@@ -20,6 +20,7 @@ type Ask struct {
 	Sort      string
 	Direction string
 	Search    string
+	Filters   []Filter
 }
 
 func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.Error) {
@@ -70,7 +71,17 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 		shown.Sort = asked.Sort
 	}
 
-	where, arguments := searchClause(columns, asked.Search)
+	shown.Filters = keptFilters(columns, asked.Filters)
+	shown.Operators = OperatorChoices()
+	shown.ColumnChoices = columnChoices(columns)
+	shown.Carry = carryOf(shown.Table, shown.Search, shown.Filters)
+
+	for index := range shown.Filters {
+		shown.Filters[index].RemoveURL = shown.BrowsePath + "?" +
+			withoutFilter(shown.Table, shown.Search, shown.Filters, index)
+	}
+
+	where, arguments := whereClause(columns, asked.Search, shown.Filters)
 
 	total, countError := countRows(requestContext, asked.Database, asked.Table, where, arguments)
 	if countError != nil {
@@ -99,6 +110,7 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 
 	shown.Rows = rows
 	shown.ColumnNames = namesOf(columns)
+	shown.View = viewOf(shown)
 
 	if total > 0 {
 		shown.FirstRow = (shown.Page-1)*shown.PageSize + 1
@@ -132,6 +144,8 @@ func readRows(requestContext context.Context, databaseName string, table string,
 		logger.Errorf(LogPrefix, ReadFailedLog, databaseName, queryError)
 		return nil, shortcuts.ServiceError(http.StatusBadGateway, RowsUnavailable)
 	}
+
+	shown.Duration = fmt.Sprintf(DurationFormat, held.DurationMs)
 
 	offset := 0
 	if shown.KeyColumn != "" {
@@ -202,27 +216,6 @@ func countRows(requestContext context.Context, databaseName string, table string
 	}
 
 	return 0, nil
-}
-
-func searchClause(columns []ColumnView, search string) (string, []any) {
-	search = strings.TrimSpace(search)
-	if search == "" {
-		return "", nil
-	}
-
-	pieces := make([]string, 0, len(columns))
-	arguments := make([]any, 0, len(columns))
-
-	for _, column := range columns {
-		pieces = append(pieces, "CAST("+quoteIdentifier(column.Name)+" AS TEXT) LIKE ?")
-		arguments = append(arguments, "%"+search+"%")
-	}
-
-	if len(pieces) == 0 {
-		return "", nil
-	}
-
-	return " WHERE " + strings.Join(pieces, " OR "), arguments
 }
 
 func keyColumnOf(requestContext context.Context, databaseName string, table string, columns []ColumnView, isView bool) string {

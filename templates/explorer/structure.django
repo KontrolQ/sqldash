@@ -1,89 +1,90 @@
 {% extends "layouts/base.django" %}
 
-{% block content %}
-<div class="page-head">
-<div class="page-title">
-<h1>{{ Database }}</h1>
-<p class="page-subtitle">{% if Table %}How {{ Table }} is built{% else %}Pick a table{% endif %}</p>
-</div>
-</div>
+{% block tight %}is-tight{% endblock %}
 
+{% block content %}
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
-<div class="explorer">
-{% include "partials/tablelist.django" with table_base=StructurePath %}
+<div class="workspace">
+{% include "partials/rail.django" with rail_base=StructurePath %}
 
-<div class="explorer-main">
+<div class="bench">
 {% if Table %}
-<div class="explorer-bar">
+<div class="workbar">
 <div class="tabs">
-<a class="tab" href="{{ BrowsePath }}?table={{ Table }}">Data</a>
-<a class="tab is-current" href="{{ StructurePath }}?table={{ Table }}">Structure</a>
+<a class="tab" href="{{ BrowsePath }}?table={{ Table }}">
+<svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+Data
+</a>
+<a class="tab is-current" href="{{ StructurePath }}?table={{ Table }}">
+<svg viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+Structure
+</a>
 </div>
-<span class="tab-bar-spacer"></span>
 {% if IsView %}<span class="badge is-outline">view</span>{% endif %}
+<div class="workbar-right">
+<span class="tally">{{ Columns|length }} columns &middot; {{ Indexes|length }} indexes</span>
+<button class="button is-outline is-small" type="button" data-copy="table-definition">
+<svg class="button-icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+Copy schema
+</button>
+</div>
 </div>
 
-<div class="card is-table">
-<div class="card-head has-border is-padded">
-<div class="card-title">Columns</div>
+<div class="sheet is-padded">
+<div class="plan">
+<div class="plan-head">
+<span class="plan-kind">{% if IsView %}View{% else %}Table{% endif %}</span>
+<span class="plan-name">{{ Table }}</span>
 </div>
-<div class="table-wrap">
-<table class="table">
-<thead><tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>References</th></tr></thead>
-<tbody>
+
+<div class="plan-group">
+<div class="plan-label">Columns</div>
+<div class="plan-rows">
 {% for column in Columns %}
-<tr>
-<td class="mono">{{ column.Name }}{% if column.PrimaryKey %} <span class="badge is-secondary">pk</span>{% endif %}</td>
-<td class="mono muted">{{ column.Kind }}</td>
-<td>{% if column.NotNull %}no{% else %}yes{% endif %}</td>
-<td class="mono muted">{{ column.Default }}</td>
-<td>{% if column.References %}<a class="chip" href="{{ StructurePath }}?table={{ column.References }}">{{ column.References }}.{{ column.OnColumn }}</a>{% endif %}</td>
-</tr>
+<div class="plan-row">
+<span class="plan-column">{{ column.Name }}</span>
+<span class="plan-type">{{ column.Kind|upper }}</span>
+{% if column.PrimaryKey %}<span class="plan-flag">PRIMARY KEY</span>{% endif %}
+{% if column.NotNull %}<span class="plan-flag">NOT NULL</span>{% endif %}
+{% if column.Default %}<span class="plan-flag">DEFAULT {{ column.Default }}</span>{% endif %}
+{% if column.References %}
+<a class="chip" href="{{ StructurePath }}?table={{ column.References }}">{{ column.References }}<span class="chip-target">{{ column.OnColumn }}</span></a>
+{% endif %}
+</div>
 {% endfor %}
-</tbody>
-</table>
 </div>
 </div>
 
 {% if Indexes %}
-<div class="card is-table">
-<div class="card-head has-border is-padded">
-<div class="card-title">Indexes</div>
-</div>
-<div class="table-wrap">
-<table class="table">
-<thead><tr><th>Name</th><th>Columns</th><th>Unique</th><th>Origin</th></tr></thead>
-<tbody>
+<div class="plan-group">
+<div class="plan-label">Indexes</div>
+<div class="plan-rows">
 {% for index in Indexes %}
-<tr>
-<td class="mono">{{ index.Name }}</td>
-<td class="mono muted">{{ index.Columns|join:", " }}</td>
-<td>{% if index.Unique %}<span class="badge is-secondary">unique</span>{% else %}&mdash;{% endif %}</td>
-<td class="muted">{{ index.Origin }}</td>
-</tr>
+<div class="plan-row">
+<span class="plan-column">{{ index.Name }}</span>
+<span class="plan-type">{{ index.Columns|join:", " }}</span>
+{% if index.Unique %}<span class="plan-flag">UNIQUE</span>{% endif %}
+<span class="plan-flag">{{ index.Origin }}</span>
+</div>
 {% endfor %}
-</tbody>
-</table>
 </div>
 </div>
 {% endif %}
 
 {% if Definition %}
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Definition</div>
-</div>
-<div class="card-body">
-<pre class="code is-block">{{ Definition }}</pre>
-</div>
+<div class="plan-group">
+<div class="plan-label">Definition</div>
+<pre class="code is-block" id="table-definition">{{ Definition }}</pre>
 </div>
 {% endif %}
+</div>
+</div>
 {% else %}
-<div class="empty">
-<span class="empty-title">Nothing selected</span>
-<span>Choose a table on the left.</span>
+<div class="sheet-empty">
+<strong>Nothing selected</strong>
+<span>Choose a table on the left to see how it is built.</span>
 </div>
 {% endif %}
 </div>

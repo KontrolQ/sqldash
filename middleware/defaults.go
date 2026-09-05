@@ -23,6 +23,7 @@ const (
 	PaletteGoLabel        = "Go to"
 	PaletteDatabasesLabel = "Databases"
 	PaletteTablesLabel    = "Tables"
+	PaletteInsideLabel    = "Inside %s"
 	PaletteDatabaseNote   = "Database"
 	PaletteTableNote      = "Table"
 	PaletteViewNote       = "View"

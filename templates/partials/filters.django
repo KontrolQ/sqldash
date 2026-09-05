@@ -1,0 +1,14 @@
+{% if Filters %}
+<div class="filters">
+{% for filter in Filters %}
+<span class="filter">
+<span class="filter-column">{{ filter.Column }}</span>
+<span class="filter-operator">{{ filter.Label }}</span>
+{% if filter.Value %}<span class="filter-value">{{ filter.Value }}</span>{% endif %}
+<a class="filter-drop" href="{{ filter.RemoveURL }}" aria-label="Remove this filter">
+<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</a>
+</span>
+{% endfor %}
+</div>
+{% endif %}

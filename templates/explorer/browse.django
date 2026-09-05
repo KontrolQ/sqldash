@@ -1,54 +1,232 @@
 {% extends "layouts/base.django" %}
 
-{% block content %}
-<div class="page-head">
-<div class="page-title">
-<h1>{{ Database }}</h1>
-<p class="page-subtitle">{% if Table %}{{ Total }} rows in {{ Table }}{% else %}Pick a table to browse{% endif %}</p>
-</div>
-</div>
+{% block tight %}is-tight{% endblock %}
 
+{% block content %}
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
-<div class="explorer">
-{% include "partials/tablelist.django" with table_base=BrowsePath %}
+<div class="workspace">
+{% include "partials/rail.django" with rail_base=BrowsePath %}
 
-<div class="explorer-main">
+<div class="bench">
 {% if Table %}
-<div class="explorer-bar">
-<div class="tabs">
-<a class="tab is-current" href="{{ BrowsePath }}?table={{ Table }}">Data</a>
-<a class="tab" href="{{ StructurePath }}?table={{ Table }}">Structure</a>
-</div>
-<form class="inline-form" method="get" action="{{ BrowsePath }}">
+<form class="selection" method="post" action="{% url "databases.explore.row" name=Database %}" data-selection data-confirm="The rows you picked are removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete the rows you picked?" data-confirm-action="Delete rows">
 <input type="hidden" name="table" value="{{ Table }}">
-<input class="input" name="search" value="{{ Search }}" placeholder="Search" aria-label="Search every column">
-<button class="button is-outline" type="submit">Search</button>
-{% if Search %}<a class="button is-ghost" href="{{ BrowsePath }}?table={{ Table }}">Clear</a>{% endif %}
+<input type="hidden" name="back" value="{{ View }}">
+
+<div class="workbar">
+<div class="tabs">
+<a class="tab is-current" href="{{ BrowsePath }}?table={{ Table }}">
+<svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+Data
+</a>
+<a class="tab" href="{{ StructurePath }}?table={{ Table }}">
+<svg viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+Structure
+</a>
+</div>
+
+<div class="menu" data-menu>
+<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+Filters{% if Filters %} <span class="badge is-secondary">{{ Filters|length }}</span>{% endif %}
+</button>
+<div class="menu-content is-form" data-menu-content hidden>
+<form class="filter-form" method="get" action="{{ BrowsePath }}">
+<input type="hidden" name="table" value="{{ Table }}">
+{% if Search %}<input type="hidden" name="search" value="{{ Search }}">{% endif %}
+{% for filter in Filters %}
+<input type="hidden" name="column" value="{{ filter.Column }}">
+<input type="hidden" name="operator" value="{{ filter.Operator }}">
+<input type="hidden" name="value" value="{{ filter.Value }}">
+{% endfor %}
+{% include "partials/select.django" with select_name="column" select_label="Column to filter on" select_chosen="" select_options=ColumnChoices select_wide=1 %}
+{% include "partials/select.django" with select_name="operator" select_label="How to compare" select_chosen="contains" select_options=Operators select_wide=1 %}
+<input class="input" name="value" placeholder="Value" aria-label="Value to compare against">
+<button class="button is-small" type="submit">Apply filter</button>
 </form>
-<span class="tab-bar-spacer"></span>
-<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ Page }}{% if Search %}&search={{ Search }}{% endif %}" title="Reload">Refresh</a>
-{% if Editable %}<button class="button is-small" type="button" data-reveal="add-row">Add record</button>{% endif %}
+</div>
+</div>
+
+<div class="menu" data-menu>
+<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/></svg>
+Sort{% if Sort %} <span class="badge is-secondary">{{ Sort }}</span>{% endif %}
+</button>
+<div class="menu-content" data-menu-content hidden>
+<div class="menu-label">Sort by</div>
+<div class="menu-separator"></div>
+{% for column in Columns %}
+<a class="menu-check" role="menuitemradio" aria-checked="{% if Sort == column.Name %}true{% else %}false{% endif %}" href="{{ BrowsePath }}?{{ Carry }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}">
+<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+{{ column.Name }}
+{% if Sort == column.Name %}<span class="menu-note">{% if Direction == "asc" %}ascending{% else %}descending{% endif %}</span>{% endif %}
+</a>
+{% endfor %}
+{% if Sort %}
+<div class="menu-separator"></div>
+<a class="menu-check" href="{{ BrowsePath }}?{{ Carry }}"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Clear sorting</a>
+{% endif %}
+</div>
+</div>
+
+<div class="menu" data-menu data-columns="{{ Database }}.{{ Table }}">
+<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<svg class="button-icon" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
+Columns
+</button>
+<div class="menu-content" data-menu-content hidden>
+<div class="menu-label">Columns shown</div>
+<div class="menu-separator"></div>
+{% for column in Columns %}
+<button class="menu-check" type="button" role="menuitemcheckbox" aria-checked="true" data-column="{{ column.Name }}">
+<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+{{ column.Name }}
+</button>
+{% endfor %}
+</div>
 </div>
 
 {% if Editable %}
-<div class="card" id="add-row" hidden>
-<div class="card-head has-border">
-<div class="card-title">Add a record to {{ Table }}</div>
-<div class="card-note">Leave a field empty to use its default.</div>
+<button class="button is-small" type="button" data-reveal="add-row">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
+Add record
+</button>
+{% endif %}
+
+<div class="workbar-right">
+<span class="timing">{{ Duration }}</span>
+<a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ BrowsePath }}?{{ Carry }}&page={{ PreviousPage }}" aria-label="Previous page">
+<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+</a>
+<span class="tally">{{ FirstRow }} &ndash; {{ LastRow }} of {{ Total }}</span>
+<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ BrowsePath }}?{{ Carry }}&page={{ NextPage }}" aria-label="Next page">
+<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+</a>
+<a class="step" href="{{ BrowsePath }}?{{ View }}" aria-label="Reload the rows">
+<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+</a>
+<div class="menu" data-menu>
+<button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions">
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+</button>
+<div class="menu-content" data-menu-content hidden>
+<a class="menu-plain" href="{{ StructurePath }}?table={{ Table }}">Show structure</a>
+<a class="menu-plain" href="{% url "databases.console" name=Database %}">Open the console</a>
+<div class="menu-separator"></div>
+<a class="menu-plain" href="{% url "databases.export" name=Database %}">Download a dump</a>
 </div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.explore.insert" name=Database %}">
+</div>
+</div>
+</div>
+
+<div class="workbar is-second">
+<form class="inline-form" method="get" action="{{ BrowsePath }}">
+<input type="hidden" name="table" value="{{ Table }}">
+{% for filter in Filters %}
+<input type="hidden" name="column" value="{{ filter.Column }}">
+<input type="hidden" name="operator" value="{{ filter.Operator }}">
+<input type="hidden" name="value" value="{{ filter.Value }}">
+{% endfor %}
+<input class="input is-small is-search" name="search" value="{{ Search }}" placeholder="Search every column" aria-label="Search every column">
+{% if Search %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ Carry }}">Clear</a>{% endif %}
+</form>
+{% include "partials/filters.django" %}
+<div class="workbar-right" data-selection-bar hidden>
+<span class="selection-count" data-selection-count></span>
+<button class="button is-ghost is-small" type="button" data-selection-clear>Clear</button>
+<button class="button is-destructive is-small" type="submit">Delete rows</button>
+</div>
+</div>
+
+<div class="sheet">
+<table class="table is-grid">
+<thead>
+<tr>
+{% if Editable %}
+<th class="table-pick">
+{% include "partials/checkbox.django" with checkbox_label="Pick every row on this page" checkbox_hook="selection-all" %}
+</th>
+{% endif %}
+{% for column in Columns %}
+<th data-cell="{{ column.Name }}">
+<a class="column-sort" href="{{ BrowsePath }}?{{ Carry }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}">
+<span class="column-name">{{ column.Name }}</span>
+<span class="column-kind">{{ column.Kind|lower }}</span>
+{% if Sort == column.Name %}<span class="sort-mark">{% if Direction == "asc" %}&uarr;{% else %}&darr;{% endif %}</span>{% endif %}
+</a>
+</th>
+{% endfor %}
+{% if Editable %}<th class="table-pick"></th>{% endif %}
+</tr>
+</thead>
+<tbody>
+{% for row in Rows %}
+<tr>
+{% if Editable %}
+<td class="table-pick">
+{% include "partials/checkbox.django" with checkbox_name="key" checkbox_value=row.Key checkbox_label="Pick this row" checkbox_hook="selection-one" %}
+</td>
+{% endif %}
+{% for cell in row.Cells %}
+<td class="cell" data-cell="{{ cell.Column }}">
+{% if cell.LinkTo %}
+<a class="chip" href="{{ BrowsePath }}?table={{ cell.LinkTo }}&search={{ cell.Text }}">{{ cell.Text }}<span class="chip-target">{{ cell.LinkTo }}</span></a>
+{% elif Editable %}
+<input class="cell-input" form="cell-{{ forloop.ParentLoop.Counter }}-{{ forloop.Counter }}" name="value" value="{{ cell.Text }}"{% if cell.IsNull %} placeholder="NULL"{% endif %}>
+{% else %}
+{% if cell.IsNull %}<span class="null">NULL</span>{% else %}{{ cell.Text }}{% endif %}
+{% endif %}
+</td>
+{% endfor %}
+{% if Editable %}
+<td class="table-pick">
+<button class="step is-bare" type="submit" name="key" value="{{ row.Key }}" data-row-delete aria-label="Delete this row">
+<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+</button>
+</td>
+{% endif %}
+</tr>
+{% empty %}
+<tr><td colspan="99" class="cell-empty">No rows match.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</form>
+
+{% if Editable %}
+{% for row in Rows %}
+{% for cell in row.Cells %}
+{% if not cell.LinkTo %}
+<form id="cell-{{ forloop.ParentLoop.Counter }}-{{ forloop.Counter }}" method="post" action="{% url "databases.explore.cell" name=Database %}" hidden>
+<input type="hidden" name="table" value="{{ Table }}">
+<input type="hidden" name="column" value="{{ cell.Column }}">
+<input type="hidden" name="key" value="{{ row.Key }}">
+<input type="hidden" name="back" value="{{ View }}">
+</form>
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+<div class="drawer" id="add-row" hidden>
+<div class="drawer-head">
+<span class="card-title">Add a record to {{ Table }}</span>
+<button class="step" type="button" data-reveal="add-row" aria-label="Close">
+<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
+</div>
+<form class="drawer-body" method="post" action="{% url "databases.explore.insert" name=Database %}">
 <input type="hidden" name="table" value="{{ Table }}">
 <input type="hidden" name="columns" value="{{ ColumnNames }}">
-<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
+<input type="hidden" name="back" value="{{ View }}">
 <div class="row">
 {% for column in Columns %}
 <div class="field">
 <label class="label" for="new-{{ column.Name }}">{{ column.Name }}</label>
 <input class="input" id="new-{{ column.Name }}" name="column.{{ column.Name }}">
-<span class="field-note">{{ column.Kind }}{% if column.PrimaryKey %} · primary key{% endif %}{% if column.NotNull %} · required{% endif %}</span>
+<span class="field-note">{{ column.Kind }}{% if column.PrimaryKey %} &middot; primary key{% endif %}{% if column.NotNull %} &middot; required{% endif %}</span>
 </div>
 {% endfor %}
 </div>
@@ -58,74 +236,11 @@
 </div>
 </form>
 </div>
-</div>
 {% endif %}
-
-<div class="card is-table">
-<div class="table-wrap">
-<table class="table is-grid">
-<thead>
-<tr>
-{% for column in Columns %}
-<th>
-<a class="column-sort" href="{{ BrowsePath }}?table={{ Table }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}{% if Search %}&search={{ Search }}{% endif %}">
-{{ column.Name }}{% if Sort == column.Name %}<span class="sort-mark">{% if Direction == "asc" %}&uarr;{% else %}&darr;{% endif %}</span>{% endif %}
-</a>
-<div class="column-kind">{{ column.Kind }}{% if column.PrimaryKey %} · pk{% endif %}</div>
-</th>
-{% endfor %}
-{% if Editable %}<th></th>{% endif %}
-</tr>
-</thead>
-<tbody>
-{% for row in Rows %}
-<tr>
-{% for cell in row.Cells %}
-<td class="cell">
-{% if cell.LinkTo %}
-<a class="chip" href="{{ BrowsePath }}?table={{ cell.LinkTo }}&search={{ cell.Text }}">{{ cell.Text }}<span class="chip-target">&rarr; {{ cell.LinkTo }}</span></a>
-{% elif Editable %}
-<form class="cell-form" method="post" action="{% url "databases.explore.cell" name=Database %}">
-<input type="hidden" name="table" value="{{ Table }}">
-<input type="hidden" name="column" value="{{ cell.Column }}">
-<input type="hidden" name="key" value="{{ row.Key }}">
-<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
-<input class="cell-input" name="value" value="{{ cell.Text }}">
-</form>
 {% else %}
-{% if cell.IsNull %}<span class="null">NULL</span>{% else %}{{ cell.Text }}{% endif %}
-{% endif %}
-</td>
-{% endfor %}
-{% if Editable %}
-<td class="table-actions">
-<form method="post" action="{% url "databases.explore.row" name=Database %}" data-confirm="This row is removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete this row?" data-confirm-action="Delete row">
-<input type="hidden" name="table" value="{{ Table }}">
-<input type="hidden" name="key" value="{{ row.Key }}">
-<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
-<button class="button is-ghost is-small" type="submit">Delete</button>
-</form>
-</td>
-{% endif %}
-</tr>
-{% empty %}
-<tr><td colspan="99" class="cell-empty">No rows.</td></tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-</div>
-
-<div class="pager">
-<span class="pager-note">{{ FirstRow }} – {{ LastRow }} of {{ Total }}</span>
-<span class="tab-bar-spacer"></span>
-{% if Page > 1 %}<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ PreviousPage }}{% if Search %}&search={{ Search }}{% endif %}">Previous</a>{% endif %}
-{% if Page < Pages %}<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ NextPage }}{% if Search %}&search={{ Search }}{% endif %}">Next</a>{% endif %}
-</div>
-{% else %}
-<div class="empty">
-<span class="empty-title">Nothing selected</span>
-<span>Choose a table on the left.</span>
+<div class="sheet-empty">
+<strong>Nothing selected</strong>
+<span>Choose a table on the left to see its rows.</span>
 </div>
 {% endif %}
 </div>

@@ -22,6 +22,7 @@ func Browse(context fiber.Ctx) error {
 		Sort:      context.Query(SortParameter),
 		Direction: context.Query(DirectionParameter),
 		Search:    context.Query(SearchParameter),
+		Filters:   filtersAsked(context),
 	})
 
 	if dataError != nil {
@@ -55,4 +56,28 @@ func describe(context fiber.Ctx, name string, label string, section string) {
 		meta.Crumb{Label: label},
 	)
 	meta.SetSection(context, name, section)
+}
+
+func filtersAsked(context fiber.Ctx) []service.Filter {
+	arguments := context.RequestCtx().QueryArgs()
+
+	columns := arguments.PeekMulti(ColumnParameter)
+	operators := arguments.PeekMulti(OperatorParameter)
+	values := arguments.PeekMulti(ValueParameter)
+
+	asked := make([]service.Filter, 0, len(columns))
+
+	for index, column := range columns {
+		if index >= len(operators) || index >= len(values) {
+			break
+		}
+
+		asked = append(asked, service.Filter{
+			Column:   string(column),
+			Operator: string(operators[index]),
+			Value:    string(values[index]),
+		})
+	}
+
+	return asked
 }

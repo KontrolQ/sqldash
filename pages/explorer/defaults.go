@@ -13,6 +13,9 @@ const (
 	SortParameter      = "sort"
 	DirectionParameter = "direction"
 	SearchParameter    = "search"
+	ColumnParameter    = "column"
+	OperatorParameter  = "operator"
+	ValueParameter     = "value"
 
 	DatabasesLabel = "Databases"
 	DatabasesPath  = "/"

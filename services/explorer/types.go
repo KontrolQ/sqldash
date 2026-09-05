@@ -16,6 +16,19 @@ type ColumnView struct {
 	OnColumn   string
 }
 
+type ChoiceView struct {
+	Value string
+	Label string
+}
+
+type FilterView struct {
+	Column    string
+	Operator  string
+	Value     string
+	Label     string
+	RemoveURL string
+}
+
 type CellView struct {
 	Column    string
 	Text      string
@@ -46,6 +59,12 @@ type BrowseContext struct {
 	Search        string
 	Editable      bool
 	KeyColumn     string
+	Filters       []FilterView
+	Operators     []ChoiceView
+	ColumnChoices []ChoiceView
+	Carry         string
+	View          string
+	Duration      string
 	Problem       string
 	Done          string
 	PreviousPage  int
@@ -57,18 +76,26 @@ type BrowseContext struct {
 	StructurePath string
 }
 
+type SchemaTable struct {
+	Name    string
+	Columns []string
+}
+
 type ConsoleContext struct {
-	Title     string
-	Database  string
-	Tables    []TableView
-	Statement string
-	Columns   []string
-	Rows      [][]string
-	Affected  int64
-	Duration  string
-	RowsRead  int64
-	Problem   string
-	Ran       bool
+	Title      string
+	Database   string
+	Tables     []TableView
+	BrowsePath string
+	Table      string
+	Schema     string
+	Statement  string
+	Columns    []string
+	Rows       [][]string
+	Affected   int64
+	Duration   string
+	RowsRead   int64
+	Problem    string
+	Ran        bool
 }
 
 type IndexView struct {

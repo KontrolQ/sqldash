@@ -59,7 +59,11 @@ func UpdateCell(requestContext context.Context, databaseName string, table strin
 	return nil
 }
 
-func DeleteRow(requestContext context.Context, databaseName string, table string, key string) *fiber.Error {
+func DeleteRows(requestContext context.Context, databaseName string, table string, keys []string) *fiber.Error {
+	if len(keys) == 0 {
+		return shortcuts.ServiceError(http.StatusBadRequest, NothingChosen)
+	}
+
 	columns, columnsError := Columns(requestContext, databaseName, table)
 	if columnsError != nil {
 		return columnsError
@@ -70,9 +74,18 @@ func DeleteRow(requestContext context.Context, databaseName string, table string
 		return shortcuts.ServiceError(http.StatusBadRequest, NotEditable)
 	}
 
-	statement := "DELETE FROM " + quoteIdentifier(table) + " WHERE " + quoteIdentifier(keyColumn) + " = ?"
+	places := make([]string, 0, len(keys))
+	arguments := make([]any, 0, len(keys))
 
-	if _, runError := sqld.Query(requestContext, databaseName, statement, key); runError != nil {
+	for _, key := range keys {
+		places = append(places, "?")
+		arguments = append(arguments, key)
+	}
+
+	statement := "DELETE FROM " + quoteIdentifier(table) +
+		" WHERE " + quoteIdentifier(keyColumn) + " IN (" + strings.Join(places, ", ") + ")"
+
+	if _, runError := sqld.Query(requestContext, databaseName, statement, arguments...); runError != nil {
 		logger.Errorf(LogPrefix, WriteFailedLog, databaseName, runError)
 		return shortcuts.ServiceError(http.StatusBadRequest, strings.TrimSpace(runError.Error()))
 	}

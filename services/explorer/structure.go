@@ -70,7 +70,7 @@ func indexesOf(requestContext context.Context, databaseName string, table string
 		view := IndexView{
 			Name:   name,
 			Unique: fmt.Sprint(row[2]) == "1",
-			Origin: fmt.Sprint(row[3]),
+			Origin: originLabel(fmt.Sprint(row[3])),
 		}
 
 		if parts, partsError := sqld.Query(requestContext, databaseName, fmt.Sprintf(IndexInfoSQL, quoteIdentifier(name))); partsError == nil {
@@ -94,4 +94,17 @@ func definitionOf(requestContext context.Context, databaseName string, table str
 	}
 
 	return fmt.Sprint(held.Rows[0][0])
+}
+
+func originLabel(origin string) string {
+	switch origin {
+	case CreatedOrigin:
+		return CreatedLabel
+	case UniqueOrigin:
+		return UniqueLabel
+	case PrimaryKeyOrigin:
+		return PrimaryKeyLabel
+	}
+
+	return origin
 }

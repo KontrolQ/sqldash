@@ -25,6 +25,55 @@ const (
 	HasRowIdSQL       = "SELECT rowid FROM %s LIMIT 1"
 
 	ConsoleTitle = "Console"
+	EmptySchema  = "[]"
+
+	SchemaSQL = `SELECT m.name, p.name FROM sqlite_master m
+		JOIN pragma_table_info(m.name) p
+		WHERE m.type IN ('table','view') AND m.name NOT LIKE 'sqlite_%'
+		ORDER BY m.name, p.cid`
+
+	TableKey     = "table"
+	SearchKey    = "search"
+	ColumnKey    = "column"
+	OperatorKey  = "operator"
+	ValueKey     = "value"
+	PageKey      = "page"
+	SortKey      = "sort"
+	DirectionKey = "direction"
+
+	OperatorContains = "contains"
+	OperatorMisses   = "misses"
+	OperatorIs       = "is"
+	OperatorIsNot    = "isnot"
+	OperatorStarts   = "starts"
+	OperatorEnds     = "ends"
+	OperatorAbove    = "above"
+	OperatorAtLeast  = "atleast"
+	OperatorBelow    = "below"
+	OperatorAtMost   = "atmost"
+	OperatorEmpty    = "empty"
+	OperatorFilled   = "filled"
+
+	CreatedOrigin    = "c"
+	UniqueOrigin     = "u"
+	PrimaryKeyOrigin = "pk"
+
+	CreatedLabel    = "declared"
+	UniqueLabel     = "unique constraint"
+	PrimaryKeyLabel = "primary key"
+
+	ContainsLabel = "contains"
+	MissesLabel   = "does not contain"
+	IsLabel       = "is"
+	IsNotLabel    = "is not"
+	StartsLabel   = "starts with"
+	EndsLabel     = "ends with"
+	AboveLabel    = "is greater than"
+	AtLeastLabel  = "is at least"
+	BelowLabel    = "is less than"
+	AtMostLabel   = "is at most"
+	EmptyLabel    = "is empty"
+	FilledLabel   = "is not empty"
 )
 
 const (

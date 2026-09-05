@@ -27,6 +27,9 @@
 <link rel="stylesheet" href="{% static "css/chart.css" %}">
 <link rel="stylesheet" href="{% static "css/dialog.css" %}">
 <link rel="stylesheet" href="{% static "css/command.css" %}">
+<link rel="stylesheet" href="{% static "css/checkbox.css" %}">
+<link rel="stylesheet" href="{% static "css/explorer.css" %}">
+<link rel="stylesheet" href="{% static "css/editor.css" %}">
 {% block styles %}{% endblock %}
 </head>
 <body>
@@ -34,7 +37,7 @@
 {% include "partials/sidebar.django" %}
 <div class="main">
 {% include "partials/topbar.django" %}
-<main class="content">
+<main class="content {% block tight %}{% endblock %}">
 {% block content %}{% endblock %}
 </main>
 </div>
@@ -48,6 +51,12 @@
 <script src="{% static "js/copy.js" %}" defer></script>
 <script src="{% static "js/toast.js" %}" defer></script>
 <script src="{% static "js/palette.js" %}" defer></script>
+<script src="{% static "js/menu.js" %}" defer></script>
+<script src="{% static "js/columns.js" %}" defer></script>
+<script src="{% static "js/selection.js" %}" defer></script>
+<script src="{% static "js/rail.js" %}" defer></script>
+<script src="{% static "js/console.js" %}" defer></script>
+<script src="{% static "js/editor.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

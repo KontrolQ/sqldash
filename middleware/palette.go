@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -47,7 +48,10 @@ func palette(context fiber.Ctx) error {
 	groups = append(groups, meta.PaletteGroup{Label: PaletteDatabasesLabel, Items: databases})
 
 	if held {
-		groups = append(groups, meta.PaletteGroup{Label: opened, Items: sectionsOf(opened)})
+		groups = append(groups, meta.PaletteGroup{
+			Label: fmt.Sprintf(PaletteInsideLabel, opened),
+			Items: sectionsOf(opened),
+		})
 
 		if tables := tablesOf(context, opened); len(tables) > 0 {
 			groups = append(groups, meta.PaletteGroup{Label: PaletteTablesLabel, Items: tables})
@@ -63,10 +67,10 @@ func sectionsOf(name string) []meta.PaletteItem {
 	base := DatabasePath + url.PathEscape(name)
 
 	return []meta.PaletteItem{
-		{Label: PaletteOverviewLabel, Note: name, URL: base},
-		{Label: PaletteDataLabel, Note: name, URL: base + ExplorePath},
-		{Label: PaletteConsoleLabel, Note: name, URL: base + ConsolePath},
-		{Label: PaletteInsightsLabel, Note: name, URL: base + InsightsPath},
+		{Label: PaletteOverviewLabel, URL: base},
+		{Label: PaletteDataLabel, URL: base + ExplorePath},
+		{Label: PaletteConsoleLabel, URL: base + ConsolePath},
+		{Label: PaletteInsightsLabel, URL: base + InsightsPath},
 	}
 }
 

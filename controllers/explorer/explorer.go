@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,7 +35,7 @@ func SaveCell(context fiber.Ctx) error {
 	return backTo(context, name, asked.Back)
 }
 
-func DeleteRow(context fiber.Ctx) error {
+func DeleteRows(context fiber.Ctx) error {
 	asked, parseError := meta.Body[RowRequest](context)
 	if parseError != nil {
 		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
@@ -42,10 +43,10 @@ func DeleteRow(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	if deleteError := service.DeleteRow(context.Context(), name, asked.Table, asked.Key); deleteError != nil {
+	if deleteError := service.DeleteRows(context.Context(), name, asked.Table, asked.Keys); deleteError != nil {
 		sessions.Complain(context, deleteError.Message)
 	} else {
-		sessions.Report(context, service.RowDeleted)
+		sessions.Report(context, fmt.Sprintf(service.RowsDeleted, len(asked.Keys)))
 	}
 
 	return backTo(context, name, asked.Back)

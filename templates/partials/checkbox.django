@@ -1,0 +1,7 @@
+<label class="checkbox">
+<input type="checkbox" name="{{ checkbox_name }}" value="{{ checkbox_value }}" aria-label="{{ checkbox_label }}"{% if checkbox_on %} checked{% endif %}{% if checkbox_hook %} data-{{ checkbox_hook }}{% endif %}>
+<span class="checkbox-mark">
+<svg class="checkbox-all" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+<svg class="checkbox-some" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+</span>
+</label>

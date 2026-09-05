@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -17,10 +18,12 @@ func RunConsole(requestContext context.Context, databaseName string, statement s
 	}
 
 	shown := &ConsoleContext{
-		Title:     ConsoleTitle,
-		Database:  databaseName,
-		Tables:    tables,
-		Statement: statement,
+		Title:      ConsoleTitle,
+		Database:   databaseName,
+		Tables:     tables,
+		Statement:  statement,
+		BrowsePath: DatabasePath + databaseName + BrowseSuffix,
+		Schema:     schemaOf(requestContext, databaseName),
 	}
 
 	statement = strings.TrimSpace(statement)
@@ -73,4 +76,41 @@ func readableCell(value any) string {
 	}
 
 	return text
+}
+
+func schemaOf(requestContext context.Context, databaseName string) string {
+	held, queryError := sqld.Query(requestContext, databaseName, SchemaSQL)
+	if queryError != nil {
+		return EmptySchema
+	}
+
+	order := make([]string, 0)
+	columns := make(map[string][]string)
+
+	for _, row := range held.Rows {
+		if row[0] == nil || row[1] == nil {
+			continue
+		}
+
+		table := fmt.Sprint(row[0])
+
+		if _, seen := columns[table]; !seen {
+			order = append(order, table)
+		}
+
+		columns[table] = append(columns[table], fmt.Sprint(row[1]))
+	}
+
+	tables := make([]SchemaTable, 0, len(order))
+
+	for _, table := range order {
+		tables = append(tables, SchemaTable{Name: table, Columns: columns[table]})
+	}
+
+	encoded, encodeError := json.Marshal(tables)
+	if encodeError != nil {
+		return EmptySchema
+	}
+
+	return string(encoded)
 }

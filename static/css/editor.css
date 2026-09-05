@@ -1,0 +1,120 @@
+.editor {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-paint,
+.editor-field {
+  padding: 14px 16px;
+  margin: 0;
+  border: 0;
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0;
+  line-height: 22px;
+  tab-size: 2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.editor-paint {
+  position: absolute;
+  overflow: hidden;
+  inset: 0;
+  color: var(--foreground);
+  pointer-events: none;
+}
+
+.editor-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: transparent;
+  caret-color: var(--foreground);
+  color: transparent;
+  outline: none;
+  resize: vertical;
+}
+
+.editor-field::selection {
+  background: color-mix(in oklab, var(--ring) 40%, transparent);
+}
+
+.editor-paint .is-word {
+  color: var(--sql-word);
+  font-weight: var(--fw-medium);
+}
+
+.editor-paint .is-call {
+  color: var(--sql-call);
+}
+
+.editor-paint .is-text {
+  color: var(--sql-text);
+}
+
+.editor-paint .is-number {
+  color: var(--sql-number);
+}
+
+.editor-paint .is-note {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.editor-paint .is-mark,
+.editor-paint .is-bind {
+  color: var(--sql-mark);
+}
+
+.editor-hint {
+  position: absolute;
+  z-index: 30;
+  overflow-y: auto;
+  width: 240px;
+  max-height: 220px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--popover);
+  box-shadow: var(--shadow-md);
+  color: var(--popover-foreground);
+}
+
+.editor-hint[hidden] {
+  display: none;
+}
+
+.hint-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  gap: 8px;
+  text-align: left;
+}
+
+.hint-item.is-active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.hint-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hint-note {
+  margin-left: auto;
+  color: var(--muted-foreground);
+  font-family: var(--sans);
+  font-size: 11px;
+}

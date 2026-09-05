@@ -1,57 +1,74 @@
 {% extends "layouts/base.django" %}
 
-{% block content %}
-<div class="page-head">
-<div class="page-title">
-<h1>{{ Database }}</h1>
-<p class="page-subtitle">Run a statement against this database.</p>
-</div>
-</div>
+{% block tight %}is-tight{% endblock %}
 
+{% block content %}
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
-<div class="card">
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.console.run" name=Database %}">
-<textarea class="textarea is-code" name="statement" rows="6" spellcheck="false" placeholder="SELECT * FROM sqlite_master">{{ Statement }}</textarea>
-<div class="actions">
-<button class="button" type="submit">Run</button>
-</div>
-</form>
+<div class="workspace">
+{% include "partials/rail.django" with rail_base=BrowsePath %}
+
+<div class="bench">
+<form class="console" method="post" action="{% url "databases.console.run" name=Database %}">
+<div class="workbar">
+<button class="button is-small" type="submit">
+<svg class="button-icon" viewBox="0 0 24 24"><path d="m6 3 14 9-14 9V3z"/></svg>
+Run
+</button>
+<kbd class="kbd">Ctrl Enter</kbd>
+<button class="button is-outline is-small" type="button" data-tidy>
+<svg class="button-icon" viewBox="0 0 24 24"><path d="m5 3 1.5 3L10 7.5 6.5 9 5 12 3.5 9 0 7.5 3.5 6z" transform="translate(3 2)"/><path d="M18 14v6M15 17h6"/></svg>
+Prettify
+</button>
+<div class="workbar-right">
+{% if Ran and not Problem %}
+<span class="timing">{{ Duration }}</span>
+<span class="tally">{{ Rows|length }} returned &middot; {{ Affected }} affected &middot; {{ RowsRead }} read</span>
+{% endif %}
 </div>
 </div>
 
+<div class="editor" data-schema="{{ Schema }}">
+<pre class="editor-paint" aria-hidden="true"></pre>
+<textarea class="editor-field" name="statement" rows="10" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Statement to run" data-statement>{{ Statement }}</textarea>
+<div class="editor-hint" role="listbox" aria-label="Completions" hidden></div>
+</div>
+</form>
+
 {% if Problem %}
-<div class="alert is-bad" role="alert">
+<div class="console-problem" role="alert">
 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-<div class="alert-title">That statement did not run</div>
-<div class="alert-body"><code class="code">{{ Problem }}</code></div>
+<code>{{ Problem }}</code>
 </div>
 {% endif %}
 
+<div class="sheet">
 {% if Ran and not Problem %}
-<div class="card is-table">
-<div class="card-head has-border is-padded">
-<div class="card-title">Result</div>
-<div class="card-note">{{ Rows|length }} rows returned · {{ Affected }} affected · {{ RowsRead }} read · {{ Duration }}</div>
-</div>
 {% if Columns %}
-<div class="table-wrap">
 <table class="table is-grid">
-<thead><tr>{% for column in Columns %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+<thead><tr>{% for column in Columns %}<th><span class="column-name">{{ column }}</span></th>{% endfor %}</tr></thead>
 <tbody>
 {% for row in Rows %}
 <tr>{% for cell in row %}<td class="cell">{{ cell }}</td>{% endfor %}</tr>
 {% empty %}
-<tr><td colspan="99" class="cell-empty">No rows.</td></tr>
+<tr><td colspan="99" class="cell-empty">No rows returned.</td></tr>
 {% endfor %}
 </tbody>
 </table>
-</div>
 {% else %}
-<div class="card-body"><div class="empty"><span class="empty-title">Done</span><span>{{ Affected }} rows affected.</span></div></div>
-{% endif %}
+<div class="sheet-empty">
+<strong>Done</strong>
+<span>{{ Affected }} rows affected.</span>
 </div>
 {% endif %}
+{% else %}
+<div class="sheet-empty">
+<strong>Nothing run yet</strong>
+<span>Write a statement above and run it.</span>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
 {% endblock %}

@@ -10,9 +10,9 @@ type CellRequest struct {
 }
 
 type RowRequest struct {
-	Table string `form:"table"`
-	Key   string `form:"key"`
-	Back  string `form:"back"`
+	Table string   `form:"table"`
+	Keys  []string `form:"key"`
+	Back  string   `form:"back"`
 }
 
 type ConsoleRequest struct {

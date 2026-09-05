@@ -29,6 +29,7 @@
 
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
+  --checkbox-ground: transparent;
   --ring: oklch(0.708 0 0);
 
   --sidebar: oklch(0.985 0 0);
@@ -42,6 +43,12 @@
   --chart-read: oklch(0.55 0.16 250);
   --chart-write: oklch(0.6 0.14 165);
   --chart-third: oklch(0.62 0.18 300);
+
+  --sql-word: oklch(0.5 0.2 292);
+  --sql-call: oklch(0.52 0.15 220);
+  --sql-text: oklch(0.52 0.14 150);
+  --sql-number: oklch(0.55 0.16 40);
+  --sql-mark: oklch(0.55 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -76,6 +83,7 @@
 
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
+    --checkbox-ground: oklch(1 0 0 / 4.5%);
     --ring: oklch(0.556 0 0);
 
     --sidebar: oklch(0.205 0 0);
@@ -89,6 +97,12 @@
     --chart-read: oklch(0.7 0.14 250);
     --chart-write: oklch(0.72 0.13 165);
     --chart-third: oklch(0.72 0.15 300);
+
+    --sql-word: oklch(0.75 0.15 300);
+    --sql-call: oklch(0.78 0.11 220);
+    --sql-text: oklch(0.78 0.12 150);
+    --sql-number: oklch(0.8 0.12 60);
+    --sql-mark: oklch(0.7 0 0);
   }
 }
 
@@ -123,6 +137,7 @@
 
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
+  --checkbox-ground: oklch(1 0 0 / 4.5%);
   --ring: oklch(0.556 0 0);
 
   --sidebar: oklch(0.205 0 0);
@@ -136,4 +151,10 @@
   --chart-read: oklch(0.7 0.14 250);
   --chart-write: oklch(0.72 0.13 165);
   --chart-third: oklch(0.72 0.15 300);
+
+  --sql-word: oklch(0.75 0.15 300);
+  --sql-call: oklch(0.78 0.11 220);
+  --sql-text: oklch(0.78 0.12 150);
+  --sql-number: oklch(0.8 0.12 60);
+  --sql-mark: oklch(0.7 0 0);
 }
