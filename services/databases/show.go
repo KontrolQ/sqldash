@@ -6,9 +6,11 @@ import (
 	"net/http"
 
 	"sqldash/config"
+	ruleRepository "sqldash/repositories/accessrule"
 	repository "sqldash/repositories/database"
 	tokenservice "sqldash/services/tokens"
 	"sqldash/sqld"
+	"sqldash/utils/collections"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -35,6 +37,7 @@ func GetShowData(requestContext context.Context, name string, secret string) (*S
 		URL:       AddressScheme + address,
 		Protected: held.Protected,
 		Secret:    secret,
+		Scopes:    collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel),
 	}
 
 	if held, statisticsError := sqld.Statistics(requestContext, name); statisticsError == nil {
@@ -65,6 +68,16 @@ func GetShowData(requestContext context.Context, name string, secret string) (*S
 	}
 
 	shown.Tokens = tokenViews
+
+	if rules, rulesError := ruleRepository.ForDatabase(name); rulesError == nil {
+		for _, rule := range rules {
+			shown.Rules = append(shown.Rules, RuleView{
+				Identifier: rule.ID,
+				Network:    rule.Network,
+				Note:       rule.Note,
+			})
+		}
+	}
 
 	return shown, nil
 }

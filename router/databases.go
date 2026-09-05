@@ -19,6 +19,8 @@ func init() {
 	urls.Path(urls.Post, "/databases/import", controller.Import, "databases.import")
 	urls.Path(urls.Get, "/databases/:name/export", controller.Export, "databases.export")
 	urls.Path(urls.Post, "/databases/:name/fork", controller.Fork, "databases.fork")
+	urls.Path(urls.Post, "/databases/:name/rules", controller.AllowNetwork, "databases.rules.add")
+	urls.Path(urls.Post, "/databases/:name/rules/:rule/remove", controller.RemoveNetwork, "databases.rules.remove")
 	urls.Path(urls.Post, "/databases/:name/delete", controller.Delete, "databases.delete")
 	urls.Path(urls.Post, "/databases/:name/tokens", tokencontroller.Mint, "databases.tokens.mint")
 	urls.Path(urls.Post, "/databases/:name/tokens/:identifier/revoke", tokencontroller.Revoke, "databases.tokens.revoke")

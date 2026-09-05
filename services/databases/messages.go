@@ -42,3 +42,15 @@ const (
 	OnlyDumpsFormat = "only a .sql dump can be loaded, not %s"
 	MomentUnusable  = "That is not a moment this database can be restored to."
 )
+
+const (
+	RuleFailedLog = "Failed to change the access rules for %s: %v"
+)
+
+const (
+	NetworkUnusable = "That is not an address range. Write it in CIDR form, such as 203.0.113.0/24."
+	NetworkRefused  = "That range could not be saved."
+	NetworkMissing  = "No such range."
+	NetworkAllowed  = "That range may now connect."
+	NetworkRemoved  = "That range was removed."
+)

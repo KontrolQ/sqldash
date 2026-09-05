@@ -2,6 +2,7 @@ package databases
 
 import (
 	tokenservice "sqldash/services/tokens"
+	"sqldash/utils/collections"
 )
 
 type IndexContext struct {
@@ -31,4 +32,12 @@ type ShowContext struct {
 	QueryCount  int64
 	Tokens      []tokenservice.TokenView
 	Secret      string
+	Scopes      []collections.Option
+	Rules       []RuleView
+}
+
+type RuleView struct {
+	Identifier uint
+	Network    string
+	Note       string
 }

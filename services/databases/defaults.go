@@ -49,3 +49,10 @@ const (
 
 	PageSQL = "SELECT * FROM %s LIMIT %d OFFSET %d"
 )
+
+const (
+	ReadWriteValue = "read-write"
+	ReadWriteLabel = "Read and write"
+	ReadOnlyValue  = "read-only"
+	ReadOnlyLabel  = "Read only"
+)

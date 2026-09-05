@@ -20,3 +20,8 @@ type ForkRequest struct {
 	Name   string `form:"name"`
 	Moment string `form:"moment"`
 }
+
+type RuleRequest struct {
+	Network string `form:"network"`
+	Note    string `form:"note"`
+}

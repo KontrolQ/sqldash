@@ -16,6 +16,7 @@ const (
 
 const (
 	EveryDatabase = "every database"
+	LastPrefix    = "Last "
 )
 
 const (

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"sqldash/analytics"
+	"sqldash/utils/collections"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -37,23 +38,24 @@ func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fi
 	}
 
 	shown := &OverviewContext{
-		Title:       heading,
-		Heading:     heading,
-		FormAction:  action,
-		Scope:       scope,
-		Window:      window.Label,
-		Windows:     windowLabels(),
-		Queries:     summary.Count,
-		Failures:    summary.Failures,
-		RowsRead:    summary.RowsRead,
-		RowsWritten: summary.RowsWritten,
-		Average:     readableDuration(summary.Average()),
-		P50:         readableDuration(summary.Histogram.Percentile(0.50)),
-		P75:         readableDuration(summary.Histogram.Percentile(0.75)),
-		P90:         readableDuration(summary.Histogram.Percentile(0.90)),
-		P95:         readableDuration(summary.Histogram.Percentile(0.95)),
-		P99:         readableDuration(summary.Histogram.Percentile(0.99)),
-		Approximate: summary.Count > 0,
+		Title:         heading,
+		Heading:       heading,
+		FormAction:    action,
+		Scope:         scope,
+		Window:        window.Label,
+		Windows:       windowLabels(),
+		WindowOptions: windowOptions(),
+		Queries:       summary.Count,
+		Failures:      summary.Failures,
+		RowsRead:      summary.RowsRead,
+		RowsWritten:   summary.RowsWritten,
+		Average:       readableDuration(summary.Average()),
+		P50:           readableDuration(summary.Histogram.Percentile(0.50)),
+		P75:           readableDuration(summary.Histogram.Percentile(0.75)),
+		P90:           readableDuration(summary.Histogram.Percentile(0.90)),
+		P95:           readableDuration(summary.Histogram.Percentile(0.95)),
+		P99:           readableDuration(summary.Histogram.Percentile(0.99)),
+		Approximate:   summary.Count > 0,
 	}
 
 	shown.Top = toQueryViews(top, summary.TotalDuration)
@@ -118,4 +120,14 @@ func windowLabels() []string {
 	}
 
 	return labels
+}
+
+func windowOptions() []collections.Option {
+	options := make([]collections.Option, 0)
+
+	for _, window := range analytics.Windows() {
+		options = append(options, collections.Option{Value: window.Label, Label: LastPrefix + window.Label})
+	}
+
+	return options
 }

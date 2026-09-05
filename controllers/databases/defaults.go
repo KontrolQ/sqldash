@@ -9,6 +9,7 @@ const (
 	ShowPath   = "/databases/"
 
 	NameParameter = "name"
+	RuleParameter = "rule"
 	CheckedValue  = "on"
 
 	DumpField         = "dump"
