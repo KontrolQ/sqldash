@@ -5,11 +5,13 @@ import "time"
 const (
 	LogPrefix = "Proxy"
 
-	NamespaceHeader    = "x-namespace"
-	ForwardedForHeader = "x-forwarded-for"
-	ContentTypeHeader  = "content-type"
-	UpgradeHeader      = "upgrade"
-	WebsocketUpgrade   = "websocket"
+	NamespaceHeader       = "x-namespace"
+	ContentEncodingHeader = "Content-Encoding"
+	GzipEncoding          = "gzip"
+	ForwardedForHeader    = "x-forwarded-for"
+	ContentTypeHeader     = "content-type"
+	UpgradeHeader         = "upgrade"
+	WebsocketUpgrade      = "websocket"
 
 	PipelinePathV2 = "/v2/pipeline"
 	PipelinePathV3 = "/v3/pipeline"

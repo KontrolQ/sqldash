@@ -2,8 +2,10 @@ package proxy
 
 import (
 	"bytes"
+	"compress/gzip"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"sqldash/proxy/hrana"
@@ -32,6 +34,28 @@ func (self *capturing) Write(payload []byte) (int, error) {
 	return self.ResponseWriter.Write(payload)
 }
 
+func readable(captured *capturing) []byte {
+	held := captured.body.Bytes()
+
+	if !strings.EqualFold(captured.Header().Get(ContentEncodingHeader), GzipEncoding) {
+		return held
+	}
+
+	reader, openError := gzip.NewReader(bytes.NewReader(held))
+	if openError != nil {
+		return held
+	}
+
+	defer reader.Close()
+
+	plain, readError := io.ReadAll(io.LimitReader(reader, MaximumMeasuredBody))
+	if readError != nil {
+		return held
+	}
+
+	return plain
+}
+
 func measure(writer http.ResponseWriter, request *http.Request, database string) {
 	asked, readError := io.ReadAll(io.LimitReader(request.Body, MaximumMeasuredBody))
 	request.Body.Close()
@@ -52,7 +76,7 @@ func measure(writer http.ResponseWriter, request *http.Request, database string)
 	in := int64(len(asked))
 	out := captured.sent
 
-	for _, statement := range hrana.Measure(asked, captured.body.Bytes()) {
+	for _, statement := range hrana.Measure(asked, readable(captured)) {
 		telemetry.Record(telemetry.Observation{
 			DatabaseName: database,
 			SQL:          statement.SQL,
