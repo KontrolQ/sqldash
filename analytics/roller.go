@@ -94,6 +94,10 @@ func Fold() {
 				held.Failures++
 			}
 
+			if statement.RowsWritten > 0 {
+				held.Writes++
+			}
+
 			histograms[key].Add(statement.DurationMs)
 		}
 	}
@@ -119,6 +123,7 @@ func apply(fresh *models.Rollup, histogram Histogram) error {
 	if findError == nil {
 		existing.Count += fresh.Count
 		existing.Failures += fresh.Failures
+		existing.Writes += fresh.Writes
 		existing.TotalDuration += fresh.TotalDuration
 		existing.RowsRead += fresh.RowsRead
 		existing.RowsWritten += fresh.RowsWritten

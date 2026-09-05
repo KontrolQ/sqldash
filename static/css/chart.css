@@ -1,0 +1,141 @@
+.chart {
+  position: relative;
+}
+
+.chart-canvas {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.chart-band.is-0 {
+  fill: var(--chart-read);
+}
+
+.chart-band.is-1 {
+  fill: var(--chart-write);
+}
+
+.chart-band.is-2 {
+  fill: var(--chart-third);
+}
+
+.chart-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.chart-line.is-0 {
+  stroke: var(--chart-read);
+}
+
+.chart-line.is-1 {
+  stroke: var(--chart-write);
+}
+
+.chart-line.is-2 {
+  stroke: var(--chart-third);
+}
+
+.chart-rule {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-crosshair {
+  stroke: var(--muted-foreground);
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+  pointer-events: none;
+  transition: opacity var(--ease);
+}
+
+.chart-tick {
+  fill: var(--muted-foreground);
+  font-family: var(--sans);
+  font-size: 11px;
+}
+
+.chart-key {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.chart-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-swatch {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.chart-swatch.is-0 {
+  background: var(--chart-read);
+}
+
+.chart-swatch.is-1 {
+  background: var(--chart-write);
+}
+
+.chart-swatch.is-2 {
+  background: var(--chart-third);
+}
+
+.chart-tip {
+  position: absolute;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  min-width: 140px;
+  flex-direction: column;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--popover);
+  box-shadow: var(--shadow-md);
+  color: var(--popover-foreground);
+  font-size: 12px;
+  gap: 4px;
+  line-height: 16px;
+  pointer-events: none;
+}
+
+.chart-tip[hidden] {
+  display: none;
+}
+
+.chart-tip-when {
+  color: var(--muted-foreground);
+}
+
+.chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-tip-row b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.chart-empty {
+  display: grid;
+  height: 180px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  place-items: center;
+}

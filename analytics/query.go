@@ -16,6 +16,7 @@ type Window struct {
 type Summary struct {
 	Count         int64
 	Failures      int64
+	Writes        int64
 	TotalDuration float64
 	RowsRead      int64
 	RowsWritten   int64
@@ -126,6 +127,7 @@ func TopQueries(databaseName string, window Window, limit int) ([]QuerySummary, 
 func (self *Summary) absorb(record models.Rollup) {
 	self.Count += record.Count
 	self.Failures += record.Failures
+	self.Writes += record.Writes
 	self.TotalDuration += record.TotalDuration
 	self.RowsRead += record.RowsRead
 	self.RowsWritten += record.RowsWritten

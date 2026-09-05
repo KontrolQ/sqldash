@@ -18,6 +18,7 @@ type Rollup struct {
 	BucketStart   time.Time  `gorm:"index:idx_rollup_slot,unique;index;not null"`
 	Count         int64      `gorm:"not null"`
 	Failures      int64      `gorm:"not null"`
+	Writes        int64      `gorm:"not null;default:0"`
 	TotalDuration float64    `gorm:"not null"`
 	RowsRead      int64      `gorm:"not null"`
 	RowsWritten   int64      `gorm:"not null"`

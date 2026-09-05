@@ -27,3 +27,7 @@ const (
 const (
 	FoldedMarker = "folded-statement"
 )
+
+const (
+	SeriesSlots = 60
+)

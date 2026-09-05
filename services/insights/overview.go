@@ -60,6 +60,13 @@ func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fi
 
 	shown.Top = toQueryViews(top, summary.TotalDuration)
 
+	if points, seriesError := analytics.SeriesFor(databaseName, window); seriesError == nil {
+		shown.TrafficChart = trafficChart(points)
+		shown.LatencyChart = latencyChart(points)
+		shown.TrafficSeries = []string{ReadsName, WritesName}
+		shown.LatencySeries = []string{P50Name, P95Name, P99Name}
+	}
+
 	return shown, nil
 }
 

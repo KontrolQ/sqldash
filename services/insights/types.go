@@ -21,6 +21,10 @@ type OverviewContext struct {
 	P95           string
 	P99           string
 	Top           []QueryView
+	TrafficChart  string
+	LatencyChart  string
+	TrafficSeries []string
+	LatencySeries []string
 	Approximate   bool
 }
 
