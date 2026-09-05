@@ -1,11 +1,14 @@
 package proxy
 
 import (
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
+	"sqldash/certificates"
 	"sqldash/config"
 	"sqldash/utils/logger"
 )
@@ -24,6 +27,34 @@ func init() {
 }
 
 func Serve() {
+	if !certificates.Wanted() {
+		servePlain()
+		return
+	}
+
+	settings, settingsError := certificates.Settings()
+	if settingsError != nil {
+		logger.Fatalf(LogPrefix, CertificateFailedLog, settingsError)
+	}
+
+	go redirect()
+
+	server := &http.Server{
+		Addr:              config.HTTPSAddress(),
+		Handler:           http.HandlerFunc(handle),
+		TLSConfig:         settings,
+		ReadHeaderTimeout: ReadHeaderTimeout,
+		IdleTimeout:       IdleTimeout,
+	}
+
+	logger.Successf(LogPrefix, SecureStartedLog, server.Addr)
+
+	if listenError := server.ListenAndServeTLS("", ""); listenError != nil {
+		logger.Fatalf(LogPrefix, ListenFailedLog, server.Addr, listenError)
+	}
+}
+
+func servePlain() {
 	server := &http.Server{
 		Addr:              config.HTTPAddress(),
 		Handler:           http.HandlerFunc(handle),
@@ -36,6 +67,38 @@ func Serve() {
 	if listenError := server.ListenAndServe(); listenError != nil {
 		logger.Fatalf(LogPrefix, ListenFailedLog, server.Addr, listenError)
 	}
+}
+
+func redirect() {
+	server := &http.Server{
+		Addr:              config.HTTPAddress(),
+		Handler:           http.HandlerFunc(sendToTLS),
+		ReadHeaderTimeout: ReadHeaderTimeout,
+		IdleTimeout:       IdleTimeout,
+	}
+
+	logger.Successf(LogPrefix, RedirectStartedLog, server.Addr)
+
+	if listenError := server.ListenAndServe(); listenError != nil {
+		logger.Errorf(LogPrefix, ListenFailedLog, server.Addr, listenError)
+	}
+}
+
+func sendToTLS(writer http.ResponseWriter, request *http.Request) {
+	host, _, splitError := net.SplitHostPort(request.Host)
+	if splitError != nil {
+		host = request.Host
+	}
+
+	if host == "" {
+		host = config.Server.Domain
+	}
+
+	if config.Server.HTTPSPort != StandardTLSPort {
+		host = net.JoinHostPort(host, strconv.Itoa(config.Server.HTTPSPort))
+	}
+
+	http.Redirect(writer, request, HTTPSScheme+host+request.URL.RequestURI(), http.StatusMovedPermanently)
 }
 
 func handle(writer http.ResponseWriter, request *http.Request) {

@@ -3,6 +3,9 @@ package proxy
 const (
 	StartedLog           = "Proxy listening on %s"
 	ListenFailedLog      = "Failed to listen on %s: %v"
+	CertificateFailedLog = "Failed to get a certificate: %v"
+	SecureStartedLog     = "Listening on %s over TLS"
+	RedirectStartedLog   = "Sending plain requests on %s to TLS"
 	UnknownDatabaseLog   = "Refused a request for unknown database %q"
 	ForwardFailedLog     = "Failed to forward to the database server: %v"
 	TokenLookupFailedLog = "Failed to look up a token: %v"

@@ -21,6 +21,7 @@ type sqldSettings struct {
 
 type certificateSettings struct {
 	Automatic          bool   `env:"AUTOMATIC_CERTIFICATES" envDefault:"false"`
+	Staging            bool   `env:"CERTIFICATE_STAGING" envDefault:"false"`
 	Email              string `env:"CERTIFICATE_EMAIL"`
 	CloudflareAPIToken string `env:"CLOUDFLARE_API_TOKEN"`
 }

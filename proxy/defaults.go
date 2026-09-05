@@ -29,3 +29,8 @@ const (
 	SocketScheme = "ws://"
 	MaximumFrame = 32 << 20
 )
+
+const (
+	StandardTLSPort = 443
+	HTTPSScheme     = "https://"
+)
