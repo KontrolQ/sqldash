@@ -1,0 +1,13 @@
+#:schema https://raw.githubusercontent.com/air-verse/air/master/air_example.toml
+root = "."
+tmp_dir = "bin"
+
+[build]
+bin = "./bin/sqldash"
+cmd = "make build"
+include_ext = ["go", "django", "css", "js"]
+exclude_dir = ["bin", "data", "node_modules", ".git"]
+delay = 500
+
+[misc]
+clean_on_exit = true

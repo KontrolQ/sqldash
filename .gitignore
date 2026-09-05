@@ -1,0 +1,31 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test artefacts
+*.test
+*.out
+coverage.*
+*.coverprofile
+
+# Workspace
+go.work
+go.work.sum
+
+# Local data and secrets
+data/
+.env
+*.pem
+
+# Skills and Docs
+*clau*
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
