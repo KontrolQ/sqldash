@@ -20,6 +20,11 @@
   flex-direction: column;
   padding: var(--sp-6);
   gap: var(--sp-6);
+  scrollbar-gutter: stable;
+}
+
+.content > * {
+  flex-shrink: 0;
 }
 
 .content.is-tight {

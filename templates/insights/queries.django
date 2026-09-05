@@ -1,7 +1,7 @@
 {% extends "layouts/base.django" %}
 
 {% block content %}
-<div class="page-head">
+<div class="page-head is-slim">
 <div class="page-title">
 <h1>Top queries</h1>
 <p class="page-subtitle">Across {{ Scope }} over the last {{ Window }}.</p>

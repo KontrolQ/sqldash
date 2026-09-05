@@ -144,3 +144,7 @@
   font-weight: 500;
   text-align: left;
 }
+
+.actions.is-left {
+  justify-content: flex-start;
+}
