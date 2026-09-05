@@ -31,14 +31,10 @@
 <tbody>
 {% for database in Databases %}
 <tr>
-<td><span class="table-name"><span class="dot is-live"></span>{{ database.Name }}</span></td>
+<td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot is-live"></span>{{ database.Name }}</a></td>
 <td class="mono muted">{{ database.Address }}</td>
 <td>{% if database.Protected %}<span class="badge is-secondary">Protected</span>{% else %}<span class="badge is-outline">Open</span>{% endif %}</td>
-<td class="table-actions">
-<form method="post" action="{% url "databases.delete" name=database.Name %}">
-<button class="button is-ghost is-small" type="submit">Delete</button>
-</form>
-</td>
+<td class="table-actions"><a class="button is-ghost is-small" href="{% url "databases.show" name=database.Name %}">Manage</a></td>
 </tr>
 {% endfor %}
 </tbody>

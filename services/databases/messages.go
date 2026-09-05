@@ -19,3 +19,12 @@ const (
 	DatabaseMissing = "No such database."
 	DatabaseHeld    = "That database is protected. Remove the protection before deleting it."
 )
+
+const (
+	StatisticsFailedLog    = "Failed to read statistics for %s: %v"
+	ConfigurationFailedLog = "Failed to read or save settings for %s: %v"
+)
+
+const (
+	SettingsRefused = "Those settings could not be saved."
+)

@@ -25,7 +25,7 @@ func Create(context fiber.Ctx) error {
 }
 
 func Delete(context fiber.Ctx) error {
-	if deleteError := service.Delete(context.Context(), context.Params(NameParam)); deleteError != nil {
+	if deleteError := service.Delete(context.Context(), context.Params(NameParameter)); deleteError != nil {
 		return shortcuts.RedirectToPath(context, IndexPath+"?problem="+url.QueryEscape(deleteError.Message))
 	}
 

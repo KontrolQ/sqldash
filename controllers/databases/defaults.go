@@ -4,6 +4,13 @@ const (
 	LogPrefix = "DatabasesController"
 
 	IndexRoute = "databases"
+	ShowRoute  = "databases.show"
 	IndexPath  = "/"
-	NameParam  = "name"
+	ShowPath   = "/databases/"
+
+	NameParameter = "name"
+	CheckedValue  = "on"
+
+	ProblemParameter = "problem"
+	DoneParameter    = "done"
 )

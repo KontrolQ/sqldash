@@ -1,0 +1,120 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>{{ Name }}</h1>
+<p class="page-subtitle">{{ Address }}</p>
+</div>
+<div class="page-actions">
+<a class="button is-outline" href="{% url "databases" %}">All databases</a>
+</div>
+</div>
+
+{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+{% if Secret %}
+<div class="notice is-good">
+<div>Token created. Copy it now &mdash; it is not shown again.</div>
+<code class="secret">{{ Secret }}</code>
+</div>
+{% endif %}
+
+<div class="stats">
+<div class="stat"><span class="stat-label">Storage</span><span class="stat-value">{{ Storage }}</span></div>
+<div class="stat"><span class="stat-label">Rows read</span><span class="stat-value">{{ RowsRead }}</span></div>
+<div class="stat"><span class="stat-label">Rows written</span><span class="stat-value">{{ RowsWritten }}</span></div>
+<div class="stat"><span class="stat-label">Queries</span><span class="stat-value">{{ QueryCount }}</span></div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Connection</div>
+<div class="card-note">Point a libSQL client at this address with one of the tokens below.</div>
+</div>
+<div class="card-body">
+<code class="secret">{{ URL }}</code>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Tokens</div>
+<div class="card-note">Each token can be revoked on its own.</div>
+</div>
+<div class="card-body">
+<form class="inline-form" method="post" action="{% url "databases.tokens.mint" name=Name %}">
+<input class="input is-inline" name="label" placeholder="What is it for?" aria-label="What the token is for">
+<select class="input is-inline" name="scope" aria-label="What the token may do">
+<option value="read-write">Read and write</option>
+<option value="read-only">Read only</option>
+</select>
+<button class="button" type="submit">Create token</button>
+</form>
+</div>
+{% if Tokens %}
+<div class="table-wrap">
+<table class="table">
+<thead>
+<tr><th>Label</th><th>Token</th><th>Scope</th><th>State</th><th></th></tr>
+</thead>
+<tbody>
+{% for token in Tokens %}
+<tr>
+<td>{{ token.Label }}</td>
+<td class="mono muted">{{ token.Prefix }}&hellip;</td>
+<td>{{ token.Scope }}</td>
+<td>
+{% if token.Revoked %}<span class="badge is-outline">Revoked</span>
+{% elif token.Expired %}<span class="badge is-outline">Expired</span>
+{% else %}<span class="badge is-secondary">Active</span>{% endif %}
+</td>
+<td class="table-actions">
+{% if not token.Revoked %}
+<form method="post" action="{% url "databases.tokens.revoke" name=Name identifier=token.Identifier %}">
+<button class="button is-ghost is-small" type="submit">Revoke</button>
+</form>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Settings</div>
+<div class="card-note">Blocking takes effect on the database server itself.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.settings" name=Name %}">
+<label class="check"><input type="checkbox" name="block_reads" {% if BlockReads %}checked{% endif %}> <span>Block reads</span></label>
+<label class="check"><input type="checkbox" name="block_writes" {% if BlockWrites %}checked{% endif %}> <span>Block writes</span></label>
+<label class="check"><input type="checkbox" name="allow_attach" {% if AllowAttach %}checked{% endif %}> <span>Allow ATTACH</span></label>
+<label class="check"><input type="checkbox" name="protected" {% if Protected %}checked{% endif %}> <span>Protect from deletion</span></label>
+<div class="field">
+<label class="label" for="block_reason">Reason shown when blocked</label>
+<input class="input" id="block_reason" name="block_reason" value="{{ BlockReason }}">
+</div>
+<div class="actions">
+<button class="button" type="submit">Save settings</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Delete</div>
+<div class="card-note">This removes the database and everything in it.</div>
+</div>
+<div class="card-body">
+<form method="post" action="{% url "databases.delete" name=Name %}">
+<button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
+</form>
+</div>
+</div>
+{% endblock %}
