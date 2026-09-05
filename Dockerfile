@@ -25,10 +25,11 @@ COPY static ./static
 
 ENV SQLDASH_DATA_DIRECTORY=/data \
     SQLDASH_HTTP_PORT=80 \
+    SQLDASH_HTTPS_PORT=443 \
     SQLDASH_SQLD_BINARY=/usr/local/bin/sqld
 
 VOLUME /data
 
-EXPOSE 80
+EXPOSE 80 443
 
 CMD ["./sqldash"]
