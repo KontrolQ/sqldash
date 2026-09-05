@@ -18,6 +18,8 @@ type Token struct {
 	DatabaseName string     `gorm:"index;not null"`
 	Label        string     `gorm:"not null"`
 	Identifier   string     `gorm:"uniqueIndex;not null"`
+	Digest       string     `gorm:"uniqueIndex;not null"`
+	Prefix       string     `gorm:"not null"`
 	Scope        TokenScope `gorm:"not null"`
 	ExpiresAt    *time.Time
 	RevokedAt    *time.Time
