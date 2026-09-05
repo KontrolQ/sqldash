@@ -13,12 +13,13 @@ var (
 	Sqld         sqldSettings
 	Certificates certificateSettings
 	Session      sessionSettings
+	Access       accessSettings
 )
 
 func init() {
 	_ = godotenv.Load(EnvironmentFileName)
 
-	for _, target := range []any{&Server, &Data, &Sqld, &Certificates, &Session} {
+	for _, target := range []any{&Server, &Data, &Sqld, &Certificates, &Session, &Access} {
 		if parseError := env.ParseWithOptions(target, env.Options{Prefix: EnvironmentPrefix}); parseError != nil {
 			logger.Fatalf(LogPrefix, ParseFailedLog, parseError)
 		}

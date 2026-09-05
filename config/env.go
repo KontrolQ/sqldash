@@ -25,6 +25,10 @@ type certificateSettings struct {
 	CloudflareAPIToken string `env:"CLOUDFLARE_API_TOKEN"`
 }
 
+type accessSettings struct {
+	AllowedOrigins []string `env:"ALLOWED_ORIGINS" envSeparator:","`
+}
+
 type sessionSettings struct {
 	CookieName string `env:"SESSION_COOKIE" envDefault:"sqldash"`
 }

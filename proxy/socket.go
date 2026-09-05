@@ -21,8 +21,8 @@ type pending struct {
 
 func carrySocket(writer http.ResponseWriter, request *http.Request, database string) {
 	fromClient, acceptError := websocket.Accept(writer, request, &websocket.AcceptOptions{
-		Subprotocols:       hrana.Subprotocols,
-		InsecureSkipVerify: true,
+		Subprotocols:   hrana.Subprotocols,
+		OriginPatterns: config.Access.AllowedOrigins,
 	})
 
 	if acceptError != nil {
