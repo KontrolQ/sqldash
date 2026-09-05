@@ -16,6 +16,7 @@ func migrate() {
 		&models.Statement{},
 		&models.Rollup{},
 		&models.Marker{},
+		&models.Snippet{},
 	)
 
 	if migrationError != nil {

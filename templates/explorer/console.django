@@ -13,26 +13,53 @@
 {% include "partials/databasetabs.django" %}
 {% include "partials/alert.django" %}
 
-<div class="workspace">
-{% include "partials/rail.django" with rail_base=BrowsePath %}
+<div class="workspace is-console">
+<aside class="rail">
+<div class="rail-head">
+<input class="input" type="search" placeholder="Search snippets" aria-label="Search the snippet list" data-rail-search>
+<button class="step" type="button" data-snippet-new title="Start a new statement" aria-label="Start a new statement">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+</button>
+</div>
+<div class="rail-list">
+<div class="rail-group">Snippets</div>
+{% for one in Snippets %}
+<a class="rail-item {% if one.ID == SnippetID %}is-current{% endif %}" href="{% url "databases.console" name=Database %}?snippet={{ one.ID }}" data-rail-row="{{ one.Name }}">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+<span class="rail-name">{{ one.Name }}</span>
+</a>
+{% endfor %}
+{% if not Snippets %}<div class="rail-empty">Nothing saved yet.</div>{% endif %}
+</div>
+</aside>
 
 <div class="bench">
 <form class="console" method="post" action="{% url "databases.console.run" name=Database %}">
+<input type="hidden" name="snippet" value="{{ SnippetID }}">
 <div class="workbar">
+<button class="step" type="button" data-rail-toggle aria-label="Hide the snippet list" aria-expanded="true" title="Hide the snippet list">
+<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+</button>
 <button class="button is-small" type="submit">
 <svg class="button-icon" viewBox="0 0 24 24"><path d="m6 3 14 9-14 9V3z"/></svg>
 Run
 </button>
-<kbd class="kbd">Ctrl Enter</kbd>
 <button class="button is-outline is-small" type="button" data-tidy>
 <svg class="button-icon" viewBox="0 0 24 24"><path d="m5 3 1.5 3L10 7.5 6.5 9 5 12 3.5 9 0 7.5 3.5 6z" transform="translate(3 2)"/><path d="M18 14v6M15 17h6"/></svg>
 Prettify
 </button>
-<div class="workbar-right">
-{% if Ran and not Failure %}
-<span class="timing">{{ Duration }}</span>
-<span class="tally">{{ Rows|length }} returned &middot; {{ Affected }} affected &middot; {{ RowsRead }} read</span>
+<button class="button is-outline is-small" type="button" data-snippet-save>
+<svg class="button-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+Save snippet
+</button>
+{% if SnippetID %}
+<button class="step" type="submit" form="snippet-remove-form" aria-label="Delete this snippet" title="Delete this snippet" data-confirm="The snippet {{ Name }} is removed. This cannot be undone." data-confirm-title="Delete this snippet?" data-confirm-action="Delete snippet">
+<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+</button>
 {% endif %}
+<div class="workbar-right">
+<span class="timing">{% if Ran and not Failure %}{{ Duration }}{% endif %}</span>
+<span class="tally">{% if Ran and not Failure %}{{ Rows|length }} returned &middot; {{ Affected }} affected &middot; {{ RowsRead }} read{% endif %}</span>
 </div>
 </div>
 
@@ -51,10 +78,31 @@ Prettify
 </div>
 {% endif %}
 
-<div class="sheet">
+<div class="workbar is-second">
+<div class="tabs is-compact" data-result-views>
+<button class="tab is-current" type="button" data-result-view="table">
+<svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+Table
+</button>
+<button class="tab" type="button" data-result-view="json">
+<svg viewBox="0 0 24 24"><path d="m8 3-2 0a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2M16 3h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2"/></svg>
+JSON
+</button>
+<button class="tab" type="button" data-result-view="csv">
+<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>
+CSV
+</button>
+</div>
+<div class="workbar-right">
+<button class="button is-ghost is-small" type="button" data-result-copy>Copy</button>
+<button class="button is-outline is-small" type="button" data-result-download>Download</button>
+</div>
+</div>
+
+<div class="sheet" data-result>
 {% if Ran and not Failure %}
 {% if Columns %}
-<table class="table is-grid">
+<table class="table is-grid" data-result-table>
 <thead><tr>{% for column in Columns %}<th scope="col"><span class="column-name">{{ column }}</span></th>{% endfor %}</tr></thead>
 <tbody>
 {% for row in Rows %}
@@ -64,6 +112,7 @@ Prettify
 {% endfor %}
 </tbody>
 </table>
+<pre class="result-text" data-result-text hidden></pre>
 {% else %}
 <div class="sheet-empty">
 <strong>Done</strong>
@@ -79,4 +128,33 @@ Prettify
 </div>
 </div>
 </div>
+
+<div class="sheet-veil" data-sheet="name-snippet" hidden>
+<div class="dialog-veil" data-sheet-close></div>
+<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="snippet-title">
+<div class="dialog-head">
+<div class="dialog-title" id="snippet-title">Save this snippet</div>
+<div class="dialog-note">It is kept with {{ Database }} and shows in the list on the left.</div>
+</div>
+<form id="snippet-form" class="stack" method="post" action="{% url "databases.console.snippet.save" name=Database %}">
+<input type="hidden" name="snippet" value="{{ SnippetID }}">
+<input type="hidden" name="statement">
+<div class="field">
+<label class="label" for="snippet-name">Name</label>
+<input class="input" id="snippet-name" name="name" value="{{ Name }}" placeholder="Recent orders">
+<span class="field-note">Leave it blank to use the first line.</span>
+</div>
+<div class="dialog-foot">
+<button class="button is-outline" type="button" data-sheet-close>Cancel</button>
+<button class="button" type="submit">Save snippet</button>
+</div>
+</form>
+</div>
+</div>
+
+{% if SnippetID %}
+<form id="snippet-remove-form" method="post" action="{% url "databases.console.snippet.remove" name=Database %}" hidden>
+<input type="hidden" name="snippet" value="{{ SnippetID }}">
+</form>
+{% endif %}
 {% endblock %}

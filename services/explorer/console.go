@@ -26,6 +26,7 @@ func RunConsole(requestContext context.Context, databaseName string, statement s
 		Statement:  statement,
 		BrowsePath: DatabasePath + databaseName + BrowseSuffix,
 		Schema:     schemaOf(requestContext, databaseName),
+		Snippets:   Snippets(databaseName),
 	}
 
 	statement = strings.TrimSpace(statement)

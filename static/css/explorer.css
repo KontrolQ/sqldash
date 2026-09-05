@@ -393,3 +393,41 @@
 .workbar-group[hidden] {
   display: none;
 }
+
+.workspace.is-shut {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.workspace.is-shut .rail {
+  display: none;
+}
+
+.workspace.is-console.is-shut {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.result-text {
+  overflow: auto;
+  height: 100%;
+  padding: 12px 14px;
+  margin: 0;
+  color: var(--foreground);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  line-height: 18px;
+  white-space: pre;
+}
+
+.result-text[hidden] {
+  display: none;
+}
+
+.workbar .button.is-small,
+.workbar .input.is-small {
+  height: 28px;
+}
+
+.workbar .step {
+  width: 26px;
+  height: 26px;
+}

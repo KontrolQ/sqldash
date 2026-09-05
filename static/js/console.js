@@ -5,15 +5,6 @@
     return;
   }
 
-  const form = field.form;
-
-  field.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      form.requestSubmit();
-    }
-  });
-
   const clauses = [
     'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER BY', 'LIMIT', 'OFFSET',
     'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'RETURNING',

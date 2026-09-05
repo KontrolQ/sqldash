@@ -301,11 +301,6 @@
 
   field.addEventListener('keydown', function (event) {
     if (hint.hidden) {
-      if (event.key === ' ' && event.ctrlKey) {
-        event.preventDefault();
-        offer();
-      }
-
       return;
     }
 

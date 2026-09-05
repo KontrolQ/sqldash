@@ -74,9 +74,51 @@ func RunConsole(context fiber.Ctx) error {
 		return dataError
 	}
 
+	data.SnippetID = asked.Snippet
+
+	for _, one := range data.Snippets {
+		if one.ID == data.SnippetID {
+			data.Name = one.Name
+		}
+	}
+
 	meta.SetPageTitle(context, data.Title)
 
 	return shortcuts.Render(context, ConsoleTemplate, data)
+}
+
+func SaveSnippet(context fiber.Ctx) error {
+	asked, parseError := meta.Body[SnippetRequest](context)
+	if parseError != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+
+	name := context.Params(NameParameter)
+
+	if saveError := service.SaveSnippet(name, asked.Snippet, asked.Name, asked.Statement); saveError != nil {
+		sessions.Complain(context, saveError.Message)
+	} else {
+		sessions.Report(context, service.SnippetSaved)
+	}
+
+	return shortcuts.RedirectToPath(context, ExplorePath+url.PathEscape(name)+ConsoleSuffix)
+}
+
+func RemoveSnippet(context fiber.Ctx) error {
+	asked, parseError := meta.Body[SnippetRequest](context)
+	if parseError != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+
+	name := context.Params(NameParameter)
+
+	if removeError := service.RemoveSnippet(name, asked.Snippet); removeError != nil {
+		sessions.Complain(context, removeError.Message)
+	} else {
+		sessions.Report(context, service.SnippetRemoved)
+	}
+
+	return shortcuts.RedirectToPath(context, ExplorePath+url.PathEscape(name)+ConsoleSuffix)
 }
 
 func savedMessage(count int) string {

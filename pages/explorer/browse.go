@@ -37,10 +37,25 @@ func Browse(context fiber.Ctx) error {
 
 func Console(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
+	chosen, _ := strconv.Atoi(context.Query(SnippetParameter))
+
+	statement := ""
+	if chosen > 0 {
+		statement = service.SnippetStatement(name, uint(chosen))
+	}
 
 	data, dataError := service.RunConsole(context.Context(), name, "")
 	if dataError != nil {
 		return dataError
+	}
+
+	data.Statement = statement
+	data.SnippetID = uint(chosen)
+
+	for _, one := range data.Snippets {
+		if one.ID == data.SnippetID {
+			data.Name = one.Name
+		}
 	}
 
 	meta.SetPageTitle(context, data.Title)

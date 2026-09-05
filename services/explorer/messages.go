@@ -30,3 +30,16 @@ const (
 	NothingToInsert = "Fill in at least one column."
 	RowAdded        = "That row was added."
 )
+
+const (
+	SnippetsFailedLog = "Failed to read or save snippets for %s: %v"
+)
+
+const (
+	SnippetEmpty    = "There is nothing to save."
+	SnippetRefused  = "That snippet could not be saved."
+	SnippetMissing  = "No such snippet."
+	SnippetSaved    = "Snippet saved."
+	SnippetRemoved  = "Snippet removed."
+	UntitledSnippet = "Untitled"
+)

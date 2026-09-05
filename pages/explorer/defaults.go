@@ -9,6 +9,7 @@ const (
 
 	NameParameter      = "name"
 	TableParameter     = "table"
+	SnippetParameter   = "snippet"
 	PageParameter      = "page"
 	SortParameter      = "sort"
 	DirectionParameter = "direction"

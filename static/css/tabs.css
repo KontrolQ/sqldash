@@ -78,8 +78,9 @@
   }
 
   :root:not([data-theme='light']) .tab.is-current {
-    border-color: var(--input);
-    background: color-mix(in oklab, var(--input) 30%, transparent);
+    border-color: var(--border);
+    background: var(--background);
+    box-shadow: var(--shadow-sm);
     color: var(--foreground);
   }
 }
@@ -93,8 +94,9 @@
 }
 
 :root[data-theme='dark'] .tab.is-current {
-  border-color: var(--input);
-  background: color-mix(in oklab, var(--input) 30%, transparent);
+  border-color: var(--border);
+  background: var(--background);
+  box-shadow: var(--shadow-sm);
   color: var(--foreground);
 }
 
@@ -106,4 +108,9 @@
 
 .tab-bar-spacer {
   flex: 1;
+}
+
+.workbar .tabs,
+.workbar .tabs.is-compact {
+  height: 28px;
 }

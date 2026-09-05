@@ -65,6 +65,8 @@
 <script src="{% static "js/filter.js" %}" defer></script>
 <script src="{% static "js/grid.js" %}" defer></script>
 <script src="{% static "js/peek.js" %}" defer></script>
+<script src="{% static "js/results.js" %}" defer></script>
+<script src="{% static "js/snippets.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

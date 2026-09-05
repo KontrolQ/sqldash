@@ -77,14 +77,6 @@
 
   document.querySelectorAll('[data-palette-open]').forEach(function (button) {
     button.addEventListener('click', open);
-
-    if (/Mac|iPhone|iPad/.test(navigator.platform)) {
-      const key = button.querySelector('.kbd');
-
-      if (key) {
-        key.textContent = '⌘ K';
-      }
-    }
   });
 
   palette.querySelectorAll('[data-palette-close]').forEach(function (veil) {
@@ -113,10 +105,7 @@
   });
 
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      palette.hidden ? open() : close();
-    } else if (event.key === 'Escape' && !palette.hidden) {
+    if (event.key === 'Escape' && !palette.hidden) {
       close();
     }
   });

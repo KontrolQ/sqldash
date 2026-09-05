@@ -88,6 +88,12 @@ type BrowseContext struct {
 	StructurePath string
 }
 
+type SnippetView struct {
+	ID        uint
+	Name      string
+	Statement string
+}
+
 type SchemaTable struct {
 	Name    string
 	Columns []string
@@ -109,6 +115,9 @@ type ConsoleContext struct {
 	RowsRead   int64
 	Failure    string
 	Ran        bool
+	Snippets   []SnippetView
+	SnippetID  uint
+	Name       string
 }
 
 type IndexView struct {

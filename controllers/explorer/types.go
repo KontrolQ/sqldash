@@ -17,6 +17,13 @@ type RowRequest struct {
 
 type ConsoleRequest struct {
 	Statement string `form:"statement"`
+	Snippet   uint   `form:"snippet"`
+}
+
+type SnippetRequest struct {
+	Snippet   uint   `form:"snippet"`
+	Name      string `form:"name"`
+	Statement string `form:"statement"`
 }
 
 type InsertRequest struct {
