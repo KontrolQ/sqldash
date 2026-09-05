@@ -21,9 +21,6 @@ data/
 .env
 *.pem
 
-# Skills and Docs
-*clau*
-
 # Editors and operating systems
 .idea/
 .vscode/
