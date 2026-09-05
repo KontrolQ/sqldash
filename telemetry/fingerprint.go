@@ -21,13 +21,10 @@ func Normalise(statement string) string {
 			index = skipQuoted(runes, index, '\'')
 			builder.WriteByte('?')
 			spaced = false
-		case letter == '"':
-			index = skipQuoted(runes, index, '"')
-			builder.WriteByte('?')
-			spaced = false
-		case unicode.IsDigit(letter) && !spaced && startsNumber(runes, index):
+		case unicode.IsDigit(letter) && startsNumber(runes, index):
 			index = skipNumber(runes, index)
 			builder.WriteByte('?')
+			spaced = false
 		case unicode.IsSpace(letter):
 			if !spaced && builder.Len() > 0 {
 				builder.WriteByte(' ')
