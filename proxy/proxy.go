@@ -37,7 +37,11 @@ func Serve() {
 		logger.Fatalf(LogPrefix, CertificateFailedLog, settingsError)
 	}
 
-	go redirect()
+	if config.Server.RedirectToTLS {
+		go redirect()
+	} else {
+		go servePlainBeside()
+	}
 
 	server := &http.Server{
 		Addr:              config.HTTPSAddress(),
@@ -51,6 +55,21 @@ func Serve() {
 
 	if listenError := server.ListenAndServeTLS("", ""); listenError != nil {
 		logger.Fatalf(LogPrefix, ListenFailedLog, server.Addr, listenError)
+	}
+}
+
+func servePlainBeside() {
+	server := &http.Server{
+		Addr:              config.HTTPAddress(),
+		Handler:           http.HandlerFunc(handle),
+		ReadHeaderTimeout: ReadHeaderTimeout,
+		IdleTimeout:       IdleTimeout,
+	}
+
+	logger.Successf(LogPrefix, BesideStartedLog, server.Addr)
+
+	if listenError := server.ListenAndServe(); listenError != nil {
+		logger.Errorf(LogPrefix, ListenFailedLog, server.Addr, listenError)
 	}
 }
 

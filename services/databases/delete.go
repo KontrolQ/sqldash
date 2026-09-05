@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"sqldash/hosting"
 	repository "sqldash/repositories/database"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
@@ -36,6 +37,8 @@ func Delete(requestContext context.Context, name string) *fiber.Error {
 		logger.Errorf(LogPrefix, DeleteFailedLog, name, forgetError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, DeleteRefused)
 	}
+
+	go hosting.Withdraw(context.WithoutCancel(requestContext), name)
 
 	return nil
 }

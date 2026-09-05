@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"sqldash/config"
+	"sqldash/hosting"
 	"sqldash/models"
 	repository "sqldash/repositories/database"
 	"sqldash/sqld"
@@ -54,6 +55,8 @@ func CreateFromUpload(requestContext context.Context, asked string, fileName str
 
 		return shortcuts.ServiceError(http.StatusInternalServerError, ImportRefused)
 	}
+
+	go hosting.Publish(context.WithoutCancel(requestContext), name)
 
 	return nil
 }
@@ -244,6 +247,8 @@ func Fork(requestContext context.Context, from string, asked string, at *time.Ti
 		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, ForkRefused)
 	}
+
+	go hosting.Publish(context.WithoutCancel(requestContext), name)
 
 	return nil
 }

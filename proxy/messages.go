@@ -6,6 +6,7 @@ const (
 	CertificateFailedLog = "Failed to get a certificate: %v"
 	SecureStartedLog     = "Listening on %s over TLS"
 	RedirectStartedLog   = "Sending plain requests on %s to TLS"
+	BesideStartedLog     = "Also listening on %s without TLS, for a proxy in front"
 	UnknownDatabaseLog   = "Refused a request for unknown database %q"
 	ForwardFailedLog     = "Failed to forward to the database server: %v"
 	TokenLookupFailedLog = "Failed to look up a token: %v"

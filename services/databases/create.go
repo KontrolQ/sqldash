@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"sqldash/hosting"
 	"sqldash/models"
 	repository "sqldash/repositories/database"
 	"sqldash/sqld"
@@ -28,6 +29,8 @@ func Create(requestContext context.Context, asked string) *fiber.Error {
 		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, CreateRefused)
 	}
+
+	go hosting.Publish(context.WithoutCancel(requestContext), name)
 
 	return nil
 }
