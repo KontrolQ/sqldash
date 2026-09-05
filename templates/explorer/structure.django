@@ -1,0 +1,91 @@
+{% extends "layouts/base.django" %}
+
+{% block content %}
+<div class="page-head">
+<div class="page-title">
+<h1>{{ Database }}</h1>
+<p class="page-subtitle">{% if Table %}How {{ Table }} is built{% else %}Pick a table{% endif %}</p>
+</div>
+</div>
+
+{% include "partials/databasetabs.django" %}
+{% include "partials/alert.django" %}
+
+<div class="explorer">
+{% include "partials/tablelist.django" with table_base=StructurePath %}
+
+<div class="explorer-main">
+{% if Table %}
+<div class="explorer-bar">
+<div class="tabs">
+<a class="tab" href="{{ BrowsePath }}?table={{ Table }}">Data</a>
+<a class="tab is-current" href="{{ StructurePath }}?table={{ Table }}">Structure</a>
+</div>
+<span class="tab-bar-spacer"></span>
+{% if IsView %}<span class="badge is-outline">view</span>{% endif %}
+</div>
+
+<div class="card is-table">
+<div class="card-head has-border is-padded">
+<div class="card-title">Columns</div>
+</div>
+<div class="table-wrap">
+<table class="table">
+<thead><tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>References</th></tr></thead>
+<tbody>
+{% for column in Columns %}
+<tr>
+<td class="mono">{{ column.Name }}{% if column.PrimaryKey %} <span class="badge is-secondary">pk</span>{% endif %}</td>
+<td class="mono muted">{{ column.Kind }}</td>
+<td>{% if column.NotNull %}no{% else %}yes{% endif %}</td>
+<td class="mono muted">{{ column.Default }}</td>
+<td>{% if column.References %}<a class="chip" href="{{ StructurePath }}?table={{ column.References }}">{{ column.References }}.{{ column.OnColumn }}</a>{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+{% if Indexes %}
+<div class="card is-table">
+<div class="card-head has-border is-padded">
+<div class="card-title">Indexes</div>
+</div>
+<div class="table-wrap">
+<table class="table">
+<thead><tr><th>Name</th><th>Columns</th><th>Unique</th><th>Origin</th></tr></thead>
+<tbody>
+{% for index in Indexes %}
+<tr>
+<td class="mono">{{ index.Name }}</td>
+<td class="mono muted">{{ index.Columns|join:", " }}</td>
+<td>{% if index.Unique %}<span class="badge is-secondary">unique</span>{% else %}&mdash;{% endif %}</td>
+<td class="muted">{{ index.Origin }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endif %}
+
+{% if Definition %}
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Definition</div>
+</div>
+<div class="card-body">
+<pre class="code is-block">{{ Definition }}</pre>
+</div>
+</div>
+{% endif %}
+{% else %}
+<div class="empty">
+<span class="empty-title">Nothing selected</span>
+<span>Choose a table on the left.</span>
+</div>
+{% endif %}
+</div>
+</div>
+{% endblock %}

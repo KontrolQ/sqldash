@@ -12,29 +12,54 @@
 {% include "partials/alert.django" %}
 
 <div class="explorer">
-<aside class="explorer-list">
-{% for one in Tables %}
-<a class="explorer-item {% if one.Name == Table %}is-current{% endif %}" href="{% url "databases.explore" name=Database %}?table={{ one.Name }}">
-<span class="explorer-name">{{ one.Name }}</span>
-{% if one.IsView %}<span class="badge is-outline">view</span>{% endif %}
-</a>
-{% empty %}
-<div class="explorer-empty">No tables yet.</div>
-{% endfor %}
-</aside>
+{% include "partials/tablelist.django" with table_base=BrowsePath %}
 
 <div class="explorer-main">
 {% if Table %}
 <div class="explorer-bar">
-<form class="inline-form" method="get" action="{% url "databases.explore" name=Database %}">
+<div class="tabs">
+<a class="tab is-current" href="{{ BrowsePath }}?table={{ Table }}">Data</a>
+<a class="tab" href="{{ StructurePath }}?table={{ Table }}">Structure</a>
+</div>
+<form class="inline-form" method="get" action="{{ BrowsePath }}">
 <input type="hidden" name="table" value="{{ Table }}">
 <input class="input" name="search" value="{{ Search }}" placeholder="Search" aria-label="Search every column">
 <button class="button is-outline" type="submit">Search</button>
-{% if Search %}<a class="button is-ghost" href="{% url "databases.explore" name=Database %}?table={{ Table }}">Clear</a>{% endif %}
+{% if Search %}<a class="button is-ghost" href="{{ BrowsePath }}?table={{ Table }}">Clear</a>{% endif %}
 </form>
 <span class="tab-bar-spacer"></span>
-{% if Editable %}<span class="badge is-outline">editable</span>{% else %}<span class="badge is-outline">read-only</span>{% endif %}
+<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ Page }}{% if Search %}&search={{ Search }}{% endif %}" title="Reload">Refresh</a>
+{% if Editable %}<button class="button is-small" type="button" data-reveal="add-row">Add record</button>{% endif %}
 </div>
+
+{% if Editable %}
+<div class="card" id="add-row" hidden>
+<div class="card-head has-border">
+<div class="card-title">Add a record to {{ Table }}</div>
+<div class="card-note">Leave a field empty to use its default.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.explore.insert" name=Database %}">
+<input type="hidden" name="table" value="{{ Table }}">
+<input type="hidden" name="columns" value="{{ ColumnNames }}">
+<input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">
+<div class="row">
+{% for column in Columns %}
+<div class="field">
+<label class="label" for="new-{{ column.Name }}">{{ column.Name }}</label>
+<input class="input" id="new-{{ column.Name }}" name="column.{{ column.Name }}">
+<span class="field-note">{{ column.Kind }}{% if column.PrimaryKey %} · primary key{% endif %}{% if column.NotNull %} · required{% endif %}</span>
+</div>
+{% endfor %}
+</div>
+<div class="actions">
+<button class="button is-ghost" type="button" data-reveal="add-row">Cancel</button>
+<button class="button" type="submit">Add record</button>
+</div>
+</form>
+</div>
+</div>
+{% endif %}
 
 <div class="card is-table">
 <div class="table-wrap">
@@ -43,10 +68,10 @@
 <tr>
 {% for column in Columns %}
 <th>
-<a class="column-sort" href="{% url "databases.explore" name=Database %}?table={{ Table }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}{% if Search %}&search={{ Search }}{% endif %}">
+<a class="column-sort" href="{{ BrowsePath }}?table={{ Table }}&sort={{ column.Name }}&direction={% if Sort == column.Name and Direction == "asc" %}desc{% else %}asc{% endif %}{% if Search %}&search={{ Search }}{% endif %}">
 {{ column.Name }}{% if Sort == column.Name %}<span class="sort-mark">{% if Direction == "asc" %}&uarr;{% else %}&darr;{% endif %}</span>{% endif %}
 </a>
-<div class="column-kind">{{ column.Kind }}{% if column.PrimaryKey %} · pk{% endif %}{% if column.References %} · &rarr; {{ column.References }}{% endif %}</div>
+<div class="column-kind">{{ column.Kind }}{% if column.PrimaryKey %} · pk{% endif %}</div>
 </th>
 {% endfor %}
 {% if Editable %}<th></th>{% endif %}
@@ -57,7 +82,9 @@
 <tr>
 {% for cell in row.Cells %}
 <td class="cell">
-{% if Editable %}
+{% if cell.LinkTo %}
+<a class="chip" href="{{ BrowsePath }}?table={{ cell.LinkTo }}&search={{ cell.Text }}">{{ cell.Text }}<span class="chip-target">&rarr; {{ cell.LinkTo }}</span></a>
+{% elif Editable %}
 <form class="cell-form" method="post" action="{% url "databases.explore.cell" name=Database %}">
 <input type="hidden" name="table" value="{{ Table }}">
 <input type="hidden" name="column" value="{{ cell.Column }}">
@@ -89,13 +116,12 @@
 </div>
 </div>
 
-{% if Pages > 1 %}
 <div class="pager">
-{% if Page > 1 %}<a class="button is-outline is-small" href="{% url "databases.explore" name=Database %}?table={{ Table }}&page={{ PreviousPage }}{% if Search %}&search={{ Search }}{% endif %}">Previous</a>{% endif %}
-<span class="pager-note">Page {{ Page }} of {{ Pages }}</span>
-{% if Page < Pages %}<a class="button is-outline is-small" href="{% url "databases.explore" name=Database %}?table={{ Table }}&page={{ NextPage }}{% if Search %}&search={{ Search }}{% endif %}">Next</a>{% endif %}
+<span class="pager-note">{{ FirstRow }} – {{ LastRow }} of {{ Total }}</span>
+<span class="tab-bar-spacer"></span>
+{% if Page > 1 %}<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ PreviousPage }}{% if Search %}&search={{ Search }}{% endif %}">Previous</a>{% endif %}
+{% if Page < Pages %}<a class="button is-outline is-small" href="{{ BrowsePath }}?table={{ Table }}&page={{ NextPage }}{% if Search %}&search={{ Search }}{% endif %}">Next</a>{% endif %}
 </div>
-{% endif %}
 {% else %}
 <div class="empty">
 <span class="empty-title">Nothing selected</span>

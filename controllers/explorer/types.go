@@ -18,3 +18,9 @@ type RowRequest struct {
 type ConsoleRequest struct {
 	Statement string `form:"statement"`
 }
+
+type InsertRequest struct {
+	Table   string `form:"table"`
+	Columns string `form:"columns"`
+	Back    string `form:"back"`
+}

@@ -41,6 +41,7 @@
 <script src="{% static "js/select.js" %}" defer></script>
 <script src="{% static "js/moment.js" %}" defer></script>
 <script src="{% static "js/chart.js" %}" defer></script>
+<script src="{% static "js/reveal.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

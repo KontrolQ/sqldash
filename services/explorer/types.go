@@ -30,26 +30,31 @@ type RowView struct {
 }
 
 type BrowseContext struct {
-	Title        string
-	Database     string
-	Table        string
-	IsView       bool
-	Tables       []TableView
-	Columns      []ColumnView
-	Rows         []RowView
-	Total        int64
-	Page         int
-	Pages        int
-	PageSize     int
-	Sort         string
-	Direction    string
-	Search       string
-	Editable     bool
-	KeyColumn    string
-	Problem      string
-	Done         string
-	PreviousPage int
-	NextPage     int
+	Title         string
+	Database      string
+	Table         string
+	IsView        bool
+	Tables        []TableView
+	Columns       []ColumnView
+	Rows          []RowView
+	Total         int64
+	Page          int
+	Pages         int
+	PageSize      int
+	Sort          string
+	Direction     string
+	Search        string
+	Editable      bool
+	KeyColumn     string
+	Problem       string
+	Done          string
+	PreviousPage  int
+	NextPage      int
+	FirstRow      int
+	LastRow       int
+	ColumnNames   string
+	BrowsePath    string
+	StructurePath string
 }
 
 type ConsoleContext struct {
@@ -64,4 +69,24 @@ type ConsoleContext struct {
 	RowsRead  int64
 	Problem   string
 	Ran       bool
+}
+
+type IndexView struct {
+	Name    string
+	Unique  bool
+	Origin  string
+	Columns []string
+}
+
+type StructureContext struct {
+	Title         string
+	BrowsePath    string
+	StructurePath string
+	Database      string
+	Table         string
+	IsView        bool
+	Tables        []TableView
+	Columns       []ColumnView
+	Indexes       []IndexView
+	Definition    string
 }

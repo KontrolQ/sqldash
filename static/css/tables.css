@@ -159,3 +159,34 @@
   color: var(--muted-foreground);
   font-style: italic;
 }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-family: var(--mono);
+  font-size: 11px;
+  gap: 6px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--ring);
+}
+
+.chip-target {
+  color: var(--muted-foreground);
+}
+
+.code.is-block {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+}

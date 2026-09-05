@@ -29,11 +29,13 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 	}
 
 	shown := &BrowseContext{
-		Title:    asked.Database,
-		Database: asked.Database,
-		Tables:   tables,
-		PageSize: DefaultPageSize,
-		Page:     1,
+		Title:         asked.Database,
+		Database:      asked.Database,
+		Tables:        tables,
+		PageSize:      DefaultPageSize,
+		Page:          1,
+		BrowsePath:    DatabasePath + asked.Database + BrowseSuffix,
+		StructurePath: DatabasePath + asked.Database + StructureSuffix,
 	}
 
 	if asked.Table == "" {
@@ -96,6 +98,12 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 	}
 
 	shown.Rows = rows
+	shown.ColumnNames = namesOf(columns)
+
+	if total > 0 {
+		shown.FirstRow = (shown.Page-1)*shown.PageSize + 1
+		shown.LastRow = shown.FirstRow + len(rows) - 1
+	}
 
 	return shown, nil
 }
@@ -262,4 +270,14 @@ func pagesFor(total int64, size int) int {
 	}
 
 	return pages
+}
+
+func namesOf(columns []ColumnView) string {
+	names := make([]string, 0, len(columns))
+
+	for _, column := range columns {
+		names = append(names, column.Name)
+	}
+
+	return strings.Join(names, ",")
 }

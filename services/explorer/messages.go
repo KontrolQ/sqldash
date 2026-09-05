@@ -21,3 +21,8 @@ const (
 	CellSaved     = "Saved."
 	RowDeleted    = "That row was deleted."
 )
+
+const (
+	NothingToInsert = "Fill in at least one column."
+	RowAdded        = "That row was added."
+)

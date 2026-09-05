@@ -3,8 +3,9 @@ package explorer
 const (
 	LogPrefix = "ExplorerPage"
 
-	BrowseTemplate  = "explorer/browse"
-	ConsoleTemplate = "explorer/console"
+	BrowseTemplate    = "explorer/browse"
+	ConsoleTemplate   = "explorer/console"
+	StructureTemplate = "explorer/structure"
 
 	NameParameter      = "name"
 	TableParameter     = "table"
@@ -17,8 +18,10 @@ const (
 	DatabasesPath  = "/"
 	DatabasePath   = "/databases/"
 
-	DataLabel      = "Data"
-	DataSection    = "data"
-	ConsoleLabel   = "Console"
-	ConsoleSection = "console"
+	DataLabel        = "Data"
+	DataSection      = "data"
+	ConsoleLabel     = "Console"
+	ConsoleSection   = "console"
+	StructureLabel   = "Structure"
+	StructureSection = "structure"
 )

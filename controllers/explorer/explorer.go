@@ -3,6 +3,7 @@ package explorer
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
 	service "sqldash/services/explorer"
 	"sqldash/sessions"
@@ -76,4 +77,30 @@ func backTo(context fiber.Ctx, name string, back string) error {
 	}
 
 	return shortcuts.RedirectToPath(context, target)
+}
+
+func InsertRow(context fiber.Ctx) error {
+	asked, parseError := meta.Body[InsertRequest](context)
+	if parseError != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+
+	name := context.Params(NameParameter)
+	values := make(map[string]string)
+
+	for _, column := range strings.Split(asked.Columns, ColumnSeparator) {
+		column = strings.TrimSpace(column)
+
+		if column != "" {
+			values[column] = context.FormValue(ColumnPrefix + column)
+		}
+	}
+
+	if insertError := service.InsertRow(context.Context(), name, asked.Table, values); insertError != nil {
+		sessions.Complain(context, insertError.Message)
+	} else {
+		sessions.Report(context, service.RowAdded)
+	}
+
+	return backTo(context, name, asked.Back)
 }

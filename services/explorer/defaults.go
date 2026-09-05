@@ -8,6 +8,10 @@ const (
 	MaximumCellText = 160
 	RowIdentifier   = "rowid"
 
+	DatabasePath    = "/databases/"
+	BrowseSuffix    = "/explore"
+	StructureSuffix = "/structure"
+
 	AscendingOrder  = "asc"
 	DescendingOrder = "desc"
 
@@ -28,4 +32,10 @@ const (
 	BytesFormat    = "%d bytes"
 	NullText       = "NULL"
 	Ellipsis       = "…"
+)
+
+const (
+	IndexListSQL  = "PRAGMA index_list(%s)"
+	IndexInfoSQL  = "PRAGMA index_info(%s)"
+	DefinitionSQL = "SELECT sql FROM sqlite_master WHERE name = ?"
 )

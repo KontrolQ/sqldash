@@ -10,4 +10,7 @@ const (
 	NameParameter   = "name"
 	CheckedValue    = "on"
 	ConsoleTemplate = "explorer/console"
+
+	ColumnPrefix    = "column."
+	ColumnSeparator = ","
 )

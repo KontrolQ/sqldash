@@ -1,0 +1,10 @@
+<aside class="explorer-list">
+{% for one in Tables %}
+<a class="explorer-item {% if one.Name == Table %}is-current{% endif %}" href="{{ table_base }}?table={{ one.Name }}">
+<span class="explorer-name">{{ one.Name }}</span>
+{% if one.IsView %}<span class="badge is-outline">view</span>{% endif %}
+</a>
+{% empty %}
+<div class="explorer-empty">No tables yet.</div>
+{% endfor %}
+</aside>
