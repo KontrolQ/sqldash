@@ -13,12 +13,16 @@
 </div>
 </div>
 
-{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
-{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+{% include "partials/alert.django" %}
+
 {% if Secret %}
-<div class="notice is-good">
-<div>Token created. Copy it now &mdash; it is not shown again.</div>
-<code class="secret">{{ Secret }}</code>
+<div class="alert is-good" role="status">
+<svg viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<div class="alert-title">Token created</div>
+<div class="alert-body">
+<span>Copy it now &mdash; it is not shown again.</span>
+<code class="code">{{ Secret }}</code>
+</div>
 </div>
 {% endif %}
 
@@ -31,11 +35,11 @@
 
 <div class="card">
 <div class="card-head has-border">
-<div class="card-title">Connection</div>
+<div class="card-title">Connect</div>
 <div class="card-note">Point a libSQL client at this address with one of the tokens below.</div>
 </div>
 <div class="card-body">
-<code class="secret">{{ URL }}</code>
+<code class="code">{{ URL }}</code>
 </div>
 </div>
 
@@ -45,13 +49,21 @@
 <div class="card-note">Each token can be revoked on its own.</div>
 </div>
 <div class="card-body">
-<form class="inline-form" method="post" action="{% url "databases.tokens.mint" name=Name %}">
-<input class="input is-inline" name="label" placeholder="What is it for?" aria-label="What the token is for">
-<select class="input is-inline" name="scope" aria-label="What the token may do">
-<option value="read-write">Read and write</option>
-<option value="read-only">Read only</option>
-</select>
+<form class="stack" method="post" action="{% url "databases.tokens.mint" name=Name %}">
+<div class="row">
+<div class="field">
+<label class="label" for="token-label">Label</label>
+<input class="input" id="token-label" name="label" required>
+<span class="field-note">So you can tell it apart later.</span>
+</div>
+<div class="field">
+<span class="label">Scope</span>
+{% include "partials/select.django" with select_name="scope" select_label="What the token may do" select_chosen="read-write" select_options=Scopes select_wide=1 %}
+</div>
+</div>
+<div class="actions">
 <button class="button" type="submit">Create token</button>
+</div>
 </form>
 </div>
 {% if Tokens %}
@@ -88,21 +100,24 @@
 
 <div class="card">
 <div class="card-head has-border">
-<div class="card-title">Settings</div>
+<div class="card-title">Configuration</div>
 <div class="card-note">Blocking takes effect on the database server itself.</div>
 </div>
 <div class="card-body">
 <form class="stack" method="post" action="{% url "databases.settings" name=Name %}">
-<label class="check"><input type="checkbox" name="block_reads" {% if BlockReads %}checked{% endif %}> <span>Block reads</span></label>
-<label class="check"><input type="checkbox" name="block_writes" {% if BlockWrites %}checked{% endif %}> <span>Block writes</span></label>
-<label class="check"><input type="checkbox" name="allow_attach" {% if AllowAttach %}checked{% endif %}> <span>Allow ATTACH</span></label>
-<label class="check"><input type="checkbox" name="protected" {% if Protected %}checked{% endif %}> <span>Protect from deletion</span></label>
+{% include "partials/switch.django" with switch_field="block_reads" switch_name="Block reads" switch_note="Refuse every read on this database." switch_on=BlockReads %}
+<hr class="separator">
+{% include "partials/switch.django" with switch_field="block_writes" switch_name="Block writes" switch_note="Refuse every write on this database." switch_on=BlockWrites %}
+<hr class="separator">
+{% include "partials/switch.django" with switch_field="allow_attach" switch_name="Allow ATTACH" switch_note="Let this database attach to others." switch_on=AllowAttach %}
+<hr class="separator">
+{% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
 <div class="field">
 <label class="label" for="block_reason">Reason shown when blocked</label>
 <input class="input" id="block_reason" name="block_reason" value="{{ BlockReason }}">
 </div>
 <div class="actions">
-<button class="button" type="submit">Save settings</button>
+<button class="button" type="submit">Save configuration</button>
 </div>
 </form>
 </div>
@@ -110,19 +125,64 @@
 
 <div class="card">
 <div class="card-head has-border">
+<div class="card-title">Restrict access</div>
+<div class="card-note">Limit which clients may connect, by source address. Leave empty to allow all traffic.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.rules.add" name=Name %}">
+<div class="row">
+<div class="field">
+<label class="label" for="rule-network">Address range</label>
+<input class="input" id="rule-network" name="network" placeholder="203.0.113.0/24" required>
+<span class="field-note">In CIDR form.</span>
+</div>
+<div class="field">
+<label class="label" for="rule-note">Note</label>
+<input class="input" id="rule-note" name="note">
+</div>
+</div>
+<div class="actions">
+<button class="button is-outline" type="submit">Allow range</button>
+</div>
+</form>
+</div>
+{% if Rules %}
+<div class="table-wrap">
+<table class="table">
+<thead><tr><th>Range</th><th>Note</th><th></th></tr></thead>
+<tbody>
+{% for rule in Rules %}
+<tr>
+<td class="mono">{{ rule.Network }}</td>
+<td class="muted">{{ rule.Note }}</td>
+<td class="table-actions">
+<form method="post" action="{% url "databases.rules.remove" name=Name rule=rule.Identifier %}">
+<button class="button is-ghost is-small" type="submit">Remove</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+</div>
+
+<div class="card">
+<div class="card-head has-border">
 <div class="card-title">Copy and restore</div>
-<div class="card-note">A copy is a new database. Leave the moment blank to copy it as it is now.</div>
+<div class="card-note">A copy is a new database. Leave the moment blank to copy it as it stands.</div>
 </div>
 <div class="card-body">
 <form class="stack" method="post" action="{% url "databases.fork" name=Name %}">
 <div class="row">
 <div class="field">
 <label class="label" for="fork-name">Name for the copy</label>
-<input class="input" id="fork-name" name="name" placeholder="{{ Name }}-copy" required>
+<input class="input" id="fork-name" name="name" required>
 </div>
 <div class="field">
-<label class="label" for="fork-moment">As it stood at</label>
-<input class="input" id="fork-moment" name="moment" type="datetime-local">
+<span class="label">As it stood at</span>
+{% include "partials/moment.django" with moment_field="moment" moment_placeholder="Latest" %}
 </div>
 </div>
 <div class="actions">

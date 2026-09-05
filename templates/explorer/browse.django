@@ -9,9 +9,7 @@
 </div>
 
 {% include "partials/explorertabs.django" with Browsing=1 %}
-
-{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
-{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+{% include "partials/alert.django" %}
 
 <div class="explorer">
 <aside class="explorer-list">
@@ -27,16 +25,16 @@
 
 <div class="explorer-main">
 {% if Table %}
-<form class="inline-form explorer-search" method="get" action="{% url "databases.explore" name=Database %}">
+<div class="explorer-bar">
+<form class="inline-form" method="get" action="{% url "databases.explore" name=Database %}">
 <input type="hidden" name="table" value="{{ Table }}">
-<input class="input" name="search" value="{{ Search }}" placeholder="Search every column">
+<input class="input" name="search" value="{{ Search }}" placeholder="Search" aria-label="Search every column">
 <button class="button is-outline" type="submit">Search</button>
 {% if Search %}<a class="button is-ghost" href="{% url "databases.explore" name=Database %}?table={{ Table }}">Clear</a>{% endif %}
 </form>
-
-{% if not Editable %}
-<div class="notice">This table has no single primary key and no rowid, so rows here are read-only.</div>
-{% endif %}
+<span class="tab-bar-spacer"></span>
+{% if Editable %}<span class="badge is-outline">editable</span>{% else %}<span class="badge is-outline">read-only</span>{% endif %}
+</div>
 
 <div class="card is-table">
 <div class="table-wrap">

@@ -8,8 +8,7 @@
 </div>
 </div>
 
-{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
-{% if Done %}<div class="notice is-good">{{ Done }}</div>{% endif %}
+{% include "partials/alert.django" %}
 
 <div class="card">
 <div class="card-head has-border">
@@ -65,18 +64,18 @@
 <div class="card-note">Follow your system, or pick one.</div>
 </div>
 <div class="card-body">
-<form class="themes" method="post" action="{% url "settings.theme" %}">
-<button class="theme-choice {% if Theme == "system" %}is-chosen{% endif %}" type="submit" name="theme" value="system">
-<span class="theme-swatch is-system"></span>
-<span class="theme-name">System</span>
+<form class="choices" method="post" action="{% url "settings.theme" %}">
+<button class="choice {% if Theme == "system" %}is-chosen{% endif %}" type="submit" name="theme" value="system">
+<span class="choice-preview is-system"></span>
+<span class="choice-name">System</span>
 </button>
-<button class="theme-choice {% if Theme == "light" %}is-chosen{% endif %}" type="submit" name="theme" value="light">
-<span class="theme-swatch is-light"></span>
-<span class="theme-name">Light</span>
+<button class="choice {% if Theme == "light" %}is-chosen{% endif %}" type="submit" name="theme" value="light">
+<span class="choice-preview is-light"></span>
+<span class="choice-name">Light</span>
 </button>
-<button class="theme-choice {% if Theme == "dark" %}is-chosen{% endif %}" type="submit" name="theme" value="dark">
-<span class="theme-swatch is-dark"></span>
-<span class="theme-name">Dark</span>
+<button class="choice {% if Theme == "dark" %}is-chosen{% endif %}" type="submit" name="theme" value="dark">
+<span class="choice-preview is-dark"></span>
+<span class="choice-name">Dark</span>
 </button>
 </form>
 </div>

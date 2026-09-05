@@ -1,0 +1,10 @@
+<div class="switch-field">
+<div class="switch-text">
+<span class="switch-name">{{ switch_name }}</span>
+{% if switch_note %}<span class="switch-note">{{ switch_note }}</span>{% endif %}
+</div>
+<label class="switch">
+<input type="checkbox" name="{{ switch_field }}" {% if switch_on %}checked{% endif %} aria-label="{{ switch_name }}">
+<span class="switch-thumb"></span>
+</label>
+</div>

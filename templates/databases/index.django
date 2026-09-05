@@ -6,32 +6,59 @@
 <h1>Databases</h1>
 <p class="page-subtitle">Every database this server holds.</p>
 </div>
-<div class="page-actions">
-<form class="inline-form" method="post" action="{% url "databases.create" %}">
-<input class="input is-inline" name="name" placeholder="new-database" aria-label="Name of the new database" required>
-<button class="button" type="submit">Create</button>
-</form>
-<form class="inline-form" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data">
-<input class="input is-inline" name="name" placeholder="from-a-dump" aria-label="Name for the loaded database" required>
-<input class="input is-file" type="file" name="dump" accept=".sql" aria-label="A .sql dump to load" required>
-<button class="button is-outline" type="submit">Load</button>
+</div>
+
+{% include "partials/alert.django" %}
+
+<div class="row">
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">New database</div>
+<div class="card-note">Starts empty.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.create" %}">
+<div class="field">
+<label class="label" for="create-name">Name</label>
+<input class="input" id="create-name" name="name" required>
+<span class="field-note">Lowercase letters, digits and hyphens.</span>
+</div>
+<div class="actions">
+<button class="button" type="submit">Create database</button>
+</div>
 </form>
 </div>
 </div>
 
-{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+<div class="card">
+<div class="card-head has-border">
+<div class="card-title">Load a dump</div>
+<div class="card-note">Builds a database from a .sql file.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data">
+<div class="field">
+<label class="label" for="import-name">Name</label>
+<input class="input" id="import-name" name="name" required>
+</div>
+<div class="field">
+<label class="label" for="import-dump">Dump</label>
+<input class="file" id="import-dump" type="file" name="dump" accept=".sql" required>
+</div>
+<div class="actions">
+<button class="button is-outline" type="submit">Load database</button>
+</div>
+</form>
+</div>
+</div>
+</div>
 
 {% if Databases %}
 <div class="card is-table">
 <div class="table-wrap">
 <table class="table">
 <thead>
-<tr>
-<th>Name</th>
-<th>Address</th>
-<th>State</th>
-<th></th>
-</tr>
+<tr><th>Name</th><th>Address</th><th>State</th><th></th></tr>
 </thead>
 <tbody>
 {% for database in Databases %}
@@ -49,7 +76,7 @@
 {% else %}
 <div class="empty">
 <span class="empty-title">No databases yet</span>
-<span>Create one with the field above.</span>
+<span>Create one above to get started.</span>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,23 @@
+<div class="popover" data-moment>
+<input type="hidden" name="{{ moment_field }}">
+<button class="select-trigger is-wide" type="button" data-moment-trigger data-placeholder="{{ moment_placeholder }}">
+<span data-moment-label class="is-empty">{{ moment_placeholder }}</span>
+<svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18"/><rect width="18" height="18" x="3" y="4" rx="2"/></svg>
+</button>
+<div class="popover-content" data-moment-content hidden>
+<div class="calendar">
+<div class="calendar-head">
+<button class="calendar-step" type="button" data-moment-back aria-label="Previous month"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+<span class="calendar-title" data-moment-title></span>
+<button class="calendar-step" type="button" data-moment-forward aria-label="Next month"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+</div>
+<div class="calendar-grid" data-moment-grid></div>
+<div class="calendar-time">
+<input class="input" type="time" value="00:00" data-moment-time aria-label="Time of day">
+</div>
+<div class="calendar-foot">
+<button class="button is-ghost is-small" type="button" data-moment-clear>Clear</button>
+</div>
+</div>
+</div>
+</div>

@@ -9,11 +9,12 @@
 </div>
 
 {% include "partials/explorertabs.django" %}
+{% include "partials/alert.django" %}
 
 <div class="card">
 <div class="card-body">
 <form class="stack" method="post" action="{% url "databases.console.run" name=Database %}">
-<textarea class="input is-area" name="statement" rows="6" spellcheck="false" placeholder="SELECT * FROM sqlite_master">{{ Statement }}</textarea>
+<textarea class="textarea is-code" name="statement" rows="6" spellcheck="false" placeholder="SELECT * FROM sqlite_master">{{ Statement }}</textarea>
 <div class="actions">
 <button class="button" type="submit">Run</button>
 </div>
@@ -21,11 +22,17 @@
 </div>
 </div>
 
-{% if Problem %}<div class="notice is-bad">{{ Problem }}</div>{% endif %}
+{% if Problem %}
+<div class="alert is-bad" role="alert">
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+<div class="alert-title">That statement did not run</div>
+<div class="alert-body"><code class="code">{{ Problem }}</code></div>
+</div>
+{% endif %}
 
 {% if Ran and not Problem %}
 <div class="card is-table">
-<div class="card-head has-border" style="padding-top: var(--sp-6)">
+<div class="card-head has-border is-padded">
 <div class="card-title">Result</div>
 <div class="card-note">{{ Rows|length }} rows returned · {{ Affected }} affected · {{ RowsRead }} read · {{ Duration }}</div>
 </div>

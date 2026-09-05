@@ -1,0 +1,74 @@
+.alert {
+  position: relative;
+  display: grid;
+  width: 100%;
+  align-items: start;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 14px;
+  gap: 2px 12px;
+  grid-template-columns: 0 1fr;
+  line-height: 20px;
+}
+
+.alert:has(> svg) {
+  grid-template-columns: 16px 1fr;
+}
+
+.alert > svg {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transform: translateY(2px);
+}
+
+.alert-title {
+  grid-column-start: 2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  min-height: 16px;
+}
+
+.alert-body {
+  display: grid;
+  grid-column-start: 2;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  gap: 4px;
+  justify-items: start;
+}
+
+.alert.is-bad {
+  background: var(--card);
+  color: var(--destructive);
+}
+
+.alert.is-bad .alert-body {
+  color: color-mix(in oklab, var(--destructive) 90%, transparent);
+}
+
+.alert.is-good {
+  color: var(--success);
+}
+
+.alert.is-good .alert-body {
+  color: color-mix(in oklab, var(--success) 90%, transparent);
+}
+
+.separator {
+  flex-shrink: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+  border: 0;
+  margin: 0;
+}

@@ -8,11 +8,7 @@
 </div>
 <div class="page-actions">
 <form class="inline-form" method="get" action="{{ FormAction }}">
-<select class="input is-inline" name="window" aria-label="Period to report on" onchange="this.form.submit()">
-{% for option in Windows %}
-<option value="{{ option }}" {% if option == Window %}selected{% endif %}>Last {{ option }}</option>
-{% endfor %}
-</select>
+{% include "partials/select.django" with select_name="window" select_label="Period to report on" select_chosen=Window select_options=WindowOptions select_submits=1 %}
 <noscript><button class="button" type="submit">Show</button></noscript>
 </form>
 </div>
@@ -42,7 +38,7 @@
 </div>
 
 <div class="card is-table">
-<div class="card-head has-border" style="padding-top: var(--sp-6)">
+<div class="card-head has-border is-padded">
 <div class="card-title">Top queries</div>
 <div class="card-note">Ordered by how much time they took in total.</div>
 </div>

@@ -1,0 +1,126 @@
+.select {
+  position: relative;
+  display: inline-flex;
+}
+
+.select-native {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.select-trigger {
+  display: flex;
+  width: fit-content;
+  height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-shadow: var(--shadow-xs);
+  color: var(--foreground);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 14px;
+  gap: 8px;
+  line-height: 20px;
+  outline: none;
+  transition: color var(--ease), box-shadow var(--ease), border-color var(--ease);
+  white-space: nowrap;
+}
+
+:root[data-theme='dark'] .select-trigger,
+:root:not([data-theme='light']) .select-trigger {
+  background: color-mix(in oklab, var(--input) 30%, transparent);
+}
+
+:root[data-theme='dark'] .select-trigger:hover,
+:root:not([data-theme='light']) .select-trigger:hover {
+  background: color-mix(in oklab, var(--input) 50%, transparent);
+}
+
+.select-trigger:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+.select-trigger svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  fill: none;
+  pointer-events: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.select-trigger.is-wide {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.select-content {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 128px;
+  max-height: 320px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--popover);
+  box-shadow: var(--shadow-md);
+  color: var(--popover-foreground);
+}
+
+.select-content[hidden] {
+  display: none;
+}
+
+.select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px 32px 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  gap: 8px;
+  line-height: 20px;
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.select-item:hover,
+.select-item.is-active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.select-item .select-mark {
+  position: absolute;
+  right: 8px;
+  display: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.select-item.is-chosen .select-mark {
+  display: block;
+}

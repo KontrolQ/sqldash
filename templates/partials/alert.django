@@ -1,0 +1,12 @@
+{% if Problem %}
+<div class="alert is-bad" role="alert">
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+<div class="alert-title">{{ Problem }}</div>
+</div>
+{% endif %}
+{% if Done %}
+<div class="alert is-good" role="status">
+<svg viewBox="0 0 24 24"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+<div class="alert-title">{{ Done }}</div>
+</div>
+{% endif %}

@@ -83,3 +83,7 @@
   font-size: var(--text-xs);
   line-height: var(--text-xs-lh);
 }
+
+.card-head.is-padded {
+  padding-top: 24px;
+}

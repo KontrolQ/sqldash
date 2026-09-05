@@ -1,0 +1,12 @@
+<div class="select" data-select>
+<select name="{{ select_name }}" aria-label="{{ select_label }}"{% if select_submits %} onchange="this.form.submit()"{% endif %}>
+{% for option in select_options %}
+<option value="{{ option.Value }}" {% if option.Value == select_chosen %}selected{% endif %}>{{ option.Label }}</option>
+{% endfor %}
+</select>
+<button class="select-trigger{% if select_wide %} is-wide{% endif %}" type="button" data-select-trigger aria-haspopup="listbox" aria-expanded="false">
+<span data-select-label></span>
+<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+</button>
+<div class="select-content" role="listbox" data-select-content hidden></div>
+</div>
