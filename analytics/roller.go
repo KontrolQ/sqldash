@@ -89,6 +89,8 @@ func Fold() {
 			held.RowsRead += statement.RowsRead
 			held.RowsWritten += statement.RowsWritten
 			held.RowsReturned += statement.RowsReturned
+			held.BytesIn += statement.BytesIn
+			held.BytesOut += statement.BytesOut
 
 			if statement.Failed {
 				held.Failures++
@@ -128,6 +130,8 @@ func apply(fresh *models.Rollup, histogram Histogram) error {
 		existing.RowsRead += fresh.RowsRead
 		existing.RowsWritten += fresh.RowsWritten
 		existing.RowsReturned += fresh.RowsReturned
+		existing.BytesIn += fresh.BytesIn
+		existing.BytesOut += fresh.BytesOut
 
 		merged := DecodeHistogram(existing.Histogram)
 		merged.Merge(histogram)

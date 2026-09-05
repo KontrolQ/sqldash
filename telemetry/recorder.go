@@ -64,6 +64,8 @@ func write(batch []Observation) {
 			RowsRead:     observation.RowsRead,
 			RowsWritten:  observation.RowsWritten,
 			RowsReturned: observation.RowsReturned,
+			BytesIn:      observation.BytesIn,
+			BytesOut:     observation.BytesOut,
 			Failed:       observation.Failed,
 			OccurredAt:   observation.OccurredAt,
 		})

@@ -110,6 +110,7 @@ const (
 	RowsReadLabel     = "Rows read"
 	RowsWrittenLabel  = "Rows written"
 	RowsReturnedLabel = "Rows returned"
+	TransferredLabel  = "Transferred"
 	AverageLabel      = "Average"
 	TailLabel         = "P99"
 
@@ -117,3 +118,10 @@ const (
 	P95Name = "P95"
 	P99Name = "P99"
 )
+
+const (
+	ByteStep        = 1024.0
+	LargestByteUnit = " TB"
+)
+
+var ByteUnits = []string{" B", " KB", " MB", " GB"}

@@ -10,6 +10,7 @@ type Point struct {
 	Reads    int64
 	Writes   int64
 	Failures int64
+	Bytes    int64
 	P50      float64
 	P95      float64
 	P99      float64
@@ -52,6 +53,7 @@ func SeriesFor(databaseName string, window Window) ([]Point, error) {
 			Writes:   summary.Writes,
 			Reads:    summary.Count - summary.Writes,
 			Failures: summary.Failures,
+			Bytes:    summary.BytesIn + summary.BytesOut,
 			P50:      summary.Histogram.Percentile(0.50),
 			P95:      summary.Histogram.Percentile(0.95),
 			P99:      summary.Histogram.Percentile(0.99),

@@ -10,6 +10,8 @@ type Statement struct {
 	RowsRead     int64     `gorm:"not null"`
 	RowsWritten  int64     `gorm:"not null"`
 	RowsReturned int64     `gorm:"not null"`
+	BytesIn      int64     `gorm:"not null;default:0"`
+	BytesOut     int64     `gorm:"not null;default:0"`
 	Failed       bool      `gorm:"not null;default:false"`
 	OccurredAt   time.Time `gorm:"index;not null"`
 }

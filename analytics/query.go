@@ -21,6 +21,8 @@ type Summary struct {
 	RowsRead      int64
 	RowsWritten   int64
 	RowsReturned  int64
+	BytesIn       int64
+	BytesOut      int64
 	Histogram     Histogram
 }
 
@@ -168,6 +170,8 @@ func (self *Summary) absorb(record models.Rollup) {
 	self.RowsRead += record.RowsRead
 	self.RowsWritten += record.RowsWritten
 	self.RowsReturned += record.RowsReturned
+	self.BytesIn += record.BytesIn
+	self.BytesOut += record.BytesOut
 	self.Histogram.Merge(DecodeHistogram(record.Histogram))
 }
 

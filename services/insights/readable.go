@@ -23,6 +23,24 @@ func readableCount(value int64) string {
 	return strconv.FormatInt(value, 10)
 }
 
+func readableBytes(value int64) string {
+	if value < 0 {
+		return "-" + readableBytes(-value)
+	}
+
+	held := float64(value)
+
+	for _, unit := range ByteUnits {
+		if held < ByteStep {
+			return trimZeros(held) + unit
+		}
+
+		held /= ByteStep
+	}
+
+	return trimZeros(held) + LargestByteUnit
+}
+
 func trimZeros(value float64) string {
 	places := CompactFormat
 	if value >= TightAbove {

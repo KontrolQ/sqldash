@@ -44,6 +44,12 @@ func tilesFor(now *analytics.Summary, before *analytics.Summary, points []analyt
 			Now: now.RowsReturned, Before: before.RowsReturned, Better: NeitherIsBetter,
 			Pick: func(point analytics.Point) float64 { return float64(point.Reads) },
 		},
+		{
+			Label: TransferredLabel, Value: readableBytes(now.BytesIn + now.BytesOut),
+			Now: now.BytesIn + now.BytesOut, Before: before.BytesIn + before.BytesOut,
+			Better: NeitherIsBetter,
+			Pick:   func(point analytics.Point) float64 { return float64(point.Bytes) },
+		},
 	}
 
 	tiles := make([]TileView, 0, len(specs))

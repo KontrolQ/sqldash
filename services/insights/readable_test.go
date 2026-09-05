@@ -89,3 +89,24 @@ func TestDurationsSwitchToSecondsAboveAThousand(t *testing.T) {
 		}
 	}
 }
+
+func TestBytesClimbThroughEachUnit(t *testing.T) {
+	cases := []struct {
+		given  int64
+		wanted string
+	}{
+		{0, "0 B"},
+		{512, "512 B"},
+		{1024, "1 KB"},
+		{1536, "1.5 KB"},
+		{1024 * 1024, "1 MB"},
+		{3 * 1024 * 1024 * 1024, "3 GB"},
+		{2 * 1024 * 1024 * 1024 * 1024, "2 TB"},
+	}
+
+	for _, held := range cases {
+		if found := readableBytes(held.given); found != held.wanted {
+			t.Errorf("readableBytes(%d) gave %q, wanted %q", held.given, found, held.wanted)
+		}
+	}
+}

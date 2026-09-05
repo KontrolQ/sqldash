@@ -23,5 +23,7 @@ type Rollup struct {
 	RowsRead      int64      `gorm:"not null"`
 	RowsWritten   int64      `gorm:"not null"`
 	RowsReturned  int64      `gorm:"not null"`
+	BytesIn       int64      `gorm:"not null;default:0"`
+	BytesOut      int64      `gorm:"not null;default:0"`
 	Histogram     string     `gorm:"not null"`
 }

@@ -14,6 +14,7 @@ type capturing struct {
 	http.ResponseWriter
 	body   bytes.Buffer
 	status int
+	sent   int64
 }
 
 func (self *capturing) WriteHeader(status int) {
@@ -25,6 +26,8 @@ func (self *capturing) Write(payload []byte) (int, error) {
 	if self.body.Len() < MaximumMeasuredBody {
 		self.body.Write(payload)
 	}
+
+	self.sent += int64(len(payload))
 
 	return self.ResponseWriter.Write(payload)
 }
@@ -46,6 +49,9 @@ func measure(writer http.ResponseWriter, request *http.Request, database string)
 
 	toDatabase.ServeHTTP(captured, request)
 
+	in := int64(len(asked))
+	out := captured.sent
+
 	for _, statement := range hrana.Measure(asked, captured.body.Bytes()) {
 		telemetry.Record(telemetry.Observation{
 			DatabaseName: database,
@@ -54,8 +60,12 @@ func measure(writer http.ResponseWriter, request *http.Request, database string)
 			RowsRead:     statement.RowsRead,
 			RowsWritten:  statement.RowsWritten,
 			RowsReturned: statement.RowsReturned,
+			BytesIn:      in,
+			BytesOut:     out,
 			Failed:       statement.Failed || captured.status >= http.StatusBadRequest,
 			OccurredAt:   startedAt,
 		})
+
+		in, out = 0, 0
 	}
 }
