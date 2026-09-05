@@ -36,6 +36,10 @@
   --sidebar-border: oklch(0.922 0 0);
 
   --brand: #2f9e8c;
+
+  --chart-read: oklch(0.55 0.16 250);
+  --chart-write: oklch(0.6 0.14 165);
+  --chart-third: oklch(0.62 0.18 300);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -77,6 +81,10 @@
     --sidebar-border: oklch(1 0 0 / 10%);
 
     --brand: #4fc3b0;
+
+    --chart-read: oklch(0.7 0.14 250);
+    --chart-write: oklch(0.72 0.13 165);
+    --chart-third: oklch(0.72 0.15 300);
   }
 }
 
@@ -118,4 +126,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
 
   --brand: #4fc3b0;
+
+  --chart-read: oklch(0.7 0.14 250);
+  --chart-write: oklch(0.72 0.13 165);
+  --chart-third: oklch(0.72 0.15 300);
 }
