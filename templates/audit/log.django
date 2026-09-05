@@ -8,11 +8,11 @@
 </div>
 <div class="page-actions">
 <form class="inline-form" method="get" action="{% url "audit" %}">
-{% include "partials/select.django" with select_name="action" select_label="Action" select_chosen=Action select_options=Choices select_small=1 %}
+{% include "partials/select.django" with select_name="action" select_label="Action" select_chosen=Action select_options=Choices select_small=0 %}
 {% if Database %}<input type="hidden" name="database" value="{{ Database }}">{% endif %}
-<button class="button is-outline is-small" type="submit">Filter</button>
+<button class="button is-outline" type="submit">Filter</button>
 </form>
-{% if Database or Action %}<a class="button is-ghost is-small" href="{% url "audit" %}">Clear</a>{% endif %}
+{% if Database or Action %}<a class="button is-ghost" href="{% url "audit" %}">Clear</a>{% endif %}
 </div>
 </div>
 

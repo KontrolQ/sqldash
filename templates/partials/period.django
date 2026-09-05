@@ -1,5 +1,5 @@
 <div class="menu" data-menu>
-<button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
+<button class="button is-outline" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">
 <svg class="button-icon" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
 Last {{ Window }}
 </button>

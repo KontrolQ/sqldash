@@ -428,8 +428,8 @@
 }
 
 .workbar .step {
-  width: 26px;
-  height: 26px;
+  width: var(--size-7);
+  height: var(--size-7);
 }
 
 .plan-row.is-stacked {

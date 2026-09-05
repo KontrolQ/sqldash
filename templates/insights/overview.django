@@ -8,7 +8,7 @@
 </div>
 <div class="page-actions">
 {% include "partials/period.django" with period_base=FormAction %}
-<a class="button is-outline is-small" href="{{ QueriesPath }}?window={{ Window }}">Top queries</a>
+<a class="button is-outline" href="{{ QueriesPath }}?window={{ Window }}">Top queries</a>
 </div>
 </div>
 

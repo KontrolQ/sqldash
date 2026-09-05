@@ -102,3 +102,9 @@
   font-size: var(--text-lg);
   line-height: var(--text-lg-lh);
 }
+
+.page-actions .button,
+.page-actions .select-trigger,
+.page-actions .input {
+  height: var(--size-9);
+}
