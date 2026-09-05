@@ -2,6 +2,13 @@ BINARY_NAME = sqldash
 BUILD_PATH = bin/$(BINARY_NAME)
 MAIN_PATH = ./$(BINARY_NAME)
 
+AIR_CONFIG = .air.unix.toml
+
+ifeq ($(OS),Windows_NT)
+BUILD_PATH = bin/$(BINARY_NAME).exe
+AIR_CONFIG = .air.windows.toml
+endif
+
 .PHONY: setup clean tidy build run proxy web dev all
 
 setup:
@@ -31,7 +38,7 @@ web:
 	@$(BUILD_PATH) web
 
 dev:
-	@air
+	@air -c $(AIR_CONFIG)
 
 all: setup clean build run
 

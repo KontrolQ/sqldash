@@ -3,7 +3,7 @@ root = "."
 tmp_dir = "bin"
 
 [build]
-bin = "./bin/sqldash"
+entrypoint = ["./bin/sqldash"]
 cmd = "make build"
 include_ext = ["go", "django", "css", "js"]
 exclude_dir = ["bin", "data", "node_modules", ".git"]
