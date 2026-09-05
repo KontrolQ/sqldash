@@ -8,6 +8,7 @@ import (
 func migrate() {
 	migrationError := DB.AutoMigrate(
 		&models.Account{},
+		&models.Session{},
 		&models.Database{},
 		&models.AccessRule{},
 		&models.Token{},

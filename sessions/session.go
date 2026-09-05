@@ -11,7 +11,10 @@ import (
 var Handler fiber.Handler
 
 func init() {
+	Sweep()
+
 	Handler = session.New(session.Config{
+		Storage:        store{},
 		Extractor:      extractors.FromCookie(config.Session.CookieName),
 		CookieHTTPOnly: true,
 		CookieSameSite: fiber.CookieSameSiteLaxMode,
