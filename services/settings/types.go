@@ -4,5 +4,4 @@ type IndexContext struct {
 	Title    string
 	Username string
 	Email    string
-	Theme    string
 }

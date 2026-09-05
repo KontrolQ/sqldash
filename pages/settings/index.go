@@ -10,9 +10,7 @@ import (
 )
 
 func Index(context fiber.Ctx) error {
-	theme, _ := context.Locals(meta.ThemeKey).(string)
-
-	data, dataError := service.GetIndexData(sessions.Remembered(context), theme)
+	data, dataError := service.GetIndexData(sessions.Remembered(context))
 	if dataError != nil {
 		return dataError
 	}
