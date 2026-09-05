@@ -25,4 +25,7 @@ const (
 	AuthorizationHeader = "authorization"
 	BearerPrefix        = "bearer "
 	UseNoteInterval     = time.Minute
+
+	SocketScheme = "ws://"
+	MaximumFrame = 32 << 20
 )

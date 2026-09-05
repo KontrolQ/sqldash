@@ -59,6 +59,11 @@ func handle(writer http.ResponseWriter, request *http.Request) {
 
 	request.Header.Set(NamespaceHeader, database)
 
+	if isUpgrade(request) {
+		carrySocket(writer, request, database)
+		return
+	}
+
 	if carriesStatements(request) {
 		measure(writer, request, database)
 		return

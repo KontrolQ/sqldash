@@ -33,8 +33,9 @@ type heldResult struct {
 }
 
 type heldResponse struct {
-	Type   string       `json:"type"`
-	Result *heldResult2 `json:"result"`
+	Type        string         `json:"type"`
+	Result      *heldResult2   `json:"result"`
+	StepResults []*heldResult2 `json:"step_results"`
 }
 
 type heldResult2 struct {

@@ -7,6 +7,8 @@ const (
 	ForwardFailedLog     = "Failed to forward to the database server: %v"
 	TokenLookupFailedLog = "Failed to look up a token: %v"
 	TokenNoteFailedLog   = "Failed to record a token being used: %v"
+	SocketRefusedLog     = "Failed to accept a websocket: %v"
+	SocketDialFailedLog  = "Failed to open a websocket to the database server: %v"
 )
 
 const (
