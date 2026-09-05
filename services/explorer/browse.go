@@ -193,6 +193,7 @@ func cellFor(value any, column ColumnView) CellView {
 
 	if column.References != "" && text != "" {
 		cell.LinkTo = column.References
+		cell.LinkColumn = column.OnColumn
 	}
 
 	return cell

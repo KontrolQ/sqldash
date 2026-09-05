@@ -30,11 +30,12 @@ type FilterView struct {
 }
 
 type CellView struct {
-	Column    string
-	Text      string
-	IsNull    bool
-	LinkTo    string
-	Truncated bool
+	Column     string
+	Text       string
+	IsNull     bool
+	LinkTo     string
+	LinkColumn string
+	Truncated  bool
 }
 
 type RowView struct {
@@ -66,8 +67,6 @@ type BrowseContext struct {
 	Carry         string
 	View          string
 	Duration      string
-	Problem       string
-	Done          string
 	PreviousPage  int
 	NextPage      int
 	FirstRow      int
@@ -96,7 +95,7 @@ type ConsoleContext struct {
 	Affected   int64
 	Duration   string
 	RowsRead   int64
-	Problem    string
+	Failure    string
 	Ran        bool
 }
 

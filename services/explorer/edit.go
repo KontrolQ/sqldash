@@ -12,7 +12,18 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func UpdateCell(requestContext context.Context, databaseName string, table string, column string, key string, value string, clearIt bool) *fiber.Error {
+type CellEdit struct {
+	Column string
+	Key    string
+	Value  string
+	Clear  bool
+}
+
+func UpdateCells(requestContext context.Context, databaseName string, table string, edits []CellEdit) *fiber.Error {
+	if len(edits) == 0 {
+		return shortcuts.ServiceError(http.StatusBadRequest, NothingChanged)
+	}
+
 	tables, tablesError := Tables(requestContext, databaseName)
 	if tablesError != nil {
 		return tablesError
@@ -33,25 +44,32 @@ func UpdateCell(requestContext context.Context, databaseName string, table strin
 		return columnsError
 	}
 
-	if !columnNamed(columns, column) {
-		return shortcuts.ServiceError(http.StatusBadRequest, ColumnMissing)
-	}
-
 	keyColumn := keyColumnOf(requestContext, databaseName, table, columns, false)
 	if keyColumn == "" {
 		return shortcuts.ServiceError(http.StatusBadRequest, NotEditable)
 	}
 
-	statement := "UPDATE " + quoteIdentifier(table) +
-		" SET " + quoteIdentifier(column) + " = ?" +
-		" WHERE " + quoteIdentifier(keyColumn) + " = ?"
+	statements := make([]sqld.Statement, 0, len(edits))
 
-	var wanted any = value
-	if clearIt {
-		wanted = nil
+	for _, edit := range edits {
+		if !columnNamed(columns, edit.Column) {
+			return shortcuts.ServiceError(http.StatusBadRequest, ColumnMissing)
+		}
+
+		var wanted any = edit.Value
+		if edit.Clear {
+			wanted = nil
+		}
+
+		statements = append(statements, sqld.Statement{
+			SQL: "UPDATE " + quoteIdentifier(table) +
+				" SET " + quoteIdentifier(edit.Column) + " = ?" +
+				" WHERE " + quoteIdentifier(keyColumn) + " = ?",
+			Arguments: []any{wanted, edit.Key},
+		})
 	}
 
-	if _, runError := sqld.Query(requestContext, databaseName, statement, wanted, key); runError != nil {
+	if _, runError := sqld.Run(requestContext, databaseName, statements...); runError != nil {
 		logger.Errorf(LogPrefix, WriteFailedLog, databaseName, runError)
 		return shortcuts.ServiceError(http.StatusBadRequest, strings.TrimSpace(runError.Error()))
 	}

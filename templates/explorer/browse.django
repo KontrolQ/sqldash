@@ -76,6 +76,13 @@ Columns
 <svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
 Add record
 </button>
+<div class="workbar-edits">
+<button class="button is-ghost is-small" type="button" data-grid-discard disabled>Discard</button>
+<button class="button is-small" type="submit" form="grid-form" data-grid-save disabled>
+Save changes
+<span class="badge is-secondary" data-grid-count>0</span>
+</button>
+</div>
 {% endif %}
 
 <div class="workbar-right">
@@ -137,20 +144,23 @@ Add record
 </thead>
 <tbody>
 {% for row in Rows %}
-<tr>
+<tr data-key="{{ row.Key }}">
 {% if Editable %}
 <td class="table-pick">
 {% include "partials/checkbox.django" with checkbox_name="key" checkbox_value=row.Key checkbox_label="Pick this row" checkbox_hook="selection-one" checkbox_form="row-form" %}
 </td>
 {% endif %}
 {% for cell in row.Cells %}
-<td class="cell" data-cell="{{ cell.Column }}"{% if Editable and not cell.LinkTo %} data-edit="cell-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" tabindex="-1"{% endif %}>
-{% if cell.LinkTo %}
-<a class="chip" href="{{ BrowsePath }}?table={{ cell.LinkTo }}&search={{ cell.Text }}">{{ cell.Text }}<span class="chip-target">{{ cell.LinkTo }}</span></a>
-{% elif cell.IsNull %}
+<td class="cell" data-cell="{{ cell.Column }}"{% if Editable %} data-edit tabindex="-1"{% endif %}>
+{% if cell.IsNull %}
 <span class="cell-text null">NULL</span>
 {% else %}
 <span class="cell-text">{{ cell.Text }}</span>
+{% endif %}
+{% if cell.LinkTo %}
+<a class="cell-jump" href="{{ BrowsePath }}?table={{ cell.LinkTo }}{% if cell.LinkColumn %}&column={{ cell.LinkColumn }}&operator=is&value={{ cell.Text }}{% else %}&search={{ cell.Text }}{% endif %}" aria-label="Open the matching row in {{ cell.LinkTo }}" title="{{ cell.LinkTo }}">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+</a>
 {% endif %}
 </td>
 {% endfor %}
@@ -189,20 +199,10 @@ Add record
 </form>
 
 {% if Editable %}
-{% for row in Rows %}
-{% for cell in row.Cells %}
-{% if not cell.LinkTo %}
-<form id="cell-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" method="post" action="{% url "databases.explore.cell" name=Database %}" hidden>
+<form id="grid-form" method="post" action="{% url "databases.explore.cell" name=Database %}" hidden>
 <input type="hidden" name="table" value="{{ Table }}">
-<input type="hidden" name="column" value="{{ cell.Column }}">
-<input type="hidden" name="key" value="{{ row.Key }}">
 <input type="hidden" name="back" value="{{ View }}">
-<input type="hidden" name="value">
-<input type="hidden" name="clear">
 </form>
-{% endif %}
-{% endfor %}
-{% endfor %}
 
 <div class="drawer" id="add-row" hidden>
 <div class="drawer-head">

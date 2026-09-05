@@ -1,12 +1,12 @@
 package explorer
 
 type CellRequest struct {
-	Table  string `form:"table"`
-	Column string `form:"column"`
-	Key    string `form:"key"`
-	Value  string `form:"value"`
-	Clear  string `form:"clear"`
-	Back   string `form:"back"`
+	Table   string   `form:"table"`
+	Columns []string `form:"column"`
+	Keys    []string `form:"key"`
+	Values  []string `form:"value"`
+	Clears  []string `form:"clear"`
+	Back    string   `form:"back"`
 }
 
 type RowRequest struct {

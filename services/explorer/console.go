@@ -37,7 +37,7 @@ func RunConsole(requestContext context.Context, databaseName string, statement s
 
 	held, runError := sqld.Query(requestContext, databaseName, statement)
 	if runError != nil {
-		shown.Problem = strings.TrimSpace(runError.Error())
+		shown.Failure = strings.TrimSpace(runError.Error())
 		return shown, nil
 	}
 

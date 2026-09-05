@@ -17,10 +17,13 @@ const (
 )
 
 const (
-	ColumnMissing = "No such column."
-	CellSaved     = "Saved."
-	RowsDeleted   = "%d rows were deleted."
-	NothingChosen = "Pick at least one row first."
+	ColumnMissing  = "No such column."
+	CellSaved      = "Saved."
+	NothingChanged = "Nothing was changed."
+	OneCellSaved   = "One change saved."
+	CellsSaved     = "%d changes saved."
+	RowsDeleted    = "%d rows were deleted."
+	NothingChosen  = "Pick at least one row first."
 )
 
 const (

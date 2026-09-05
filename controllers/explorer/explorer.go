@@ -14,22 +14,31 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func SaveCell(context fiber.Ctx) error {
+func SaveCells(context fiber.Ctx) error {
 	asked, parseError := meta.Body[CellRequest](context)
 	if parseError != nil {
 		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
 	}
 
 	name := context.Params(NameParameter)
+	edits := make([]service.CellEdit, 0, len(asked.Columns))
 
-	saveError := service.UpdateCell(
-		context.Context(), name, asked.Table, asked.Column, asked.Key, asked.Value, asked.Clear == CheckedValue,
-	)
+	for index, column := range asked.Columns {
+		if index >= len(asked.Keys) || index >= len(asked.Values) {
+			break
+		}
 
-	if saveError != nil {
+		clear := index < len(asked.Clears) && asked.Clears[index] == CheckedValue
+
+		edits = append(edits, service.CellEdit{
+			Column: column, Key: asked.Keys[index], Value: asked.Values[index], Clear: clear,
+		})
+	}
+
+	if saveError := service.UpdateCells(context.Context(), name, asked.Table, edits); saveError != nil {
 		sessions.Complain(context, saveError.Message)
 	} else {
-		sessions.Report(context, service.CellSaved)
+		sessions.Report(context, savedMessage(len(edits)))
 	}
 
 	return backTo(context, name, asked.Back)
@@ -68,6 +77,14 @@ func RunConsole(context fiber.Ctx) error {
 	meta.SetPageTitle(context, data.Title)
 
 	return shortcuts.Render(context, ConsoleTemplate, data)
+}
+
+func savedMessage(count int) string {
+	if count == 1 {
+		return service.OneCellSaved
+	}
+
+	return fmt.Sprintf(service.CellsSaved, count)
 }
 
 func backTo(context fiber.Ctx, name string, back string) error {

@@ -26,6 +26,7 @@
   --destructive-fill: oklch(0.577 0.245 27.325);
   --destructive-ring: oklch(0.577 0.245 27.325 / 20%);
   --success: oklch(0.6 0.16 149);
+  --pending: oklch(0.72 0.16 75);
 
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -80,6 +81,7 @@
     --destructive-fill: oklch(0.704 0.191 22.216 / 60%);
     --destructive-ring: oklch(0.704 0.191 22.216 / 40%);
     --success: oklch(0.75 0.18 149);
+  --pending: oklch(0.78 0.15 75);
 
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
@@ -134,6 +136,7 @@
   --destructive-fill: oklch(0.704 0.191 22.216 / 60%);
   --destructive-ring: oklch(0.704 0.191 22.216 / 40%);
   --success: oklch(0.75 0.18 149);
+  --pending: oklch(0.78 0.15 75);
 
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);

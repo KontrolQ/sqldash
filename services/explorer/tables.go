@@ -69,7 +69,11 @@ func attachForeignKeys(requestContext context.Context, databaseName string, tabl
 	for _, row := range held.Rows {
 		target := fmt.Sprint(row[2])
 		from := fmt.Sprint(row[3])
-		to := fmt.Sprint(row[4])
+
+		to := ""
+		if row[4] != nil {
+			to = fmt.Sprint(row[4])
+		}
 
 		for index := range columns {
 			if columns[index].Name == from {

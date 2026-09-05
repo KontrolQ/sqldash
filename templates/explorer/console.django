@@ -29,7 +29,7 @@ Run
 Prettify
 </button>
 <div class="workbar-right">
-{% if Ran and not Problem %}
+{% if Ran and not Failure %}
 <span class="timing">{{ Duration }}</span>
 <span class="tally">{{ Rows|length }} returned &middot; {{ Affected }} affected &middot; {{ RowsRead }} read</span>
 {% endif %}
@@ -44,15 +44,15 @@ Prettify
 </div>
 </form>
 
-{% if Problem %}
+{% if Failure %}
 <div class="console-problem" role="alert">
 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-<code>{{ Problem }}</code>
+<code>{{ Failure }}</code>
 </div>
 {% endif %}
 
 <div class="sheet">
-{% if Ran and not Problem %}
+{% if Ran and not Failure %}
 {% if Columns %}
 <table class="table is-grid">
 <thead><tr>{% for column in Columns %}<th scope="col"><span class="column-name">{{ column }}</span></th>{% endfor %}</tr></thead>
