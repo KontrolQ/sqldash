@@ -138,5 +138,22 @@ type StructureContext struct {
 	Tables        []TableView
 	Columns       []ColumnView
 	Indexes       []IndexView
+	Triggers      []TriggerView
+	Relations     []RelationView
+	UsedBy        []RelationView
 	Definition    string
+}
+
+type TriggerView struct {
+	Name       string
+	Definition string
+}
+
+type RelationView struct {
+	FromTable  string
+	FromColumn string
+	ToTable    string
+	ToColumn   string
+	OnDelete   string
+	OnUpdate   string
 }

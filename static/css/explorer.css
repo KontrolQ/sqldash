@@ -431,3 +431,14 @@
   width: 26px;
   height: 26px;
 }
+
+.plan-row.is-stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.plan-row.is-stacked .code.is-block {
+  width: 100%;
+}

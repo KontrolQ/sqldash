@@ -52,9 +52,81 @@ func Structure(requestContext context.Context, databaseName string, table string
 
 	shown.Columns = columns
 	shown.Indexes = indexesOf(requestContext, databaseName, table)
+	shown.Triggers = triggersOf(requestContext, databaseName, table)
+	shown.Relations = relationsOf(requestContext, databaseName, table)
+	shown.UsedBy = pointingAt(requestContext, databaseName, tables, table)
 	shown.Definition = definitionOf(requestContext, databaseName, table)
 
 	return shown, nil
+}
+
+func triggersOf(requestContext context.Context, databaseName string, table string) []TriggerView {
+	held, queryError := sqld.Query(requestContext, databaseName, TriggerSQL, table)
+	if queryError != nil {
+		return nil
+	}
+
+	views := make([]TriggerView, 0, len(held.Rows))
+
+	for _, row := range held.Rows {
+		view := TriggerView{Name: fmt.Sprint(row[0])}
+
+		if row[1] != nil {
+			view.Definition = fmt.Sprint(row[1])
+		}
+
+		views = append(views, view)
+	}
+
+	return views
+}
+
+func relationsOf(requestContext context.Context, databaseName string, table string) []RelationView {
+	held, queryError := sqld.Query(requestContext, databaseName, fmt.Sprintf(ForeignKeyListSQL, quoteIdentifier(table)))
+	if queryError != nil {
+		return nil
+	}
+
+	views := make([]RelationView, 0, len(held.Rows))
+
+	for _, row := range held.Rows {
+		views = append(views, RelationView{
+			FromTable:  table,
+			FromColumn: fmt.Sprint(row[3]),
+			ToTable:    fmt.Sprint(row[2]),
+			ToColumn:   textOr(row[4], ""),
+			OnUpdate:   textOr(row[5], NoAction),
+			OnDelete:   textOr(row[6], NoAction),
+		})
+	}
+
+	return views
+}
+
+func pointingAt(requestContext context.Context, databaseName string, tables []TableView, table string) []RelationView {
+	views := make([]RelationView, 0)
+
+	for _, one := range tables {
+		if one.IsView || one.Name == table {
+			continue
+		}
+
+		for _, relation := range relationsOf(requestContext, databaseName, one.Name) {
+			if relation.ToTable == table {
+				views = append(views, relation)
+			}
+		}
+	}
+
+	return views
+}
+
+func textOr(value any, fallback string) string {
+	if value == nil {
+		return fallback
+	}
+
+	return fmt.Sprint(value)
 }
 
 func indexesOf(requestContext context.Context, databaseName string, table string) []IndexView {

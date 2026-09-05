@@ -34,7 +34,7 @@ Structure
 </div>
 {% if IsView %}<span class="badge is-outline">view</span>{% endif %}
 <div class="workbar-right">
-<span class="tally">{{ Columns|length }} columns &middot; {{ Indexes|length }} indexes</span>
+<span class="tally">{{ Columns|length }} column{{ Columns|length|pluralize }} &middot; {{ Indexes|length }} index{{ Indexes|length|pluralize:"es" }} &middot; {{ Triggers|length }} trigger{{ Triggers|length|pluralize }}</span>
 <button class="button is-outline is-small" type="button" data-copy="table-definition">
 <svg class="button-icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
 Copy schema
@@ -77,6 +77,52 @@ Copy schema
 <span class="plan-type">{{ index.Columns|join:", " }}</span>
 {% if index.Unique %}<span class="plan-flag">UNIQUE</span>{% endif %}
 <span class="plan-flag">{{ index.Origin }}</span>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+{% if Relations %}
+<div class="plan-group">
+<div class="plan-label">Points at</div>
+<div class="plan-rows">
+{% for relation in Relations %}
+<div class="plan-row">
+<span class="plan-column">{{ relation.FromColumn }}</span>
+<span class="plan-type">&rarr;</span>
+<a class="chip" href="{{ StructurePath }}?table={{ relation.ToTable }}">{{ relation.ToTable }}<span class="chip-target">{{ relation.ToColumn }}</span></a>
+<span class="plan-flag">ON DELETE {{ relation.OnDelete }}</span>
+<span class="plan-flag">ON UPDATE {{ relation.OnUpdate }}</span>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+{% if UsedBy %}
+<div class="plan-group">
+<div class="plan-label">Pointed at by</div>
+<div class="plan-rows">
+{% for relation in UsedBy %}
+<div class="plan-row">
+<a class="chip" href="{{ StructurePath }}?table={{ relation.FromTable }}">{{ relation.FromTable }}<span class="chip-target">{{ relation.FromColumn }}</span></a>
+<span class="plan-type">&rarr;</span>
+<span class="plan-column">{{ relation.ToColumn }}</span>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+{% if Triggers %}
+<div class="plan-group">
+<div class="plan-label">Triggers</div>
+<div class="plan-rows">
+{% for trigger in Triggers %}
+<div class="plan-row is-stacked">
+<span class="plan-column">{{ trigger.Name }}</span>
+{% if trigger.Definition %}<pre class="code is-block">{{ trigger.Definition }}</pre>{% endif %}
 </div>
 {% endfor %}
 </div>

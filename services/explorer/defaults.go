@@ -90,4 +90,6 @@ const (
 	IndexListSQL  = "PRAGMA index_list(%s)"
 	IndexInfoSQL  = "PRAGMA index_info(%s)"
 	DefinitionSQL = "SELECT sql FROM sqlite_master WHERE name = ?"
+	TriggerSQL    = "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ? ORDER BY name"
+	NoAction      = "NO ACTION"
 )
