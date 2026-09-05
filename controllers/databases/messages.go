@@ -9,3 +9,7 @@ const (
 	TokenMinted   = "Token created. Copy it now, it is not shown again."
 	TokenRevoked  = "That token was revoked."
 )
+
+const (
+	FileMissing = "Choose a .sql dump to load."
+)

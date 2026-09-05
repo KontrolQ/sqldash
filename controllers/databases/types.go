@@ -11,3 +11,12 @@ type SettingsRequest struct {
 	AllowAttach string `form:"allow_attach"`
 	Protected   string `form:"protected"`
 }
+
+type ImportRequest struct {
+	Name string `form:"name"`
+}
+
+type ForkRequest struct {
+	Name   string `form:"name"`
+	Moment string `form:"moment"`
+}

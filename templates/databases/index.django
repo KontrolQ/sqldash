@@ -11,6 +11,11 @@
 <input class="input is-inline" name="name" placeholder="new-database" aria-label="Name of the new database" required>
 <button class="button" type="submit">Create</button>
 </form>
+<form class="inline-form" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data">
+<input class="input is-inline" name="name" placeholder="from-a-dump" aria-label="Name for the loaded database" required>
+<input class="input is-file" type="file" name="dump" accept=".sql" aria-label="A .sql dump to load" required>
+<button class="button is-outline" type="submit">Load</button>
+</form>
 </div>
 </div>
 

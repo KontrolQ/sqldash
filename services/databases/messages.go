@@ -28,3 +28,17 @@ const (
 const (
 	SettingsRefused = "Those settings could not be saved."
 )
+
+const (
+	ImportFailedLog = "Failed to import %s: %v"
+	ForkFailedLog   = "Failed to fork %s: %v"
+	ExportFailedLog = "Failed to export %s: %v"
+)
+
+const (
+	ImportRefused   = "That file could not be loaded."
+	ForkRefused     = "The copy could not be made."
+	ExportRefused   = "The database could not be exported."
+	OnlyDumpsFormat = "only a .sql dump can be loaded, not %s"
+	MomentUnusable  = "That is not a moment this database can be restored to."
+)

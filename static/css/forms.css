@@ -362,3 +362,23 @@ a.table-name:hover {
   line-height: 1.6;
   resize: vertical;
 }
+
+.input.is-file {
+  width: auto;
+  height: var(--size-9);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--text-xs);
+}
+
+.input.is-file::file-selector-button {
+  height: 26px;
+  margin-right: var(--sp-2);
+  padding: 0 var(--sp-2);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+}

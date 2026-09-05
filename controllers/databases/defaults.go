@@ -13,4 +13,9 @@ const (
 
 	ProblemParameter = "problem"
 	DoneParameter    = "done"
+
+	DumpField         = "dump"
+	DispositionHeader = "content-disposition"
+	ContentTypeHeader = "content-type"
+	DumpContentType   = "application/sql"
 )

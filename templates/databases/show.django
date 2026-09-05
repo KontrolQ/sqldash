@@ -110,6 +110,31 @@
 
 <div class="card">
 <div class="card-head has-border">
+<div class="card-title">Copy and restore</div>
+<div class="card-note">A copy is a new database. Leave the moment blank to copy it as it is now.</div>
+</div>
+<div class="card-body">
+<form class="stack" method="post" action="{% url "databases.fork" name=Name %}">
+<div class="row">
+<div class="field">
+<label class="label" for="fork-name">Name for the copy</label>
+<input class="input" id="fork-name" name="name" placeholder="{{ Name }}-copy" required>
+</div>
+<div class="field">
+<label class="label" for="fork-moment">As it stood at</label>
+<input class="input" id="fork-moment" name="moment" type="datetime-local">
+</div>
+</div>
+<div class="actions">
+<a class="button is-outline" href="{% url "databases.export" name=Name %}">Download a dump</a>
+<button class="button" type="submit">Make a copy</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="card">
+<div class="card-head has-border">
 <div class="card-title">Delete</div>
 <div class="card-note">This removes the database and everything in it.</div>
 </div>
