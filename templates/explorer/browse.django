@@ -99,7 +99,7 @@
 {% endfor %}
 {% if Editable %}
 <td class="table-actions">
-<form method="post" action="{% url "databases.explore.row" name=Database %}">
+<form method="post" action="{% url "databases.explore.row" name=Database %}" data-confirm="This row is removed from {{ Table }}. This cannot be undone." data-confirm-title="Delete this row?" data-confirm-action="Delete row">
 <input type="hidden" name="table" value="{{ Table }}">
 <input type="hidden" name="key" value="{{ row.Key }}">
 <input type="hidden" name="back" value="table={{ Table }}&page={{ Page }}">

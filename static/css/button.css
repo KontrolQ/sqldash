@@ -77,16 +77,18 @@
 }
 
 .button.is-destructive {
-  background: var(--destructive);
+  background: var(--destructive-fill);
   color: oklch(1 0 0);
+  box-shadow: var(--shadow-xs);
 }
 
 .button.is-destructive:hover {
-  background: color-mix(in oklab, var(--destructive) 90%, transparent);
+  background: color-mix(in oklab, var(--destructive-fill) 90%, transparent);
 }
 
 .button.is-destructive:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 20%, transparent);
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px var(--destructive-ring);
 }
 
 .button.is-small {

@@ -17,7 +17,10 @@
 <div class="alert-title">Token created</div>
 <div class="alert-body">
 <span>Copy it now &mdash; it is not shown again.</span>
-<code class="code">{{ Secret }}</code>
+<div class="copy">
+<code class="code" id="token-secret">{{ Secret }}</code>
+<button class="button is-outline is-small" type="button" data-copy="token-secret">Copy</button>
+</div>
 </div>
 </div>
 {% endif %}
@@ -35,7 +38,10 @@
 <div class="card-note">Point a libSQL client at this address with one of the tokens below.</div>
 </div>
 <div class="card-body">
-<code class="code">{{ URL }}</code>
+<div class="copy">
+<code class="code" id="connection-url">{{ URL }}</code>
+<button class="button is-outline is-small" type="button" data-copy="connection-url">Copy</button>
+</div>
 </div>
 </div>
 
@@ -81,7 +87,7 @@
 </td>
 <td class="table-actions">
 {% if not token.Revoked %}
-<form method="post" action="{% url "databases.tokens.revoke" name=Name identifier=token.Identifier %}">
+<form method="post" action="{% url "databases.tokens.revoke" name=Name identifier=token.Identifier %}" data-confirm="Any client using {{ token.Label }} stops working straight away. This cannot be undone." data-confirm-title="Revoke {{ token.Label }}?" data-confirm-action="Revoke token">
 <button class="button is-ghost is-small" type="submit">Revoke</button>
 </form>
 {% endif %}
@@ -152,7 +158,7 @@
 <td class="mono">{{ rule.Network }}</td>
 <td class="muted">{{ rule.Note }}</td>
 <td class="table-actions">
-<form method="post" action="{% url "databases.rules.remove" name=Name rule=rule.Identifier %}">
+<form method="post" action="{% url "databases.rules.remove" name=Name rule=rule.Identifier %}" data-confirm="Clients in {{ rule.Network }} lose access unless another range covers them." data-confirm-title="Remove {{ rule.Network }}?" data-confirm-action="Remove range">
 <button class="button is-ghost is-small" type="submit">Remove</button>
 </form>
 </td>
@@ -195,7 +201,7 @@
 <div class="card-note">This removes the database and everything in it.</div>
 </div>
 <div class="card-body">
-<form method="post" action="{% url "databases.delete" name=Name %}">
+<form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and every row in it are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
 <button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
 </form>
 </div>

@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="{% static "css/tables.css" %}">
 <link rel="stylesheet" href="{% static "css/tabs.css" %}">
 <link rel="stylesheet" href="{% static "css/chart.css" %}">
+<link rel="stylesheet" href="{% static "css/dialog.css" %}">
 {% block styles %}{% endblock %}
 </head>
 <body>
@@ -42,6 +43,9 @@
 <script src="{% static "js/moment.js" %}" defer></script>
 <script src="{% static "js/chart.js" %}" defer></script>
 <script src="{% static "js/reveal.js" %}" defer></script>
+<script src="{% static "js/confirm.js" %}" defer></script>
+<script src="{% static "js/copy.js" %}" defer></script>
+<script src="{% static "js/toast.js" %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
