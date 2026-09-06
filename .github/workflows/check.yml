@@ -1,0 +1,35 @@
+name: Check
+
+# Proves the panel still builds and is formatted. Needs no credentials, so it runs
+# on anything.
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Formatted to the house rules
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "these files are not gofmt clean:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - run: go vet ./...
+
+      # CGO stays off so the binary the image runs is the binary that is built here.
+      - name: Build
+        run: go build ./...
+        env:
+          CGO_ENABLED: 0
