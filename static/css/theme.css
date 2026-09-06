@@ -32,6 +32,7 @@
   --input: oklch(0.922 0 0);
   --checkbox-ground: transparent;
   --ring: oklch(0.708 0 0);
+  --selection: oklch(0.72 0.07 255 / 30%);
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0% 0 0);
@@ -87,6 +88,7 @@
     --input: oklch(1 0 0 / 15%);
     --checkbox-ground: oklch(1 0 0 / 4.5%);
     --ring: oklch(0.556 0 0);
+    --selection: oklch(0.72 0.06 255 / 22%);
 
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
@@ -142,6 +144,7 @@
   --input: oklch(1 0 0 / 15%);
   --checkbox-ground: oklch(1 0 0 / 4.5%);
   --ring: oklch(0.556 0 0);
+  --selection: oklch(0.72 0.06 255 / 22%);
 
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);

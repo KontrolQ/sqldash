@@ -63,7 +63,7 @@
 }
 
 .editor-field::selection {
-  background: color-mix(in oklab, var(--ring) 40%, transparent);
+  background: var(--selection);
 }
 
 .editor-paint .is-word {
