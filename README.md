@@ -4,8 +4,8 @@ A control panel for libSQL, for one operator and their own databases. It runs th
 databases, and gives you one place to browse them, write SQL against them, import and
 export them, and see what they are doing.
 
-It is a single binary that serves rendered pages. There is no API to call and nothing
-is passed in a query string, so a database is only ever reached by someone signed in.
+It is a single binary that serves rendered pages. There is no API to call, and every
+page is behind the sign-in.
 
 ## Running it
 
@@ -15,8 +15,8 @@ make build
 SQLDASH_DOMAIN=localhost ./bin/sqldash
 ```
 
-The panel answers on `SQLDASH_WEB_ADDRESS`, `127.0.0.1:7070` by default. The first
-account you create owns the instance.
+The panel answers on `SQLDASH_WEB_ADDRESS`, `127.0.0.1:7070` by default. It sets itself
+up on the first visit: you create the account then, and setup refuses to run again.
 
 The image is self-contained: it carries `sqld` alongside the binary, so a container
 needs nothing but a data directory.
