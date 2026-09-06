@@ -22,6 +22,7 @@
 
 .editor-lines {
   position: absolute;
+  z-index: 3;
   top: 0;
   bottom: 0;
   left: 0;
@@ -43,6 +44,7 @@
 
 .editor-paint {
   position: absolute;
+  z-index: 2;
   overflow: hidden;
   inset: 0 0 0 var(--gutter-width);
   color: var(--foreground);
@@ -51,6 +53,7 @@
 
 .editor-field {
   position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   padding-left: calc(var(--gutter-width) + 16px);
@@ -64,6 +67,7 @@
 
 .editor-field::selection {
   background: var(--selection);
+  color: transparent;
 }
 
 .editor-paint .is-word {
