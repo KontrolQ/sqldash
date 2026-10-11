@@ -37,8 +37,11 @@ func SignIn(context fiber.Ctx) error {
 }
 
 func SignOut(context fiber.Ctx) error {
-	audit.Note(context, "", audit.SignedOut, "")
-	sessions.Forget(context)
+	if forgetError := sessions.Forget(context); forgetError != nil {
+		return forgetError
+	}
 
-	return shortcuts.Redirect(context, LoginRoute)
+	audit.Note(context, "", audit.SignedOut, "")
+
+	return shortcuts.RedirectFull(context, LoginRoute)
 }

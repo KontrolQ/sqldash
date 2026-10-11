@@ -97,6 +97,26 @@
   background: var(--sidebar-accent);
 }
 
+.sidebar-profile {
+  width: 100%;
+}
+
+.sidebar-profile-menu {
+  width: calc(var(--sidebar-width) - var(--sp-4));
+}
+
+.sidebar-profile-menu .menu-check {
+  cursor: pointer;
+}
+
+.sidebar-account-chevron {
+  margin-left: auto;
+}
+
+.sidebar-account[aria-expanded='true'] .sidebar-account-chevron {
+  transform: rotate(180deg);
+}
+
 .sidebar-avatar {
   display: grid;
   width: var(--size-8);

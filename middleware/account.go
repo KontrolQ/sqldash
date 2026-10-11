@@ -33,7 +33,9 @@ func account(context fiber.Ctx) error {
 			return context.Next()
 		}
 
-		sessions.Forget(context)
+		if forgetError := sessions.Forget(context); forgetError != nil {
+			return forgetError
+		}
 	}
 
 	if isOpen(path) {

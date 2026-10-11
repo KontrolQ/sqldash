@@ -2,6 +2,8 @@ package sessions
 
 import (
 	"sqldash/config"
+	"sqldash/utils/logger"
+	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/extractors"
@@ -46,11 +48,16 @@ func Remembered(context fiber.Ctx) uint {
 	return accountID
 }
 
-func Forget(context fiber.Ctx) {
+func Forget(context fiber.Ctx) *fiber.Error {
 	held := session.FromContext(context)
 	if held == nil {
-		return
+		return nil
 	}
 
-	held.Destroy()
+	if destroyError := held.Destroy(); destroyError != nil {
+		logger.Errorf(LogPrefix, ForgetFailedLog, destroyError)
+		return shortcuts.ServiceError(fiber.StatusInternalServerError, ForgetUnavailable)
+	}
+
+	return nil
 }
