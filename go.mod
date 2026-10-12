@@ -4,23 +4,28 @@ go 1.26.0
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
+	github.com/caddyserver/certmagic v0.25.4
 	github.com/coder/websocket v1.8.15
 	github.com/flosch/pongo2/v6 v6.1.0
+	github.com/gen2brain/webp v0.6.4
 	github.com/glebarez/go-sqlite v1.21.2
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v3 v3.5.0
 	github.com/gofiber/template/django/v3 v3.1.14
 	github.com/joho/godotenv v1.5.1
+	github.com/kettek/apng v0.0.0-20250827064933-2bb5f5fcf253
+	github.com/libdns/cloudflare v0.2.2
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.56.0
+	golang.org/x/image v0.45.0
 	gorm.io/gorm v1.31.2
 )
 
 require (
 	github.com/andybalholm/brotli v1.2.2 // indirect
-	github.com/caddyserver/certmagic v0.25.4 // indirect
 	github.com/caddyserver/zerossl v0.1.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/gofiber/fiber/v2 v2.52.8 // indirect
 	github.com/gofiber/schema v1.8.3 // indirect
 	github.com/gofiber/template v1.8.3 // indirect
@@ -31,7 +36,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/libdns/cloudflare v0.2.2 // indirect
 	github.com/libdns/libdns v1.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
