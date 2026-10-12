@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net"
+
 	"sqldash/analytics"
 	"sqldash/config"
 	"sqldash/middleware"
@@ -29,9 +31,15 @@ func runWeb() {
 	middleware.Initialize(application)
 	router.Initialize(application)
 
-	logger.Successf(LogPrefix, StartedLog, config.Server.WebAddress)
+	listener, listenError := net.Listen("tcp4", config.Server.WebAddress)
+	if listenError != nil {
+		logger.Fatalf(LogPrefix, ListenFailedLog, listenError)
+	}
+	defer listener.Close()
 
-	if listenError := application.Listen(config.Server.WebAddress, fiber.ListenConfig{
+	logger.Successf(LogPrefix, StartedLog, listener.Addr().String())
+
+	if listenError := application.Listener(listener, fiber.ListenConfig{
 		DisableStartupMessage: true,
 	}); listenError != nil {
 		logger.Fatalf(LogPrefix, ListenFailedLog, listenError)

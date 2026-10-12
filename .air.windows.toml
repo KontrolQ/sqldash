@@ -8,6 +8,8 @@ cmd = "make build"
 include_ext = ["go", "django", "css", "js"]
 exclude_dir = ["bin", "data", "node_modules", ".git"]
 delay = 500
+stop_on_error = true
+rerun = false
 
 [misc]
 clean_on_exit = true
