@@ -131,14 +131,12 @@
   gap: 8px;
 }
 
-.calendar-day.is-later,
-.calendar-step:disabled {
+.calendar-day.is-later, .calendar-step:disabled {
   color: var(--muted-foreground);
   cursor: not-allowed;
   opacity: 0.3;
 }
 
-.calendar-day.is-later:hover,
-.calendar-step:disabled:hover {
+.calendar-day.is-later:hover, .calendar-step:disabled:hover {
   background: transparent;
 }

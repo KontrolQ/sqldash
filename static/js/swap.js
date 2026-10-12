@@ -12,6 +12,8 @@
         root.querySelectorAll('[data-swap-panel]').forEach(function (panel) {
           panel.hidden = panel.dataset.swapPanel !== tab.dataset.swapTo;
         });
+        const roleForm = root.querySelector('[data-role-editor]');
+        if (roleForm) { roleForm.hidden = tab.dataset.swapTo === 'role-users'; }
       });
     });
   });

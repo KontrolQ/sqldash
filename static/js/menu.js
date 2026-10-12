@@ -89,6 +89,27 @@
     content.addEventListener('click', function (event) {
       event.stopPropagation();
     });
+
+    trigger.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowDown') { return; }
+      event.preventDefault();
+      if (content.hidden) { trigger.click(); }
+      const first = content.querySelector('a, button:not(:disabled)');
+      if (first) { first.focus(); }
+    });
+
+    content.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') { shut(menu); trigger.focus(); return; }
+      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) { return; }
+      const items = [...content.querySelectorAll('a, button:not(:disabled)')];
+      if (items.length === 0) { return; }
+      event.preventDefault();
+      const current = items.indexOf(document.activeElement);
+      let next = event.key === 'ArrowUp' ? (current - 1 + items.length) % items.length : (current + 1) % items.length;
+      if (event.key === 'Home') { next = 0; }
+      if (event.key === 'End') { next = items.length - 1; }
+      items[next].focus();
+    });
   });
 
   document.addEventListener('click', function () {

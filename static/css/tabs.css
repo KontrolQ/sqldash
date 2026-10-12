@@ -110,7 +110,33 @@
   flex: 1;
 }
 
-.workbar .tabs,
-.workbar .tabs.is-compact {
+.tabs.is-line {
+  height: 42px;
+  justify-content: flex-start;
+  padding: 0;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.tabs.is-line .tab {
+  flex: 0 0 auto;
+  height: 42px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tabs.is-line .tab.is-current {
+  border-bottom-color: var(--foreground);
+  background: transparent;
+  box-shadow: none;
+}
+
+.workbar .tabs, .workbar .tabs.is-compact {
   height: 28px;
 }

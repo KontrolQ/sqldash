@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="{{ Theme }}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ Title }} · sqldash</title>
-<meta name="description" content="Sign in to sqldash, the control panel for this libSQL server.">
-<link rel="icon" href="{% static "favicon.ico" %}" sizes="any">
-<link rel="icon" href="{% static "logo.svg" %}" type="image/svg+xml">
-<link rel="apple-touch-icon" href="{% static "apple-touch-icon.png" %}">
-<link rel="stylesheet" href="{% static "css/tokens.css" %}">
-<link rel="stylesheet" href="{% static "css/theme.css" %}">
-<link rel="stylesheet" href="{% static "css/base.css" %}">
-<link rel="stylesheet" href="{% static "css/button.css" %}">
-<link rel="stylesheet" href="{% static "css/input.css" %}">
-<link rel="stylesheet" href="{% static "css/toggle.css" %}">
-<link rel="stylesheet" href="{% static "css/select.css" %}">
-<link rel="stylesheet" href="{% static "css/alert.css" %}">
-<link rel="stylesheet" href="{% static "css/popover.css" %}">
-<link rel="stylesheet" href="{% static "css/badge.css" %}">
-<link rel="stylesheet" href="{% static "css/form.css" %}">
-<link rel="stylesheet" href="{% static "css/auth.css" %}">
-</head>
-<body>
-<div class="gate">
-<div class="gate-panel">
-<div class="gate-brand brand">
-<img class="brand-mark" src="{% static "logo.svg" %}" alt="" width="26" height="26">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ Title }} · sqldash</title>
+    <meta name="description" content="Sign in to sqldash, the control panel for this libSQL server.">
+    <link rel="icon" href="{% static "favicon.ico" %}" sizes="any">
+    <link rel="icon" href="{% static "logo.svg" %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static "apple-touch-icon.png" %}">
+    <link rel="stylesheet" href="{% static "css/tokens.css" %}">
+    <link rel="stylesheet" href="{% static "css/theme.css" %}">
+    <link rel="stylesheet" href="{% static "css/base.css" %}">
+    <link rel="stylesheet" href="{% static "css/button.css" %}">
+    <link rel="stylesheet" href="{% static "css/input.css" %}">
+    <link rel="stylesheet" href="{% static "css/toggle.css" %}">
+    <link rel="stylesheet" href="{% static "css/select.css" %}">
+    <link rel="stylesheet" href="{% static "css/alert.css" %}">
+    <link rel="stylesheet" href="{% static "css/popover.css" %}">
+    <link rel="stylesheet" href="{% static "css/badge.css" %}">
+    <link rel="stylesheet" href="{% static "css/form.css" %}">
+    <link rel="stylesheet" href="{% static "css/auth.css" %}">
+  </head>
+  <body>
+    <div class="gate">
+      <div class="gate-panel">
+        <div class="gate-brand brand">
+          <img class="brand-mark" src="{% static "logo.svg" %}" alt="" width="26" height="26">
 <span class="brand-name">sqldash</span>
-</div>
-{% block content %}{% endblock %}
-</div>
-</div>
-<script src="{% static "js/password.js" %}" defer></script>
-<script src="{% static "js/select.js" %}" defer></script>
-<script src="{% static "js/moment.js" %}" defer></script>
-</body>
+        </div>
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+    <script src="{% static "js/password.js" %}" defer></script>
+    <script src="{% static "js/select.js" %}" defer></script>
+    <script src="{% static "js/moment.js" %}" defer></script>
+  </body>
 </html>

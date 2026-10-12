@@ -1,9 +1,8 @@
 {% extends "layouts/gate.django" %}
-
 {% block content %}
-<div class="gate-card">
-<h1 class="gate-title">{{ Code }}</h1>
-<p class="gate-note">{{ Message }}</p>
-<a class="button is-block" href="/">Go back</a>
-</div>
+  <div class="gate-card">
+    <h1 class="gate-title">{{ Code }}</h1>
+    <p class="gate-note">{{ Message }}</p>
+    <a class="button is-block" href="/">Go back</a>
+  </div>
 {% endblock %}

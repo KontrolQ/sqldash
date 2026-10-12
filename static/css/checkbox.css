@@ -42,19 +42,16 @@
   stroke-width: 2;
 }
 
-.checkbox input:checked + .checkbox-mark,
-.checkbox input:indeterminate + .checkbox-mark {
+.checkbox input:checked + .checkbox-mark, .checkbox input:indeterminate + .checkbox-mark {
   border-color: var(--primary);
   background: var(--primary);
 }
 
-.checkbox input:checked + .checkbox-mark svg,
-.checkbox input:indeterminate + .checkbox-mark .checkbox-some {
+.checkbox input:checked + .checkbox-mark svg, .checkbox input:indeterminate + .checkbox-mark .checkbox-some {
   opacity: 1;
 }
 
-.checkbox input:checked + .checkbox-mark .checkbox-some,
-.checkbox input:indeterminate + .checkbox-mark .checkbox-all {
+.checkbox input:checked + .checkbox-mark .checkbox-some, .checkbox input:indeterminate + .checkbox-mark .checkbox-all {
   opacity: 0;
 }
 
@@ -125,7 +122,7 @@
   white-space: nowrap;
 }
 
-.menu-check:hover {
+.menu-check:focus-visible, .menu-check:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
@@ -140,6 +137,15 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
+}
+
+.menu-check.is-destructive {
+  color: var(--destructive);
+}
+
+.menu-check.is-destructive:hover, .menu-check.is-destructive:focus-visible {
+  background: color-mix(in oklab, var(--destructive) 12%, transparent);
+  color: var(--destructive);
 }
 
 .menu-check[aria-checked='false'] svg {

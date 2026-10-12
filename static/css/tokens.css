@@ -11,7 +11,6 @@
   --sp-8: 32px;
   --sp-10: 40px;
   --sp-12: 48px;
-
   --text-xs: 12px;
   --text-xs-lh: 16px;
   --text-sm: 14px;
@@ -24,36 +23,27 @@
   --text-2xl-lh: 32px;
   --text-3xl: 30px;
   --text-3xl-lh: 36px;
-
   --fw-medium: 500;
   --fw-semibold: 600;
-
   --radius: 0.625rem;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-full: 9999px;
-
   --bw: 1px;
-
   --size-4: 16px;
   --size-7: 28px;
   --size-8: 32px;
   --size-9: 36px;
   --size-10: 40px;
-
   --sidebar-width: 16rem;
   --header-height: 3.5rem;
-
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
   --ease: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI Variable Text', 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'Cascadia Mono', Menlo,
-    Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI Variable Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
 }

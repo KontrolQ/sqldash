@@ -1,65 +1,72 @@
 <div class="table-wrap">
-<table class="table is-queries">
-<thead>
-<tr>
-<th scope="col">Query</th>
-{% for column in query_columns %}
-<th scope="col" class="table-numeric">
-<a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}&sort={{ column.Key }}&direction={% if Sort == column.Key and Direction == "desc" %}asc{% else %}desc{% endif %}">
+  <table class="table is-queries">
+    <thead>
+      <tr>
+        <th scope="col">Query</th>
+        {% for column in query_columns %}
+          <th scope="col" class="table-numeric">
+            <a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}&sort={{ column.Key }}&direction={% if Sort == column.Key and Direction == "desc" %}asc{% else %}desc{% endif %}">
 {{ column.Label }}
-{% if Sort == column.Key %}<svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true">{% if Direction == "asc" %}<path d="m5 12 7-7 7 7M12 5v14"/>{% else %}<path d="m19 12-7 7-7-7M12 19V5"/>{% endif %}</svg>{% endif %}
-</a>
-</th>
-{% endfor %}
-{% if not query_columns %}
-<th scope="col" class="table-numeric">% of runtime</th>
-<th scope="col" class="table-numeric">Count</th>
-<th scope="col" class="table-numeric">Total time</th>
-<th scope="col" class="table-numeric">P50</th>
-<th scope="col" class="table-numeric">P99</th>
-<th scope="col" class="table-numeric">Rows read</th>
-<th scope="col" class="table-numeric">Rows read / rows returned</th>
-<th scope="col" class="table-numeric">Rows written</th>
-{% endif %}
-</tr>
-</thead>
-<tbody>
-{% for query in query_rows %}
-<tr class="query-row">
-<td class="statement">
-{% if query.Example %}
-<button class="query-open" type="button" data-statement-open="query-{{ forloop.Counter }}" aria-label="Show the whole statement">
+            {% if Sort == column.Key %}
+              <svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+              {% if Direction == "asc" %}
+                <path d="m5 12 7-7 7 7M12 5v14"/>
+              {% else %}
+                <path d="m19 12-7 7-7-7M12 19V5"/>
+              {% endif %}
+              </svg>
+            {% endif %}
+            </a>
+          </th>
+        {% endfor %}
+        {% if not query_columns %}
+          <th scope="col" class="table-numeric">% of runtime</th>
+          <th scope="col" class="table-numeric">Count</th>
+          <th scope="col" class="table-numeric">Total time</th>
+          <th scope="col" class="table-numeric">P50</th>
+          <th scope="col" class="table-numeric">P99</th>
+          <th scope="col" class="table-numeric">Rows read</th>
+          <th scope="col" class="table-numeric">Rows read / rows returned</th>
+          <th scope="col" class="table-numeric">Rows written</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for query in query_rows %}
+        <tr class="query-row">
+          <td class="statement">
+            {% if query.Example %}
+              <button class="query-open" type="button" data-statement-open="query-{{ forloop.Counter }}" aria-label="Show the whole statement">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
 </button>
 <template id="query-{{ forloop.Counter }}">{{ query.Example }}</template>
-{% endif %}
-<code>{{ query.Statement }}</code>
-</td>
-<td class="table-numeric">{{ query.Share }}</td>
-<td class="table-numeric">{{ query.Count }}</td>
-<td class="table-numeric">{{ query.TotalTime }}</td>
-<td class="table-numeric">{{ query.P50 }}</td>
-<td class="table-numeric">{{ query.P99 }}</td>
-<td class="table-numeric">{{ query.RowsRead }}</td>
-<td class="table-numeric">{{ query.ReadPerRow }}</td>
-<td class="table-numeric">{{ query.RowsWritten }}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+            {% endif %}
+            <code>{{ query.Statement }}</code>
+          </td>
+          <td class="table-numeric">{{ query.Share }}</td>
+          <td class="table-numeric">{{ query.Count }}</td>
+          <td class="table-numeric">{{ query.TotalTime }}</td>
+          <td class="table-numeric">{{ query.P50 }}</td>
+          <td class="table-numeric">{{ query.P99 }}</td>
+          <td class="table-numeric">{{ query.RowsRead }}</td>
+          <td class="table-numeric">{{ query.ReadPerRow }}</td>
+          <td class="table-numeric">{{ query.RowsWritten }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-
 <div class="sheet-veil" data-statement-veil hidden>
-<div class="dialog-veil" data-statement-close></div>
-<div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="statement-title">
-<div class="dialog-head">
-<div class="dialog-title" id="statement-title">Statement</div>
-<div class="dialog-note">The whole statement, as it was run.</div>
-</div>
-<pre class="code is-block" data-statement-body></pre>
-<div class="dialog-foot">
-<button class="button is-outline" type="button" data-statement-copy>Copy</button>
+  <div class="dialog-veil" data-statement-close></div>
+  <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="statement-title">
+    <div class="dialog-head">
+      <div class="dialog-title" id="statement-title">Statement</div>
+      <div class="dialog-note">The whole statement, as it was run.</div>
+    </div>
+    <pre class="code is-block" data-statement-body></pre>
+    <div class="dialog-foot">
+      <button class="button is-outline" type="button" data-statement-copy>Copy</button>
 <button class="button" type="button" data-statement-close>Close</button>
-</div>
-</div>
+    </div>
+  </div>
 </div>

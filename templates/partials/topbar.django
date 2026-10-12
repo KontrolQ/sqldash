@@ -1,11 +1,17 @@
 <header class="topbar">
-<nav class="crumbs" aria-label="Breadcrumb">
-{% for crumb in Crumbs %}
-{% if not forloop.First %}<span class="crumb-divider">/</span>{% endif %}
-{% if crumb.URL %}<a class="crumb" href="{{ crumb.URL }}">{{ crumb.Label }}</a>{% else %}<span class="crumb-current">{{ crumb.Label }}</span>{% endif %}
-{% endfor %}
-</nav>
-<div class="topbar-spacer"></div>
-{% include "partials/palette.django" %}
-<span class="topbar-meta">{{ Version }}</span>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    {% for crumb in Crumbs %}
+      {% if not forloop.First %}
+        <span class="crumb-divider">/</span>
+      {% endif %}
+      {% if crumb.URL %}
+        <a class="crumb" href="{{ crumb.URL }}">{{ crumb.Label }}</a>
+      {% else %}
+        <span class="crumb-current">{{ crumb.Label }}</span>
+      {% endif %}
+    {% endfor %}
+  </nav>
+  <div class="topbar-spacer"></div>
+  {% include "partials/palette.django" %}
+  <span class="topbar-meta">{{ Version }}</span>
 </header>

@@ -3,6 +3,16 @@
   display: inline-flex;
 }
 
+.select.is-wide {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.select.is-wide .select-trigger, .select.is-wide .select-content {
+  width: 100%;
+}
+
 .select-native {
   position: absolute;
   width: 100%;
@@ -33,13 +43,11 @@
   white-space: nowrap;
 }
 
-:root[data-theme='dark'] .select-trigger,
-:root:not([data-theme='light']) .select-trigger {
+:root[data-theme='dark'] .select-trigger, :root:not([data-theme='light']) .select-trigger {
   background: color-mix(in oklab, var(--input) 30%, transparent);
 }
 
-:root[data-theme='dark'] .select-trigger:hover,
-:root:not([data-theme='light']) .select-trigger:hover {
+:root[data-theme='dark'] .select-trigger:hover, :root:not([data-theme='light']) .select-trigger:hover {
   background: color-mix(in oklab, var(--input) 50%, transparent);
 }
 
@@ -102,8 +110,7 @@
   white-space: nowrap;
 }
 
-.select-item:hover,
-.select-item.is-active {
+.select-item:hover, .select-item.is-active {
   background: var(--accent);
   color: var(--accent-foreground);
 }

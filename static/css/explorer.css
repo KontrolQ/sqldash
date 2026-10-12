@@ -194,15 +194,21 @@
 
 .menu-plain {
   display: block;
+  width: 100%;
   padding: 6px 8px;
+  border: 0;
   border-radius: var(--radius-sm);
+  background: transparent;
   color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
   font-size: var(--text-sm);
   line-height: var(--text-sm-lh);
   white-space: nowrap;
 }
 
-.menu-plain:hover {
+.menu-plain:focus-visible, .menu-plain:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
@@ -413,8 +419,7 @@
   display: none;
 }
 
-.workbar .button.is-small,
-.workbar .input.is-small {
+.workbar .button.is-small, .workbar .input.is-small {
   height: 28px;
 }
 

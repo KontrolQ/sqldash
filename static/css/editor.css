@@ -1,14 +1,11 @@
 .editor {
   --gutter-width: 46px;
-
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
 }
 
-.editor-lines,
-.editor-paint,
-.editor-field {
+.editor-lines, .editor-paint, .editor-field {
   padding: 14px 16px;
   margin: 0;
   border: 0;
@@ -92,8 +89,7 @@
   font-style: italic;
 }
 
-.editor-paint .is-mark,
-.editor-paint .is-bind {
+.editor-paint .is-mark, .editor-paint .is-bind {
   color: var(--sql-mark);
 }
 

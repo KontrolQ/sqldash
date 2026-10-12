@@ -55,8 +55,7 @@
   place-items: center;
 }
 
-.profile-picture-control .account-picture,
-.profile-picture-choice .account-picture {
+.profile-picture-control .account-picture, .profile-picture-choice .account-picture {
   position: absolute;
   inset: 0;
 }
@@ -88,9 +87,7 @@
   height: 28px;
 }
 
-.profile-picture-control:hover .profile-picture-change,
-.profile-picture-control:focus-visible .profile-picture-change,
-.profile-picture-control[aria-busy='true'] .profile-picture-change {
+.profile-picture-control:hover .profile-picture-change, .profile-picture-control:focus-visible .profile-picture-change, .profile-picture-control[aria-busy='true'] .profile-picture-change {
   opacity: 1;
 }
 
@@ -122,8 +119,7 @@
   cursor: pointer;
 }
 
-.profile-picture-choice:hover,
-.profile-picture-choice.is-selected {
+.profile-picture-choice:hover, .profile-picture-choice.is-selected {
   border-color: var(--ring);
 }
 
@@ -142,8 +138,7 @@
   right: 8px;
 }
 
-.profile-picture-delete,
-.profile-picture-clear-button {
+.profile-picture-delete, .profile-picture-clear-button {
   display: grid;
   padding: 0;
   border: 1px solid var(--border);
@@ -177,8 +172,7 @@
   height: 12px;
 }
 
-.profile-picture-delete:hover,
-.profile-picture-clear-button:hover {
+.profile-picture-delete:hover, .profile-picture-clear-button:hover {
   color: var(--destructive);
 }
 
@@ -250,8 +244,7 @@
   stroke-width: 2;
 }
 
-.password-toggle .icon-hide,
-.password.is-showing .icon-show {
+.password-toggle .icon-hide, .password.is-showing .icon-show {
   display: none;
 }
 

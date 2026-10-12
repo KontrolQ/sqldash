@@ -16,8 +16,7 @@
   transition: color var(--ease), box-shadow var(--ease), border-color var(--ease);
 }
 
-:root[data-theme='dark'] .input,
-:root:not([data-theme='light']) .input {
+:root[data-theme='dark'] .input, :root:not([data-theme='light']) .input {
   background: color-mix(in oklab, var(--input) 30%, transparent);
 }
 
@@ -53,8 +52,7 @@
   transition: color var(--ease), box-shadow var(--ease), border-color var(--ease);
 }
 
-:root[data-theme='dark'] .textarea,
-:root:not([data-theme='light']) .textarea {
+:root[data-theme='dark'] .textarea, :root:not([data-theme='light']) .textarea {
   background: color-mix(in oklab, var(--input) 30%, transparent);
 }
 
