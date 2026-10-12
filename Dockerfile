@@ -1,8 +1,10 @@
-FROM golang:1.26-alpine AS builder
+FROM golang:1.26-bookworm AS builder
 
 WORKDIR /sqldash
 
-RUN apk add --no-cache make
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends make \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV CGO_ENABLED=0
 
