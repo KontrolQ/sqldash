@@ -14,4 +14,7 @@ const (
 	DirectoryMode = 0o755
 
 	AppVersion = "0.1.0"
+
+	MinimumRequestBodyLimit = 4 * 1024 * 1024
+	MultipartUploadOverhead = 64 * 1024
 )

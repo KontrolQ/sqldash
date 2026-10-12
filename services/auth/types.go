@@ -5,7 +5,9 @@ type GateContext struct {
 }
 
 type AccountView struct {
-	Username string
-	Email    string
-	Initial  string
+	Username       string
+	DisplayName    string
+	Email          string
+	Initial        string
+	ProfilePicture string
 }

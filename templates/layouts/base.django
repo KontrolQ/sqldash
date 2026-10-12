@@ -45,6 +45,7 @@
 </div>
 </div>
 <script src="{% static "js/password.js" %}" defer></script>
+<script src="{% static "js/profilepicture.js" %}" defer></script>
 <script src="{% static "js/select.js" %}" defer></script>
 <script src="{% static "js/moment.js" %}" defer></script>
 <script src="{% static "js/chart.js" %}" defer></script>

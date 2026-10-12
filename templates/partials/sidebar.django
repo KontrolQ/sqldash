@@ -31,9 +31,9 @@
 <div class="sidebar-foot">
 <div class="menu sidebar-profile" data-menu>
 <button class="sidebar-account" type="button" data-menu-trigger aria-expanded="false" aria-controls="sidebar-profile-menu">
-<span class="sidebar-avatar">{{ Account.Initial }}</span>
+<span class="sidebar-avatar">{% if Account.ProfilePicture %}<img class="account-picture" src="{{ Account.ProfilePicture }}" alt="">{% else %}{{ Account.Initial }}{% endif %}</span>
 <span class="sidebar-account-text">
-<span class="sidebar-account-name">{{ Account.Username }}</span>
+<span class="sidebar-account-name">{{ Account.DisplayName }}</span>
 <span class="sidebar-account-note">{{ Account.Email }}</span>
 </span>
 <svg class="sidebar-icon sidebar-account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>

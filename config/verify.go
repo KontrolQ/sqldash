@@ -2,11 +2,16 @@ package config
 
 import (
 	"errors"
+	"math"
 	"os"
 	"path/filepath"
 )
 
 func verifyConfig() error {
+	if Server.MaximumImageUploadBytes <= 0 || Server.MaximumImageUploadBytes > math.MaxInt-MultipartUploadOverhead {
+		return errors.New(ImageUploadLimitInvalid)
+	}
+
 	if Server.Domain == "" {
 		return errors.New(DomainMissing)
 	}

@@ -13,10 +13,58 @@
 <div class="card">
 <div class="card-head has-border">
 <div class="card-title">Account</div>
-<div class="card-note">The name and address this account signs in with.</div>
+<div class="card-note">Your profile picture and sign-in details.</div>
 </div>
 <div class="card-body">
+<div class="account-settings">
+<div class="profile-picture-area">
+<div class="profile-picture-frame">
+<form method="post" action="{% url "settings.picture" %}" enctype="multipart/form-data" data-picture-upload data-picture-limit="{{ MaximumImageUploadBytes }}" data-picture-too-large="Choose a picture no larger than {{ PictureUploadLimit }}." data-picture-uploading="Saving picture...">
+<button class="profile-picture-control" type="button" data-picture-trigger aria-label="Change profile picture">
+{% if ProfilePicture %}<img class="account-picture" src="{{ ProfilePicture }}" alt="">{% else %}<span class="profile-picture-initial">{{ Account.Initial }}</span>{% endif %}
+<span class="profile-picture-change">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+<span data-picture-label>Change Picture</span>
+</span>
+</button>
+<input id="profile-picture" name="profile_picture" type="file" accept="image/jpeg,image/webp,image/gif,image/png" data-picture-input hidden required>
+<p class="field-note profile-picture-note">JPG, WebP, GIF, or PNG. Up to {{ PictureUploadLimit }}.</p>
+<p class="field-note profile-picture-error" data-picture-error role="status" hidden></p>
+</form>
+{% if ProfilePicture %}
+<form class="profile-picture-clear" method="post" action="{% url "settings.picture.clear" %}">
+<button class="profile-picture-clear-button" type="submit" aria-label="Clear avatar" title="Clear avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+</form>
+{% endif %}
+</div>
+{% if PictureHistory %}
+<div class="profile-picture-history" aria-label="Recent profile pictures">
+{% for picture in PictureHistory %}
+<div class="profile-picture-recent">
+<form method="post" action="{% url "settings.picture.restore" %}">
+<input type="hidden" name="picture_id" value="{{ picture.ID }}">
+<button class="profile-picture-choice {% if picture.Selected %}is-selected{% endif %}" type="submit" aria-label="Use profile picture {{ forloop.Counter }}" title="Use this picture">
+<img class="account-picture" src="{{ picture.Source }}" alt="">
+</button>
+</form>
+<form method="post" action="{% url "settings.picture.delete" %}">
+<input type="hidden" name="picture_id" value="{{ picture.ID }}">
+<button class="profile-picture-delete" type="submit" aria-label="Delete profile picture {{ forloop.Counter }}" title="Delete this picture"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+</form>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+<form method="post" action="{% url "settings.picture.gravatar" %}">
+<button class="button is-outline is-small is-block" type="submit">Use Gravatar</button>
+</form>
+</div>
+<div class="stack account-details">
 <form class="stack" method="post" action="{% url "settings.details" %}">
+<div class="field">
+<label class="label" for="display-name">Display name</label>
+<input class="input" id="display-name" name="display_name" value="{{ DisplayName }}" autocomplete="name">
+</div>
 <div class="row">
 <div class="field">
 <label class="label" for="username">Username</label>
@@ -31,16 +79,11 @@
 <button class="button" type="submit">Save changes</button>
 </div>
 </form>
+<form class="stack account-password" method="post" action="{% url "settings.password" %}">
+<div>
+<h3>Password</h3>
+<p class="field-note">At least eight characters.</p>
 </div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Password</div>
-<div class="card-note">At least eight characters.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "settings.password" %}">
 <div class="row">
 <div class="field">
 <label class="label" for="current">Current password</label>
@@ -55,6 +98,8 @@
 <button class="button" type="submit">Change password</button>
 </div>
 </form>
+</div>
+</div>
 </div>
 </div>
 

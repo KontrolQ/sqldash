@@ -21,6 +21,7 @@ func runWeb() {
 
 	application := fiber.New(fiber.Config{
 		AppName:      WebProcessName,
+		BodyLimit:    config.RequestBodyLimit(),
 		ErrorHandler: router.ErrorHandler,
 		Views:        engine,
 	})

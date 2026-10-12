@@ -5,7 +5,8 @@ import "time"
 const (
 	LogPrefix = "SettingsController"
 
-	IndexPath = "/settings"
+	IndexPath    = "/settings"
+	PictureField = "profile_picture"
 
 	ThemeCookie   = "sqldash-theme"
 	ThemeLifetime = 8760 * time.Hour

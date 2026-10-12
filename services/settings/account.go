@@ -13,7 +13,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func SaveDetails(accountID uint, username string, email string) *fiber.Error {
+func SaveDetails(accountID uint, username string, email string, displayName string) *fiber.Error {
 	username = strings.TrimSpace(username)
 	email = strings.TrimSpace(email)
 
@@ -29,6 +29,7 @@ func SaveDetails(accountID uint, username string, email string) *fiber.Error {
 
 	held.Username = username
 	held.Email = email
+	held.DisplayName = strings.TrimSpace(displayName)
 
 	if saveError := database.DB.Save(held).Error; saveError != nil {
 		logger.Errorf(LogPrefix, SaveFailedLog, saveError)

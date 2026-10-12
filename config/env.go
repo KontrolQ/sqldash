@@ -1,12 +1,13 @@
 package config
 
 type serverSettings struct {
-	Domain        string `env:"DOMAIN" envDefault:"localhost"`
-	HTTPPort      int    `env:"HTTP_PORT" envDefault:"8800"`
-	HTTPSPort     int    `env:"HTTPS_PORT" envDefault:"8443"`
-	WebAddress    string `env:"WEB_ADDRESS" envDefault:"127.0.0.1:7070"`
-	RedirectToTLS bool   `env:"REDIRECT_TO_TLS" envDefault:"true"`
-	Debug         bool   `env:"DEBUG" envDefault:"false"`
+	Domain                  string `env:"DOMAIN" envDefault:"localhost"`
+	HTTPPort                int    `env:"HTTP_PORT" envDefault:"8800"`
+	HTTPSPort               int    `env:"HTTPS_PORT" envDefault:"8443"`
+	WebAddress              string `env:"WEB_ADDRESS" envDefault:"127.0.0.1:7070"`
+	RedirectToTLS           bool   `env:"REDIRECT_TO_TLS" envDefault:"true"`
+	Debug                   bool   `env:"DEBUG" envDefault:"false"`
+	MaximumImageUploadBytes int    `env:"MAXIMUM_IMAGE_UPLOAD_BYTES" envDefault:"10485760"`
 }
 
 type dataSettings struct {

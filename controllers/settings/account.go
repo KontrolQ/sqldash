@@ -18,7 +18,7 @@ func SaveDetails(context fiber.Ctx) error {
 		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
 	}
 
-	if saveError := service.SaveDetails(sessions.Remembered(context), asked.Username, asked.Email); saveError != nil {
+	if saveError := service.SaveDetails(sessions.Remembered(context), asked.Username, asked.Email, asked.DisplayName); saveError != nil {
 		sessions.Complain(context, saveError.Message)
 	} else {
 		sessions.Report(context, service.DetailsSaved)

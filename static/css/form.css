@@ -17,6 +17,190 @@
   gap: 8px;
 }
 
+.account-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.account-settings {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  align-items: start;
+  gap: 32px;
+}
+
+.profile-picture-area {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-picture-control {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  background: var(--muted);
+  color: var(--foreground);
+  cursor: pointer;
+  font-family: inherit;
+  place-items: center;
+}
+
+.profile-picture-control .account-picture,
+.profile-picture-choice .account-picture {
+  position: absolute;
+  inset: 0;
+}
+
+.profile-picture-initial {
+  font-size: 64px;
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+}
+
+.profile-picture-change {
+  position: absolute;
+  display: flex;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: color-mix(in oklab, var(--background) 75%, transparent);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  opacity: 0;
+  place-items: center;
+  transition: opacity var(--ease);
+}
+
+.profile-picture-change svg {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-picture-control:hover .profile-picture-change,
+.profile-picture-control:focus-visible .profile-picture-change,
+.profile-picture-control[aria-busy='true'] .profile-picture-change {
+  opacity: 1;
+}
+
+.profile-picture-note {
+  margin-top: 8px;
+}
+
+.profile-picture-error {
+  margin-top: 8px;
+  color: var(--destructive);
+}
+
+.profile-picture-history {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-picture-choice {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+  cursor: pointer;
+}
+
+.profile-picture-choice:hover,
+.profile-picture-choice.is-selected {
+  border-color: var(--ring);
+}
+
+.profile-picture-recent {
+  position: relative;
+  min-width: 0;
+}
+
+.profile-picture-frame {
+  position: relative;
+}
+
+.profile-picture-clear {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.profile-picture-delete,
+.profile-picture-clear-button {
+  display: grid;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--background);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  place-items: center;
+}
+
+.profile-picture-delete {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+}
+
+.profile-picture-clear-button {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-picture-clear-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.profile-picture-delete svg {
+  width: 12px;
+  height: 12px;
+}
+
+.profile-picture-delete:hover,
+.profile-picture-clear-button:hover {
+  color: var(--destructive);
+}
+
+.account-details {
+  min-width: 0;
+}
+
+.account-password {
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 800px) {
+  .account-settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-picture-area {
+    width: min(100%, 16rem);
+  }
+}
+
 .inline-form {
   display: flex;
   align-items: center;

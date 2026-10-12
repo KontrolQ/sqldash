@@ -43,6 +43,7 @@ or from a `.env` beside the binary. Only the domain has to be set.
 | `SQLD_ADDRESS` | `127.0.0.1:8080` | where that server answers |
 | `SQLD_ADMIN_ADDRESS` | `127.0.0.1:8081` | where its namespace administration answers |
 | `SESSION_COOKIE` | `sqldash` | the name of the sign-in cookie |
+| `MAXIMUM_IMAGE_UPLOAD_BYTES` | `10485760` | maximum profile-picture upload size, in bytes (10 MB) |
 | `ALLOWED_ORIGINS` | | extra origins to accept, comma separated |
 | `DEBUG` | `false` | log every query and request |
 
