@@ -15,6 +15,10 @@ make build
 SQLDASH_DOMAIN=localhost ./bin/sqldash
 ```
 
+`make setup` also enables the repository's Git hooks; use `make hooks` to enable them separately.
+The hooks check staged formatting and syntax, reject local environment files and attribution
+trailers, and build and vet before pushing. They do not run tests.
+
 The panel answers on `SQLDASH_WEB_ADDRESS`, `127.0.0.1:7070` by default. It sets itself
 up on the first visit: you create the account then, and setup refuses to run again.
 

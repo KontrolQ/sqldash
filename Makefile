@@ -9,9 +9,12 @@ BUILD_PATH = bin/$(BINARY_NAME).exe
 AIR_CONFIG = .air.windows.toml
 endif
 
-.PHONY: setup clean tidy build run proxy web dev all
+.PHONY: hooks setup clean tidy build run proxy web dev all
 
-setup:
+hooks:
+	@git config --local core.hooksPath .githooks
+
+setup: hooks
 	@go mod download
 	@go mod tidy
 	@which air > /dev/null 2>&1 || go install github.com/air-verse/air@latest

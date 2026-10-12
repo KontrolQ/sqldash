@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+git diff --cached --check
+
+while IFS= read -r -d '' file; do
+  name="${file##*/}"
+  case "$name" in
+    .env.example|.env.sample|.env.template) ;;
+    .env|.env.*)
+      printf 'Commit rejected: keep local environment file %s out of Git.\n' "$file" >&2
+      exit 1
+      ;;
+  esac
+
+  if git show ":$file" | grep -E '^-----BEGIN ([A-Z0-9]+ )?PRIVATE KEY-----' >/dev/null; then
+    printf 'Commit rejected: %s contains private-key material.\n' "$file" >&2
+    exit 1
+  fi
+
+  case "$file" in
+    *.go)
+      if ! command -v gofmt >/dev/null 2>&1; then
+        printf '%s\n' 'Commit rejected: gofmt is required to check staged Go files.' >&2
+        exit 1
+      fi
+      differences="$(git show ":$file" | gofmt -d)"
+      if [[ -n "$differences" ]]; then
+        printf 'Commit rejected: format %s with gofmt before staging it.\n%s\n' "$file" "$differences" >&2
+        exit 1
+      fi
+      ;;
+    *.js|*.cjs|*.mjs)
+      if ! command -v node >/dev/null 2>&1; then
+        printf '%s\n' 'Commit rejected: Node.js is required to check staged JavaScript syntax.' >&2
+        exit 1
+      fi
+      git show ":$file" | node --check
+      ;;
+  esac
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)

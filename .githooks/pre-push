@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+while read -r local_ref local_object remote_ref remote_object; do
+  if [[ "$local_object" =~ ^0+$ ]]; then
+    printf 'Push rejected: deleting remote ref %s requires an explicit workflow change.\n' "$remote_ref" >&2
+    exit 1
+  fi
+  if [[ ! "$remote_object" =~ ^0+$ ]]; then
+    case "$remote_ref" in
+      refs/heads/*)
+        if ! git cat-file -e "${remote_object}^{commit}" 2>/dev/null; then
+          printf '%s\n' 'Push rejected: fetch the remote branch before checking whether this is a fast-forward.' >&2
+          exit 1
+        fi
+        if ! git merge-base --is-ancestor "$remote_object" "$local_object"; then
+          printf 'Push rejected: %s would rewrite remote history.\n' "$remote_ref" >&2
+          exit 1
+        fi
+        ;;
+      refs/tags/*)
+        if [[ "$local_object" != "$remote_object" ]]; then
+          printf 'Push rejected: do not overwrite published tag %s.\n' "$remote_ref" >&2
+          exit 1
+        fi
+        ;;
+    esac
+  fi
+done
+
+if [[ -f go.mod ]]; then
+  go build ./...
+  go vet ./...
+fi
