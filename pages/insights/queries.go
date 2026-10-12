@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"sqldash/services/access"
 	service "sqldash/services/insights"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -12,7 +13,11 @@ import (
 )
 
 func Queries(context fiber.Ctx) error {
-	data, dataError := service.GetQueries(asked(context, ""))
+	scope, scopeError := access.MonitoringScope(context.Context())
+	if scopeError != nil {
+		return scopeError
+	}
+	data, dataError := service.GetQueries(asked(context, ""), scope...)
 	if dataError != nil {
 		return dataError
 	}
@@ -29,7 +34,11 @@ func Queries(context fiber.Ctx) error {
 func QueriesForDatabase(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
-	data, dataError := service.GetQueries(asked(context, name))
+	scope, scopeError := access.MonitoringScope(context.Context())
+	if scopeError != nil {
+		return scopeError
+	}
+	data, dataError := service.GetQueries(asked(context, name), scope...)
 	if dataError != nil {
 		return dataError
 	}

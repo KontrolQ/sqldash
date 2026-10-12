@@ -1,0 +1,19 @@
+{% extends "layouts/gate.django" %}
+{% block content %}
+  <div class="gate-card">
+    <h1 class="gate-title">{{ Title }}</h1>
+    {% if Problem %}
+      <div class="notice is-bad">{{ Problem }}</div>
+    {% endif %}
+    <form class="gate-form is-compact" method="post" action="{% if Invitation %}{% url "auth.join.accept" %}{% else %}{% url "auth.recover.accept" %}{% endif %}">
+      <input type="hidden" name="token" value="{{ Token }}">
+      <div class="field"><label class="label" for="invitation-email">Email</label><input class="input" type="email" id="invitation-email" value="{{ Email }}" autocomplete="email" disabled></div>
+      {% if Invitation %}
+        <div class="field"><label class="label" for="username">Username</label><input class="input" name="username" id="username" autocomplete="username" maxlength="80" required></div>
+        <div class="field"><label class="label" for="display-name">Display name</label><input class="input" name="display_name" id="display-name" autocomplete="name" maxlength="120"></div>
+      {% endif %}
+      <div class="field"><label class="label" for="password">Password</label>{% include "partials/password.django" with field_id="password" field_name="password" field_autocomplete="new-password" %}<span class="field-note">At least eight characters.</span></div>
+      <button class="button is-block" type="submit">{% if Invitation %}Create account{% else %}Save password{% endif %}</button>
+    </form>
+  </div>
+{% endblock %}

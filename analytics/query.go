@@ -60,13 +60,13 @@ func WindowNamed(label string) Window {
 	return Windows()[0]
 }
 
-func rollupsIn(databaseName string, window Window) ([]models.Rollup, error) {
+func rollupsIn(databaseName string, window Window, allowed ...[]string) ([]models.Rollup, error) {
 	ends := time.Now()
 
-	return rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends)
+	return rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends, allowed...)
 }
 
-func rollupsBetween(databaseName string, resolution models.Resolution, from time.Time, to time.Time) ([]models.Rollup, error) {
+func rollupsBetween(databaseName string, resolution models.Resolution, from time.Time, to time.Time, allowed ...[]string) ([]models.Rollup, error) {
 	records := make([]models.Rollup, 0)
 
 	query := database.DB.
@@ -76,6 +76,10 @@ func rollupsBetween(databaseName string, resolution models.Resolution, from time
 		query = query.Where("database_name = ?", databaseName)
 	}
 
+	if len(allowed) > 0 {
+		query = query.Where("database_name IN ?", allowed[0])
+	}
+
 	if findError := query.Find(&records).Error; findError != nil {
 		return nil, findError
 	}
@@ -83,8 +87,8 @@ func rollupsBetween(databaseName string, resolution models.Resolution, from time
 	return records, nil
 }
 
-func Overall(databaseName string, window Window) (*Summary, error) {
-	records, findError := rollupsIn(databaseName, window)
+func Overall(databaseName string, window Window, allowed ...[]string) (*Summary, error) {
+	records, findError := rollupsIn(databaseName, window, allowed...)
 	if findError != nil {
 		return nil, findError
 	}
@@ -98,10 +102,10 @@ func Overall(databaseName string, window Window) (*Summary, error) {
 	return summary, nil
 }
 
-func Preceding(databaseName string, window Window) (*Summary, error) {
+func Preceding(databaseName string, window Window, allowed ...[]string) (*Summary, error) {
 	ends := time.Now().Add(-window.Since)
 
-	records, findError := rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends)
+	records, findError := rollupsBetween(databaseName, window.Resolution, ends.Add(-window.Since), ends, allowed...)
 	if findError != nil {
 		return nil, findError
 	}
@@ -115,8 +119,8 @@ func Preceding(databaseName string, window Window) (*Summary, error) {
 	return summary, nil
 }
 
-func TopQueries(databaseName string, window Window, limit int) ([]QuerySummary, error) {
-	summaries, findError := EveryQuery(databaseName, window)
+func TopQueries(databaseName string, window Window, limit int, allowed ...[]string) ([]QuerySummary, error) {
+	summaries, findError := EveryQuery(databaseName, window, allowed...)
 	if findError != nil {
 		return nil, findError
 	}
@@ -125,13 +129,13 @@ func TopQueries(databaseName string, window Window, limit int) ([]QuerySummary, 
 		summaries = summaries[:limit]
 	}
 
-	nameThem(databaseName, summaries)
+	nameThem(databaseName, summaries, allowed...)
 
 	return summaries, nil
 }
 
-func EveryQuery(databaseName string, window Window) ([]QuerySummary, error) {
-	records, findError := rollupsIn(databaseName, window)
+func EveryQuery(databaseName string, window Window, allowed ...[]string) ([]QuerySummary, error) {
+	records, findError := rollupsIn(databaseName, window, allowed...)
 	if findError != nil {
 		return nil, findError
 	}
@@ -158,8 +162,8 @@ func EveryQuery(databaseName string, window Window) ([]QuerySummary, error) {
 	return summaries, nil
 }
 
-func Name(databaseName string, summaries []QuerySummary) {
-	nameThem(databaseName, summaries)
+func Name(databaseName string, summaries []QuerySummary, allowed ...[]string) {
+	nameThem(databaseName, summaries, allowed...)
 }
 
 func (self *Summary) absorb(record models.Rollup) {
@@ -189,7 +193,7 @@ func sortByTotalDuration(summaries []QuerySummary) {
 	}
 }
 
-func nameThem(databaseName string, summaries []QuerySummary) {
+func nameThem(databaseName string, summaries []QuerySummary, allowed ...[]string) {
 	digests := make([]string, 0, len(summaries))
 	for _, summary := range summaries {
 		digests = append(digests, summary.Digest)
@@ -200,6 +204,10 @@ func nameThem(databaseName string, summaries []QuerySummary) {
 	query := database.DB.Where("digest IN ?", digests)
 	if databaseName != "" {
 		query = query.Where("database_name = ?", databaseName)
+	}
+
+	if len(allowed) > 0 {
+		query = query.Where("database_name IN ?", allowed[0])
 	}
 
 	if findError := query.Find(&fingerprints).Error; findError != nil {

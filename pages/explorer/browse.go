@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"sqldash/permissions"
+	"sqldash/services/access"
 	service "sqldash/services/explorer"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -29,6 +31,7 @@ func Browse(context fiber.Ctx) error {
 		return dataError
 	}
 
+	data.Editable = data.Editable && access.FromContext(context.Context()).Can(permissions.DataWrite)
 	meta.SetPageTitle(context, data.Title)
 	describe(context, name, DataLabel, DataSection)
 

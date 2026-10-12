@@ -2,6 +2,7 @@ package config
 
 type serverSettings struct {
 	Domain                  string `env:"DOMAIN" envDefault:"localhost"`
+	PublicURL               string `env:"PUBLIC_URL"`
 	HTTPPort                int    `env:"HTTP_PORT" envDefault:"8800"`
 	HTTPSPort               int    `env:"HTTPS_PORT" envDefault:"8443"`
 	WebAddress              string `env:"WEB_ADDRESS" envDefault:"127.0.0.1:7070"`

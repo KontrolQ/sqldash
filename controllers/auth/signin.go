@@ -3,6 +3,8 @@ package auth
 import (
 	"net/http"
 
+	"sqldash/permissions"
+	"sqldash/services/access"
 	"sqldash/services/audit"
 	service "sqldash/services/auth"
 	"sqldash/sessions"
@@ -33,6 +35,9 @@ func SignIn(context fiber.Ctx) error {
 		return shortcuts.RedirectToPath(context, wanted)
 	}
 
+	if granted, accessError := access.Load(held.ID); accessError == nil && !granted.Can(permissions.DatabaseView) {
+		return shortcuts.RedirectToPath(context, "/settings")
+	}
 	return shortcuts.Redirect(context, HomeRoute)
 }
 

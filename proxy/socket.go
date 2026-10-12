@@ -51,13 +51,32 @@ func carrySocket(writer http.ResponseWriter, request *http.Request, database str
 	waiting := &sync.Map{}
 	finished := make(chan struct{}, 2)
 
-	go carryFrames(runContext, fromClient, toServer, database, waiting, true, finished)
-	go carryFrames(runContext, toServer, fromClient, database, waiting, false, finished)
+	go watchSocketAccess(runContext, request, database, fromClient, stop)
+	go carryFrames(runContext, fromClient, toServer, database, waiting, request, finished)
+	go carryFrames(runContext, toServer, fromClient, database, waiting, nil, finished)
 
 	<-finished
 }
 
-func carryFrames(runContext context.Context, from *websocket.Conn, to *websocket.Conn, database string, waiting *sync.Map, fromClient bool, finished chan<- struct{}) {
+func watchSocketAccess(runContext context.Context, request *http.Request, database string, client *websocket.Conn, stop context.CancelFunc) {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-runContext.Done():
+			return
+		case <-ticker.C:
+			if status, _ := checkAccess(request, database, false); status != 0 {
+				client.CloseNow()
+				stop()
+				return
+			}
+		}
+	}
+}
+
+func carryFrames(runContext context.Context, from *websocket.Conn, to *websocket.Conn, database string, waiting *sync.Map, request *http.Request, finished chan<- struct{}) {
+	fromClient := request != nil
 	defer func() { finished <- struct{}{} }()
 
 	from.SetReadLimit(MaximumFrame)
@@ -66,6 +85,12 @@ func carryFrames(runContext context.Context, from *websocket.Conn, to *websocket
 		kind, frame, readError := from.Read(runContext)
 		if readError != nil {
 			return
+		}
+
+		if fromClient {
+			if status, _ := checkAccess(request, database, false); status != 0 {
+				return
+			}
 		}
 
 		if kind == websocket.MessageText {

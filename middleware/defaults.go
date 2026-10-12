@@ -41,6 +41,6 @@ var PaletteDestinations = []meta.PaletteItem{
 	{Label: "Settings", URL: "/settings"},
 }
 
-var OpenPaths = []string{LoginPath, SetupPath, RobotsPath}
+var OpenPaths = []string{LoginPath, SetupPath, RobotsPath, "/join", "/recover"}
 
 var Themes = []string{ThemeSystem, ThemeLight, ThemeDark}

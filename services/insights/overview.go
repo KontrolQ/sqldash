@@ -12,16 +12,16 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fiber.Error) {
+func GetOverview(databaseName string, windowLabel string, allowed ...[]string) (*OverviewContext, *fiber.Error) {
 	window := analytics.WindowNamed(windowLabel)
 
-	summary, summaryError := analytics.Overall(databaseName, window)
+	summary, summaryError := analytics.Overall(databaseName, window, allowed...)
 	if summaryError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, summaryError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
 	}
 
-	top, topError := analytics.TopQueries(databaseName, window, TopQueryLimit)
+	top, topError := analytics.TopQueries(databaseName, window, TopQueryLimit, allowed...)
 	if topError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, topError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
@@ -57,12 +57,12 @@ func GetOverview(databaseName string, windowLabel string) (*OverviewContext, *fi
 
 	shown.Top = toQueryViews(top, summary.TotalDuration)
 
-	before, beforeError := analytics.Preceding(databaseName, window)
+	before, beforeError := analytics.Preceding(databaseName, window, allowed...)
 	if beforeError != nil {
 		before = &analytics.Summary{}
 	}
 
-	points, seriesError := analytics.SeriesFor(databaseName, window)
+	points, seriesError := analytics.SeriesFor(databaseName, window, allowed...)
 	if seriesError != nil {
 		points = nil
 	}

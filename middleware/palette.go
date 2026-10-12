@@ -5,7 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	repository "sqldash/repositories/database"
+	"sqldash/permissions"
+	"sqldash/services/access"
 	explorer "sqldash/services/explorer"
 	"sqldash/utils/logger"
 	"sqldash/utils/meta"
@@ -18,10 +19,18 @@ func palette(context fiber.Ctx) error {
 		return context.Next()
 	}
 
+	heldAccess, _ := context.Locals(access.ContextKey).(*access.AccountAccess)
 	groups := make([]meta.PaletteGroup, 0, 4)
-	groups = append(groups, meta.PaletteGroup{Label: PaletteGoLabel, Items: PaletteDestinations})
+	destinations := []meta.PaletteItem{{Label: "Settings", URL: "/settings"}}
+	if heldAccess.Can(permissions.DatabaseView) {
+		destinations = append(destinations, PaletteDestinations[0])
+	}
+	if heldAccess.Can(permissions.InsightsView) {
+		destinations = append(destinations, PaletteDestinations[1])
+	}
+	groups = append(groups, meta.PaletteGroup{Label: PaletteGoLabel, Items: destinations})
 
-	records, findError := repository.All()
+	records, findError := access.Visible(heldAccess)
 	if findError != nil {
 		logger.Errorf(LogPrefix, PaletteListFailedLog, findError)
 		context.Locals(meta.PaletteKey, groups)
@@ -34,6 +43,9 @@ func palette(context fiber.Ctx) error {
 	held := false
 
 	for _, record := range records {
+		if !heldAccess.Can(permissions.DatabaseView) {
+			continue
+		}
 		databases = append(databases, meta.PaletteItem{
 			Label: record.Name,
 			Note:  PaletteDatabaseNote,
@@ -47,10 +59,10 @@ func palette(context fiber.Ctx) error {
 
 	groups = append(groups, meta.PaletteGroup{Label: PaletteDatabasesLabel, Items: databases})
 
-	if held {
+	if held && heldAccess.Can(permissions.DataRead) {
 		groups = append(groups, meta.PaletteGroup{
 			Label: fmt.Sprintf(PaletteInsideLabel, opened),
-			Items: sectionsOf(opened),
+			Items: sectionsOf(opened, heldAccess),
 		})
 
 		if tables := tablesOf(context, opened); len(tables) > 0 {
@@ -63,15 +75,22 @@ func palette(context fiber.Ctx) error {
 	return context.Next()
 }
 
-func sectionsOf(name string) []meta.PaletteItem {
+func sectionsOf(name string, held *access.AccountAccess) []meta.PaletteItem {
 	base := DatabasePath + url.PathEscape(name)
-
-	return []meta.PaletteItem{
-		{Label: PaletteOverviewLabel, URL: base},
-		{Label: PaletteDataLabel, URL: base + ExplorePath},
-		{Label: PaletteConsoleLabel, URL: base + ConsolePath},
-		{Label: PaletteInsightsLabel, URL: base + InsightsPath},
+	items := []meta.PaletteItem{}
+	if held.Can(permissions.DatabaseView) {
+		items = append(items, meta.PaletteItem{Label: PaletteOverviewLabel, URL: base})
 	}
+	if held.Can(permissions.DataRead) {
+		items = append(items, meta.PaletteItem{Label: PaletteDataLabel, URL: base + ExplorePath})
+	}
+	if held.Can(permissions.SQLExecute) {
+		items = append(items, meta.PaletteItem{Label: PaletteConsoleLabel, URL: base + ConsolePath})
+	}
+	if held.Can(permissions.InsightsView) {
+		items = append(items, meta.PaletteItem{Label: PaletteInsightsLabel, URL: base + InsightsPath})
+	}
+	return items
 }
 
 func tablesOf(context fiber.Ctx, name string) []meta.PaletteItem {

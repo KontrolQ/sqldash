@@ -11,14 +11,14 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func Revoke(identifier string) *fiber.Error {
+func Revoke(databaseName string, identifier string) *fiber.Error {
 	held, findError := repository.FindByIdentifier(identifier)
 	if findError != nil {
 		logger.Errorf(LogPrefix, RevokeFailedLog, identifier, findError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, RevokeRefused)
 	}
 
-	if held == nil {
+	if held == nil || held.DatabaseName != databaseName {
 		return shortcuts.ServiceError(http.StatusNotFound, TokenMissing)
 	}
 

@@ -24,6 +24,8 @@ type RouteRegistry struct {
 	Routes           collections.OrderedMap[string, RegisteredRoute]
 }
 
+var Guard func(RegisteredRoute) fiber.Handler
+
 var registry = &RouteRegistry{
 	Routes: collections.OrderedMapOf[string, RegisteredRoute](),
 }

@@ -1,0 +1,36 @@
+{% for request in OwnershipRequests %}
+  <section class="admin-ownership" aria-label="Ownership transfer">
+    <div>
+      <strong>
+      {% if request.RecipientAccountID == CurrentAccountID %}
+        Site ownership has been offered to you
+      {% else %}
+        Ownership transfer pending
+      {% endif %}
+      </strong>
+      <p>Review or cancel this transfer request.</p>
+    </div>
+    {% if request.RecipientAccountID == CurrentAccountID %}
+      <div class="admin-actions">
+        <button class="button is-small" type="button" data-sheet-open="accept-ownership-{{ request.ID }}">Review transfer</button>
+        <form method="post" action="{% url "ownership.respond" identifier=request.ID %}"><button class="button is-outline is-small" type="submit" name="action" value="decline">Decline</button></form>
+      </div>
+      <div class="sheet-veil" data-sheet="accept-ownership-{{ request.ID }}" hidden>
+        <div class="dialog-veil" data-sheet-close></div>
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="accept-ownership-title-{{ request.ID }}">
+          <div class="dialog-head">
+            <h2 class="dialog-title" id="accept-ownership-title-{{ request.ID }}">Accept site ownership</h2>
+            <p class="dialog-note">You become responsible for this instance and gain full access. Confirm with your own password.</p>
+          </div>
+          <form class="stack" method="post" action="{% url "ownership.respond" identifier=request.ID %}">
+            <input type="hidden" name="action" value="accept">
+            <div class="field"><label class="label" for="accept-password-{{ request.ID }}">Your current password</label><input class="input" id="accept-password-{{ request.ID }}" type="password" name="password" autocomplete="current-password" required></div>
+            <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button><button class="button" type="submit">Accept ownership</button></div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <form method="post" action="{% url "ownership.respond" identifier=request.ID %}"><button class="button is-outline is-small" type="submit" name="action" value="cancel">Cancel transfer</button></form>
+    {% endif %}
+  </section>
+{% endfor %}

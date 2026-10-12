@@ -9,9 +9,12 @@ func Create(record *models.Event) error {
 	return store.DB.Create(record).Error
 }
 
-func Page(databaseName string, action string, offset int, limit int) ([]models.Event, int64, error) {
+func Page(databaseName string, action string, offset int, limit int, allowed ...[]string) ([]models.Event, int64, error) {
 	records := make([]models.Event, 0)
 	query := store.DB.Model(&models.Event{})
+	if len(allowed) > 0 {
+		query = query.Where("database IN ?", allowed[0])
+	}
 
 	if databaseName != "" {
 		query = query.Where("database = ?", databaseName)
@@ -35,9 +38,12 @@ func Page(databaseName string, action string, offset int, limit int) ([]models.E
 	return records, total, nil
 }
 
-func Actions(databaseName string) ([]string, error) {
+func Actions(databaseName string, allowed ...[]string) ([]string, error) {
 	held := make([]string, 0)
 	query := store.DB.Model(&models.Event{})
+	if len(allowed) > 0 {
+		query = query.Where("database IN ?", allowed[0])
+	}
 
 	if databaseName != "" {
 		query = query.Where("database = ?", databaseName)

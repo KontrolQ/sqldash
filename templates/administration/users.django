@@ -1,0 +1,114 @@
+{% extends "layouts/base.django" %}
+{% block content %}
+  {% include "partials/alert.django" %}
+  {% include "administration/issuedlink.django" %}
+  {% include "administration/usereditor.django" %}
+  <div class="page-head">
+    <div class="page-title">
+      <h1>Users</h1>
+    </div>
+    <button class="button" type="button" data-sheet-open="invite-user"><svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Invite user</button>
+  </div>
+  <div class="members-toolbar">
+    <nav class="tabs"><a class="tab {% if not InvitationsOnly %}is-current{% endif %}" href="{% url "users.index" %}">Users <span class="badge is-secondary">{{ Total }}</span></a><a class="tab {% if InvitationsOnly %}is-current{% endif %}" href="?view=invitations">Invitations <span class="badge is-secondary">{{ Invitations|length }}</span></a></nav>
+    {% if not InvitationsOnly %}
+      <form class="members-search" method="get"><input class="input" type="search" name="q" value="{{ Query }}" placeholder="Search users" aria-label="Search users">{% if RoleID %}<input type="hidden" name="role" value="{{ RoleID }}">{% endif %}<button class="button is-outline" type="submit">Search</button></form>
+    {% endif %}
+  </div>
+  {% if RoleID %}
+    <a class="button is-ghost is-small members-clear-filter" href="{% url "users.index" %}">Clear role filter</a>
+  {% endif %}
+  <div class="card is-table">
+    <div class="table-wrap">
+      <table class="table members-table">
+        {% if InvitationsOnly %}
+          <thead>
+            <tr>
+              <th scope="col">Email</th>
+              <th scope="col">Expires</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for invitation in Invitations %}
+              <tr>
+                <td>{{ invitation.Email }}</td>
+                <td class="muted">{{ invitation.ExpiresAt|date:"02 Jan 2006" }}</td>
+                <td class="table-actions">
+                  <div class="actions">
+                    <form method="post" action="{% url "users.invitation.reissue" identifier=invitation.ID %}"><button class="button is-outline is-small" type="submit">New link</button></form>
+                    <form method="post" action="{% url "users.invitation.cancel" identifier=invitation.ID %}"><button class="button is-ghost is-small" type="submit">Cancel invitation</button></form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="members-empty">No pending invitations.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        {% else %}
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Roles</th>
+              <th scope="col">Database access</th>
+              <th scope="col">Status</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in Users %}
+              <tr>
+                <td>
+                  <div class="members-identity"><span class="members-avatar">{% if user.Picture %}<img class="account-picture" src="{{ user.Picture }}" alt="">{% else %}{{ user.Initial }}{% endif %}</span><div class="members-identity-text"><span class="members-name">{% if user.Manage %}<a href="?edit={{ user.ID }}">{{ user.Name }}</a>{% else %}{{ user.Name }}{% endif %}{% if user.Owner %}<span class="badge is-outline">Owner</span>{% endif %}</span><span class="muted">{{ user.Email }}</span></div></div>
+                </td>
+                <td>
+                  <div class="members-role-badges">{% for role in user.Roles %}<span class="badge is-outline"><span class="roles-dot" style="--role-color:{{ role.Color }}"></span>{{ role.Name }}</span>{% empty %}<span class="muted">—</span>{% endfor %}</div>
+                </td>
+                <td>{% if user.All %}All databases{% else %}{{ user.Databases }} selected{% endif %}</td>
+                <td><span class="badge {% if user.Active %}is-secondary{% else %}is-outline{% endif %}">{% if user.Active %}Active{% else %}Deactivated{% endif %}</span></td>
+                <td class="table-actions">{% include "administration/usermenu.django" %}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="members-empty">No users found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+  {% if Pages > 1 and not InvitationsOnly %}
+    <div class="members-pagination"><span class="field-note">Page {{ Page }} of {{ Pages }}</span><div class="actions">{% if Page > 1 %}<a class="button is-outline is-small" href="?page={{ Previous }}&q={{ Query|urlencode }}&role={{ RoleID }}">Previous</a>{% endif %}{% if Page < Pages %}<a class="button is-outline is-small" href="?page={{ Next }}&q={{ Query|urlencode }}&role={{ RoleID }}">Next</a>{% endif %}</div></div>
+  {% endif %}
+  <div class="sheet-veil" data-sheet="invite-user" hidden>
+    <div class="dialog-veil" data-sheet-close></div>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+      <div class="dialog-head">
+        <h2 class="dialog-title" id="invite-title">Invite user</h2>
+      </div>
+      <form class="dialog-body" method="post" action="{% url "users.invite" %}">
+        <div class="field"><label class="label" for="invite-email">Email</label><input class="input" type="email" name="email" id="invite-email" autocomplete="off" required></div>
+        <div class="checkbox-field">{% include "partials/checkbox.django" with checkbox_name="send_email" checkbox_value="true" checkbox_id="invite-send-email" checkbox_on=EmailConfigured checkbox_disabled=EmailDisabled checkbox_label="Send email now" %}<label for="invite-send-email">Send email now</label></div>
+        <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button><button class="button" type="submit">Generate invitation</button></div>
+      </form>
+    </section>
+  </div>
+  {% if Transferring %}
+    <div class="sheet-veil" data-sheet="ownership-transfer">
+      <div class="dialog-veil" data-sheet-close></div>
+      <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="transfer-title">
+        <div class="dialog-head">
+          <h2 class="dialog-title" id="transfer-title">Transfer ownership</h2>
+          <p class="dialog-note">Send an ownership transfer request to {{ Transferring.Name }}.</p>
+        </div>
+        <form class="stack" method="post" action="{% url "users.ownership" identifier=Transferring.ID %}">
+          <div class="field"><label class="label" for="transfer-password">Your current password</label>{% include "partials/password.django" with field_id="transfer-password" field_name="password" field_autocomplete="current-password" %}</div>
+          <div class="dialog-foot"><a class="button is-outline" href="{% url "users.index" %}">Cancel</a><button class="button" type="submit">Send request</button></div>
+        </form>
+      </section>
+    </div>
+  {% endif %}
+{% endblock %}

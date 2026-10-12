@@ -9,6 +9,8 @@ func migrate() {
 	migrationError := DB.AutoMigrate(
 		&models.Account{},
 		&models.AccountPicture{},
+		&models.Site{}, &models.Role{}, &models.RolePermission{}, &models.AccountRole{},
+		&models.DatabaseShare{}, &models.AccountLink{}, &models.OwnershipTransfer{}, &models.SMTPSettings{},
 		&models.Session{},
 		&models.Database{},
 		&models.AccessRule{},
@@ -23,5 +25,8 @@ func migrate() {
 
 	if migrationError != nil {
 		logger.Fatalf(LogPrefix, MigrationFailedLog, migrationError)
+	}
+	if ownershipError := migrateOwnership(); ownershipError != nil {
+		logger.Fatalf(LogPrefix, MigrationFailedLog, ownershipError)
 	}
 }

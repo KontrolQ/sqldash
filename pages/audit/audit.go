@@ -3,6 +3,7 @@ package audit
 import (
 	"strconv"
 
+	"sqldash/services/access"
 	service "sqldash/services/audit"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -13,8 +14,12 @@ import (
 func Log(context fiber.Ctx) error {
 	page, _ := strconv.Atoi(context.Query(PageParameter))
 
+	scope, scopeError := access.MonitoringScope(context.Context())
+	if scopeError != nil {
+		return scopeError
+	}
 	data, dataError := service.Page(
-		context.Query(DatabaseParameter), context.Query(ActionParameter), page,
+		context.Query(DatabaseParameter), context.Query(ActionParameter), page, scope...,
 	)
 
 	if dataError != nil {

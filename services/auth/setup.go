@@ -42,7 +42,7 @@ func CreateFirstAccount(username string, email string, password string) (*models
 
 	held := &models.Account{Username: username, Email: email, PasswordHash: hashed}
 
-	if createError := repository.Create(held); createError != nil {
+	if createError := repository.CreateFirst(held); createError != nil {
 		logger.Errorf(LogPrefix, CreateFailedLog, createError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, AccountUnavailable)
 	}

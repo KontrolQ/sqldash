@@ -1,0 +1,20 @@
+{% if user.Manage or Owner and user.Active and not user.Owner %}
+  <div class="menu" data-menu>
+    <button class="button is-ghost is-icon is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="menu" aria-label="Actions for {{ user.Name }}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+    <div class="menu-content user-action-menu" role="menu" data-menu-content hidden>
+      <div class="menu-label">{{ user.Name }}</div>
+      <div class="menu-separator"></div>
+      {% if user.Manage %}
+        <a class="menu-check" role="menuitem" href="{% url "users.index" %}?edit={{ user.ID }}"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/></svg>Manage user</a>
+        <form method="post" action="{% url "users.recovery" identifier=user.ID %}"><button class="menu-check" role="menuitem" type="submit"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="5"/><path d="m12 11 8-8 2 2-3 3 2 2-3 3-2-2"/></svg>Generate recovery link</button></form>
+        <form method="post" action="{% url "users.sessions.revoke" identifier=user.ID %}" data-confirm="This signs the user out on every device." data-confirm-title="Revoke sessions for {{ user.Name }}?" data-confirm-action="Revoke sessions"><button class="menu-check" role="menuitem" type="submit"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Revoke sessions</button></form>
+        <div class="menu-separator"></div>
+        <form method="post" action="{% url "users.active" identifier=user.ID %}" {% if user.Active %}data-confirm="This signs the user out and prevents new connections." data-confirm-title="Deactivate {{ user.Name }}?" data-confirm-action="Deactivate user"{% endif %}><input type="hidden" name="active" value="{% if user.Active %}false{% else %}true{% endif %}"><button class="menu-check {% if user.Active %}is-destructive{% endif %}" role="menuitem" type="submit"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg>{% if user.Active %}Deactivate user{% else %}Reactivate user{% endif %}</button></form>
+      {% endif %}
+      {% if Owner and user.Active and not user.Owner %}
+        <div class="menu-separator"></div>
+        <a class="menu-check" role="menuitem" href="{% url "users.index" %}?transfer={{ user.ID }}"><svg viewBox="0 0 24 24"><path d="m2 8 5 4 5-8 5 8 5-4-3 12H5L2 8Z"/></svg>Transfer ownership</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

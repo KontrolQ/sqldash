@@ -1,0 +1,22 @@
+{% if Issued %}
+  <div class="sheet-veil" data-sheet="issued-link">
+    <div class="dialog-veil" data-sheet-close></div>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="issued-link-title">
+      <div class="dialog-head">
+        <h2 class="dialog-title" id="issued-link-title">Link ready</h2>
+        <p class="dialog-note">{{ Issued.Email }}</p>
+      </div>
+      <div class="dialog-body">
+        <div class="field"><label class="label" for="issued-link-url">Link</label><div class="issued-link-field"><input class="input" id="issued-link-url" type="text" value="{{ Issued.URL }}" readonly autocomplete="off"><button class="button is-outline is-icon" type="button" data-copy="issued-link-copy" data-copy-label="The link" aria-label="Copy link"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button></div><span id="issued-link-copy" hidden>{{ Issued.URL }}</span></div>
+        {% if Issued.Sent %}
+          <p class="field-note">Email sent.</p>
+        {% elif Issued.DeliveryProblem %}
+          <p class="field-note issued-link-problem">Email could not be sent. Copy the link to share it.</p>
+        {% else %}
+          <p class="field-note">Copy the link to share it.</p>
+        {% endif %}
+        <div class="dialog-foot"><button class="button" type="button" data-sheet-close>Done</button></div>
+      </div>
+    </section>
+  </div>
+{% endif %}

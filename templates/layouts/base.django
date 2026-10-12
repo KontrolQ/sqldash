@@ -1,73 +1,83 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="{{ Theme }}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ Title }} · sqldash</title>
-<meta name="description" content="{% if Description %}{{ Description }}{% else %}The control panel for this libSQL server: databases, tokens, the data explorer and query insights.{% endif %}">
-<link rel="icon" href="{% static "favicon.ico" %}" sizes="any">
-<link rel="icon" href="{% static "logo.svg" %}" type="image/svg+xml">
-<link rel="apple-touch-icon" href="{% static "apple-touch-icon.png" %}">
-<link rel="stylesheet" href="{% static "css/tokens.css" %}">
-<link rel="stylesheet" href="{% static "css/theme.css" %}">
-<link rel="stylesheet" href="{% static "css/base.css" %}">
-<link rel="stylesheet" href="{% static "css/button.css" %}">
-<link rel="stylesheet" href="{% static "css/input.css" %}">
-<link rel="stylesheet" href="{% static "css/toggle.css" %}">
-<link rel="stylesheet" href="{% static "css/select.css" %}">
-<link rel="stylesheet" href="{% static "css/alert.css" %}">
-<link rel="stylesheet" href="{% static "css/popover.css" %}">
-<link rel="stylesheet" href="{% static "css/badge.css" %}">
-<link rel="stylesheet" href="{% static "css/form.css" %}">
-<link rel="stylesheet" href="{% static "css/layout.css" %}">
-<link rel="stylesheet" href="{% static "css/sidebar.css" %}">
-<link rel="stylesheet" href="{% static "css/topbar.css" %}">
-<link rel="stylesheet" href="{% static "css/panels.css" %}">
-<link rel="stylesheet" href="{% static "css/tables.css" %}">
-<link rel="stylesheet" href="{% static "css/tabs.css" %}">
-<link rel="stylesheet" href="{% static "css/chart.css" %}">
-<link rel="stylesheet" href="{% static "css/dialog.css" %}">
-<link rel="stylesheet" href="{% static "css/command.css" %}">
-<link rel="stylesheet" href="{% static "css/checkbox.css" %}">
-<link rel="stylesheet" href="{% static "css/explorer.css" %}">
-<link rel="stylesheet" href="{% static "css/editor.css" %}">
-<link rel="stylesheet" href="{% static "css/tiles.css" %}">
-{% block styles %}{% endblock %}
-</head>
-<body>
-<div class="shell">
-{% include "partials/sidebar.django" %}
-<div class="main">
-{% include "partials/topbar.django" %}
-<main class="content {% block tight %}{% endblock %}">
-{% block content %}{% endblock %}
-</main>
-</div>
-</div>
-<script src="{% static "js/password.js" %}" defer></script>
-<script src="{% static "js/profilepicture.js" %}" defer></script>
-<script src="{% static "js/select.js" %}" defer></script>
-<script src="{% static "js/moment.js" %}" defer></script>
-<script src="{% static "js/chart.js" %}" defer></script>
-<script src="{% static "js/reveal.js" %}" defer></script>
-<script src="{% static "js/confirm.js" %}" defer></script>
-<script src="{% static "js/copy.js" %}" defer></script>
-<script src="{% static "js/toast.js" %}" defer></script>
-<script src="{% static "js/palette.js" %}" defer></script>
-<script src="{% static "js/menu.js" %}" defer></script>
-<script src="{% static "js/columns.js" %}" defer></script>
-<script src="{% static "js/selection.js" %}" defer></script>
-<script src="{% static "js/rail.js" %}" defer></script>
-<script src="{% static "js/console.js" %}" defer></script>
-<script src="{% static "js/editor.js" %}" defer></script>
-<script src="{% static "js/rows.js" %}" defer></script>
-<script src="{% static "js/sheet.js" %}" defer></script>
-<script src="{% static "js/swap.js" %}" defer></script>
-<script src="{% static "js/filter.js" %}" defer></script>
-<script src="{% static "js/grid.js" %}" defer></script>
-<script src="{% static "js/peek.js" %}" defer></script>
-<script src="{% static "js/results.js" %}" defer></script>
-<script src="{% static "js/snippets.js" %}" defer></script>
-{% block scripts %}{% endblock %}
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ Title }} · sqldash</title>
+    <meta name="description" content="{% if Description %}{{ Description }}{% else %}The control panel for this libSQL server: databases, tokens, the data explorer and query insights.{% endif %}">
+    <link rel="icon" href="{% static "favicon.ico" %}" sizes="any">
+    <link rel="icon" href="{% static "logo.svg" %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static "apple-touch-icon.png" %}">
+    <link rel="stylesheet" href="{% static "css/tokens.css" %}">
+    <link rel="stylesheet" href="{% static "css/theme.css" %}">
+    <link rel="stylesheet" href="{% static "css/base.css" %}">
+    <link rel="stylesheet" href="{% static "css/button.css" %}">
+    <link rel="stylesheet" href="{% static "css/input.css" %}">
+    <link rel="stylesheet" href="{% static "css/toggle.css" %}">
+    <link rel="stylesheet" href="{% static "css/select.css" %}">
+    <link rel="stylesheet" href="{% static "css/alert.css" %}">
+    <link rel="stylesheet" href="{% static "css/popover.css" %}">
+    <link rel="stylesheet" href="{% static "css/badge.css" %}">
+    <link rel="stylesheet" href="{% static "css/form.css" %}">
+    <link rel="stylesheet" href="{% static "css/layout.css" %}">
+    <link rel="stylesheet" href="{% static "css/sidebar.css" %}">
+    <link rel="stylesheet" href="{% static "css/topbar.css" %}">
+    <link rel="stylesheet" href="{% static "css/panels.css" %}">
+    <link rel="stylesheet" href="{% static "css/tables.css" %}">
+    <link rel="stylesheet" href="{% static "css/tabs.css" %}">
+    <link rel="stylesheet" href="{% static "css/chart.css" %}">
+    <link rel="stylesheet" href="{% static "css/dialog.css" %}">
+    <link rel="stylesheet" href="{% static "css/command.css" %}">
+    <link rel="stylesheet" href="{% static "css/checkbox.css" %}">
+    <link rel="stylesheet" href="{% static "css/explorer.css" %}">
+    <link rel="stylesheet" href="{% static "css/editor.css" %}">
+    <link rel="stylesheet" href="{% static "css/tiles.css" %}">
+    <link rel="stylesheet" href="{% static "css/administration.css" %}">
+    <link rel="stylesheet" href="{% static "css/roles.css" %}">
+    <link rel="stylesheet" href="{% static "css/members.css" %}">
+    {% block styles %}
+    {% endblock %}
+  </head>
+  <body>
+    <div class="shell">
+      {% include "partials/sidebar.django" %}
+      <div class="main">
+        {% include "partials/topbar.django" %}
+        <main class="content {% block tight %}{% endblock %}">
+          {% include "administration/ownership.django" %}
+          {% block content %}
+          {% endblock %}
+        </main>
+      </div>
+    </div>
+    <script src="{% static "js/password.js" %}" defer></script>
+    <script src="{% static "js/profilepicture.js" %}" defer></script>
+    <script src="{% static "js/select.js" %}" defer></script>
+    <script src="{% static "js/moment.js" %}" defer></script>
+    <script src="{% static "js/chart.js" %}" defer></script>
+    <script src="{% static "js/reveal.js" %}" defer></script>
+    <script src="{% static "js/confirm.js" %}" defer></script>
+    <script src="{% static "js/copy.js" %}" defer></script>
+    <script src="{% static "js/toast.js" %}" defer></script>
+    <script src="{% static "js/palette.js" %}" defer></script>
+    <script src="{% static "js/menu.js" %}" defer></script>
+    <script src="{% static "js/columns.js" %}" defer></script>
+    <script src="{% static "js/selection.js" %}" defer></script>
+    <script src="{% static "js/rail.js" %}" defer></script>
+    <script src="{% static "js/console.js" %}" defer></script>
+    <script src="{% static "js/editor.js" %}" defer></script>
+    <script src="{% static "js/rows.js" %}" defer></script>
+    <script src="{% static "js/sheet.js" %}" defer></script>
+    <script src="{% static "js/swap.js" %}" defer></script>
+    <script src="{% static "js/filter.js" %}" defer></script>
+    <script src="{% static "js/grid.js" %}" defer></script>
+    <script src="{% static "js/peek.js" %}" defer></script>
+    <script src="{% static "js/results.js" %}" defer></script>
+    <script src="{% static "js/snippets.js" %}" defer></script>
+    <script src="{% static "js/administration.js" %}" defer></script>
+    <script src="{% static "js/roles.js" %}" defer></script>
+    <script src="{% static "js/rolecolour.js" %}" defer></script>
+    {% block scripts %}
+    {% endblock %}
+  </body>
 </html>

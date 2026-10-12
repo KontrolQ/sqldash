@@ -13,7 +13,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func Mint(databaseName string, label string, scope string) (string, *fiber.Error) {
+func Mint(accountID uint, databaseName string, label string, scope string) (string, *fiber.Error) {
 	wanted, scopeError := scopeFrom(scope)
 	if scopeError != nil {
 		return "", scopeError
@@ -36,6 +36,7 @@ func Mint(databaseName string, label string, scope string) (string, *fiber.Error
 
 	record := &models.Token{
 		DatabaseName: databaseName,
+		AccountID:    accountID,
 		Label:        label,
 		Identifier:   minted.Identifier,
 		Digest:       minted.Digest,

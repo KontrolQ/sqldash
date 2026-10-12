@@ -2,6 +2,8 @@ package sessions
 
 import (
 	"sqldash/config"
+	"sqldash/database"
+	"sqldash/models"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -31,7 +33,12 @@ func Remember(context fiber.Ctx, accountID uint) {
 		return
 	}
 
+	var account models.Account
+	if findError := database.DB.First(&account, accountID).Error; findError != nil {
+		return
+	}
 	held.Set(AccountKey, accountID)
+	held.Set("session-version", account.SessionVersion)
 }
 
 func Remembered(context fiber.Ctx) uint {

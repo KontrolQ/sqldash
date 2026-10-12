@@ -16,6 +16,7 @@ import (
 	"sqldash/hosting"
 	"sqldash/models"
 	repository "sqldash/repositories/database"
+	"sqldash/services/access"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
@@ -49,7 +50,7 @@ func CreateFromUpload(requestContext context.Context, asked string, fileName str
 		return shortcuts.ServiceError(http.StatusBadRequest, fmt.Sprintf(ImportRefusedFormat, replayError))
 	}
 
-	if registerError := repository.Create(&models.Database{Name: name}); registerError != nil {
+	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
 		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
 		discard(requestContext, name)
 
@@ -243,7 +244,7 @@ func Fork(requestContext context.Context, from string, asked string, at *time.Ti
 		return shortcuts.ServiceError(http.StatusBadGateway, ForkRefused)
 	}
 
-	if registerError := repository.Create(&models.Database{Name: name}); registerError != nil {
+	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
 		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, ForkRefused)
 	}

@@ -1,118 +1,135 @@
 {% extends "layouts/base.django" %}
-
 {% block content %}
-<div class="page-head">
-<div class="page-title">
-<h1>Databases</h1>
-<p class="page-subtitle">Every database this server holds.</p>
-</div>
-<div class="page-actions">
-<button class="button" type="button" data-sheet-open="new-database">
+  <div class="page-head">
+    <div class="page-title">
+      <h1>Databases</h1>
+      <p class="page-subtitle">The databases you have access to.</p>
+    </div>
+    {% if CanCreateDatabases %}
+      <div class="page-actions">
+        <button class="button" type="button" data-sheet-open="new-database">
 <svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
 Create database
 </button>
-</div>
-</div>
-
-{% include "partials/alert.django" %}
-
-{% if Databases %}
-<div class="card is-table">
-<div class="table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th scope="col">Name</th>
-<th scope="col">Address</th>
-<th scope="col" class="table-numeric">Tables</th>
-<th scope="col" class="table-numeric">Storage</th>
-<th scope="col" class="table-numeric">Rows read</th>
-<th scope="col" class="table-numeric">Queries</th>
-<th scope="col">State</th>
-<th scope="col" class="table-pick"></th>
-</tr>
-</thead>
-<tbody>
-{% for database in Databases %}
-<tr>
-<td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
-<td class="mono muted">{{ database.Address }}</td>
-<td class="table-numeric">{{ database.Tables }}</td>
-<td class="table-numeric">{{ database.Storage }}</td>
-<td class="table-numeric">{{ database.RowsRead }}</td>
-<td class="table-numeric">{{ database.Queries }}</td>
-<td>
-{% if database.Blocked %}<span class="badge is-outline">Blocked</span>
-{% elif database.Protected %}<span class="badge is-secondary">Protected</span>
-{% else %}<span class="badge is-outline">Open</span>{% endif %}
-</td>
-<td class="table-pick">
-<div class="menu" data-menu>
-<button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions for {{ database.Name }}">
+      </div>
+    {% endif %}
+  </div>
+  {% include "partials/alert.django" %}
+  {% if Databases %}
+    <div class="card is-table">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Address</th>
+              <th scope="col" class="table-numeric">Tables</th>
+              <th scope="col" class="table-numeric">Storage</th>
+              <th scope="col" class="table-numeric">Rows read</th>
+              <th scope="col" class="table-numeric">Queries</th>
+              <th scope="col">State</th>
+              <th scope="col" class="table-pick"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for database in Databases %}
+              <tr>
+                <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
+                <td class="mono muted">{{ database.Address }}</td>
+                <td class="table-numeric">{{ database.Tables }}</td>
+                <td class="table-numeric">{{ database.Storage }}</td>
+                <td class="table-numeric">{{ database.RowsRead }}</td>
+                <td class="table-numeric">{{ database.Queries }}</td>
+                <td>
+                  {% if database.Blocked %}
+                    <span class="badge is-outline">Blocked</span>
+                  {% elif database.Protected %}
+                    <span class="badge is-secondary">Protected</span>
+                  {% else %}
+                    <span class="badge is-outline">Open</span>
+                  {% endif %}
+                </td>
+                <td class="table-pick">
+                  <div class="menu" data-menu>
+                    <button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions for {{ database.Name }}">
 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
 </button>
-<div class="menu-content" data-menu-content hidden>
-<a class="menu-plain" href="{% url "databases.show" name=database.Name %}">Manage</a>
-<a class="menu-plain" href="{% url "databases.explore" name=database.Name %}">Browse data</a>
-<a class="menu-plain" href="{% url "databases.console" name=database.Name %}">Open the console</a>
-<div class="menu-separator"></div>
-<a class="menu-plain" href="{% url "databases.export" name=database.Name %}">Download a dump</a>
-</div>
-</div>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-</div>
-{% else %}
-<div class="empty">
-<span class="empty-title">No databases yet</span>
-<span>Create one to get started.</span>
-</div>
-{% endif %}
-
-<div class="sheet-veil" data-sheet="new-database" hidden>
-<div class="dialog-veil" data-sheet-close></div>
-<div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
-<div class="dialog-head">
-<div class="dialog-title" id="new-database-title">Create a database</div>
-<div class="dialog-note">Start empty, or build one from a file you already have.</div>
-</div>
-
-<div class="tabs" data-swap>
-<button class="tab is-current" type="button" data-swap-to="make-empty">Empty</button>
-<button class="tab" type="button" data-swap-to="make-dump">From a file</button>
-</div>
-
-<form class="stack" method="post" action="{% url "databases.create" %}" data-swap-panel="make-empty">
-<div class="field">
-<label class="label" for="create-name">Name</label>
+                    <div class="menu-content" data-menu-content hidden>
+                      <a class="menu-plain" href="{% url "databases.show" name=database.Name %}">Manage</a>
+                      {% if CanReadData %}
+                        <a class="menu-plain" href="{% url "databases.explore" name=database.Name %}">Browse data</a>
+                      {% endif %}
+                      {% if CanRunSQL %}
+                        <a class="menu-plain" href="{% url "databases.console" name=database.Name %}">Open the console</a>
+                      {% endif %}
+                      {% if CanExportDatabases %}
+                        <div class="menu-separator"></div>
+                        <a class="menu-plain" href="{% url "databases.export" name=database.Name %}">Download a dump</a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="empty">
+      <span class="empty-title">No databases yet</span>
+<span>
+      {% if CanCreateDatabases %}
+        Create one to get started.
+      {% else %}
+        Ask an administrator or database owner to share one with you.
+      {% endif %}
+      </span>
+    </div>
+  {% endif %}
+  {% if CanCreateDatabases %}
+    <div class="sheet-veil" data-sheet="new-database" hidden>
+      <div class="dialog-veil" data-sheet-close></div>
+      <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
+        <div class="dialog-head">
+          <div class="dialog-title" id="new-database-title">Create a database</div>
+          <div class="dialog-note">Start empty, or build one from a file you already have.</div>
+        </div>
+        <div class="tabs" data-swap>
+          <button class="tab is-current" type="button" data-swap-to="make-empty">Empty</button>
+          {% if CanImportDatabases %}
+            <button class="tab" type="button" data-swap-to="make-dump">From a file</button>
+          {% endif %}
+        </div>
+        <form class="stack" method="post" action="{% url "databases.create" %}" data-swap-panel="make-empty">
+          <div class="field">
+            <label class="label" for="create-name">Name</label>
 <input class="input" id="create-name" name="name" required>
 <span class="field-note">Lowercase letters, digits and hyphens.</span>
-</div>
-<div class="dialog-foot">
-<button class="button is-outline" type="button" data-sheet-close>Cancel</button>
+          </div>
+          <div class="dialog-foot">
+            <button class="button is-outline" type="button" data-sheet-close>Cancel</button>
 <button class="button" type="submit">Create database</button>
-</div>
-</form>
-
-<form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data" data-swap-panel="make-dump" hidden>
-<div class="field">
-<label class="label" for="import-name">Name</label>
+          </div>
+        </form>
+        {% if CanImportDatabases %}
+          <form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data" data-swap-panel="make-dump" hidden>
+            <div class="field">
+              <label class="label" for="import-name">Name</label>
 <input class="input" id="import-name" name="name" required>
-</div>
-<div class="field">
-<label class="label" for="import-dump">File</label>
+            </div>
+            <div class="field">
+              <label class="label" for="import-dump">File</label>
 <input class="file" id="import-dump" type="file" name="dump" accept=".sql,.db,.sqlite,.sqlite3" required>
 <span class="field-note">A SQLite file, or a .sql file of statements.</span>
-</div>
-<div class="dialog-foot">
-<button class="button is-outline" type="button" data-sheet-close>Cancel</button>
+            </div>
+            <div class="dialog-foot">
+              <button class="button is-outline" type="button" data-sheet-close>Cancel</button>
 <button class="button" type="submit">Load database</button>
-</div>
-</form>
-</div>
-</div>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

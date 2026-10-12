@@ -7,13 +7,19 @@ import (
 	"time"
 
 	"sqldash/models"
+	"sqldash/permissions"
 	rulerepository "sqldash/repositories/accessrule"
 	tokenrepository "sqldash/repositories/token"
+	"sqldash/services/access"
 	"sqldash/utils/logger"
 	"sqldash/utils/tokens"
 )
 
 func permitted(request *http.Request, database string) (int, string) {
+	return checkAccess(request, database, true)
+}
+
+func checkAccess(request *http.Request, database string, recordUse bool) (int, string) {
 	if allowed, ruleError := addressAllowed(request, database); ruleError != nil {
 		return http.StatusInternalServerError, AccessUnreadable
 	} else if !allowed {
@@ -35,7 +41,17 @@ func permitted(request *http.Request, database string) (int, string) {
 		return http.StatusUnauthorized, TokenRefused
 	}
 
-	noteUse(held)
+	issuer, issuerError := access.Load(held.AccountID)
+	if issuerError != nil || !issuer.Can(permissions.TokenManage) || !issuer.Can(permissions.DataWrite) {
+		return http.StatusUnauthorized, TokenRefused
+	}
+	if _, visibilityError := access.Database(issuer, database); visibilityError != nil {
+		return http.StatusUnauthorized, TokenRefused
+	}
+
+	if recordUse {
+		noteUse(held)
+	}
 
 	return 0, ""
 }

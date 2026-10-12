@@ -27,18 +27,18 @@ func Record(actor string, databaseName string, action string, detail string) {
 	}
 }
 
-func Page(databaseName string, action string, page int) (*LogContext, *fiber.Error) {
+func Page(databaseName string, action string, page int, allowed ...[]string) (*LogContext, *fiber.Error) {
 	if page < 1 {
 		page = 1
 	}
 
-	records, total, findError := repository.Page(databaseName, action, (page-1)*PageSize, PageSize)
+	records, total, findError := repository.Page(databaseName, action, (page-1)*PageSize, PageSize, allowed...)
 	if findError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, findError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, LogUnavailable)
 	}
 
-	actions, actionsError := repository.Actions(databaseName)
+	actions, actionsError := repository.Actions(databaseName, allowed...)
 	if actionsError != nil {
 		actions = nil
 	}

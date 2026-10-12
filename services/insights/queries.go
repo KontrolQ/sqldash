@@ -19,16 +19,16 @@ type QueriesAsk struct {
 	Page      int
 }
 
-func GetQueries(asked QueriesAsk) (*QueriesContext, *fiber.Error) {
+func GetQueries(asked QueriesAsk, allowed ...[]string) (*QueriesContext, *fiber.Error) {
 	window := analytics.WindowNamed(asked.Window)
 
-	summary, summaryError := analytics.Overall(asked.Database, window)
+	summary, summaryError := analytics.Overall(asked.Database, window, allowed...)
 	if summaryError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, summaryError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
 	}
 
-	every, everyError := analytics.EveryQuery(asked.Database, window)
+	every, everyError := analytics.EveryQuery(asked.Database, window, allowed...)
 	if everyError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, everyError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
@@ -75,7 +75,7 @@ func GetQueries(asked QueriesAsk) (*QueriesContext, *fiber.Error) {
 	}
 
 	page := every[from:to]
-	analytics.Name(asked.Database, page)
+	analytics.Name(asked.Database, page, allowed...)
 
 	shown.Rows = toQueryViews(page, summary.TotalDuration)
 

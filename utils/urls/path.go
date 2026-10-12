@@ -95,6 +95,9 @@ func resolveFullPath(namespace string, path string) string {
 }
 
 func bindPath(application *fiber.App, route RegisteredRoute) {
+	if Guard != nil {
+		route.Handler = Guard(route)
+	}
 	switch route.Method {
 	case Delete:
 		application.Delete(route.FullPath, route.Handler)

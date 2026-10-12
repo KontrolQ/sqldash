@@ -1,0 +1,40 @@
+{% extends "layouts/base.django" %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Database }}</h1>
+      <p class="page-subtitle">Share access with other users.</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <section class="admin-sharing">
+    <div class="admin-section-heading">
+      <h2>Database access</h2>
+      <p>Choose who can access {{ Database }}.</p>
+    </div>
+    <div class="admin-table-frame">
+      {% for member in Members %}
+        <div class="admin-sharing-row">
+          <div class="admin-person">
+            <span class="admin-avatar">
+            {% if member.Picture %}
+              <img src="{{ member.Picture }}" alt="">
+            {% else %}
+              {{ member.Initial }}
+            {% endif %}
+            </span>
+            <div class="admin-person-text"><strong>{{ member.Name }}</strong><span class="admin-person-email">{{ member.Email }}</span></div>
+          </div>
+          {% if member.Implicit %}
+            <span class="admin-status is-active"><span></span>All databases</span>
+          {% else %}
+            <form method="post" action="{% url "databases.share" name=Database %}"><input type="hidden" name="account_id" value="{{ member.ID }}"><input type="hidden" name="action" value="{% if member.Selected %}remove{% else %}add{% endif %}"><button class="button is-outline is-small" type="submit">{% if member.Selected %}Remove access{% else %}Share database{% endif %}</button></form>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="admin-table-empty">There are no other active users to share with.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

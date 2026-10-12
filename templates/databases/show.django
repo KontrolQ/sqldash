@@ -1,226 +1,251 @@
 {% extends "layouts/base.django" %}
-
 {% block content %}
-<div class="page-head is-slim">
-<div class="page-title">
-<h1>{{ Name }}</h1>
-<p class="page-subtitle">{{ Address }}</p>
-</div>
-<div class="page-actions">
-<a class="button is-outline" href="{% url "databases.export.file" name=Name %}">
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Name }}</h1>
+      <p class="page-subtitle">{{ Address }}</p>
+    </div>
+    {% if CanExportDatabases %}
+      <div class="page-actions">
+        <a class="button is-outline" href="{% url "databases.export.file" name=Name %}">
 <svg class="button-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
 Download SQLite file
 </a>
-</div>
-</div>
-
-{% include "partials/databasetabs.django" %}
-{% include "partials/alert.django" %}
-
-{% if Secret %}
-<div class="alert is-good" role="status">
-<svg viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-<div class="alert-title">Token created</div>
-<div class="alert-body">
-<span>Copy it now &mdash; it is not shown again.</span>
-<div class="copy">
-<code class="code" id="token-secret">{{ Secret }}</code>
+      </div>
+    {% endif %}
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  {% if Secret %}
+    <div class="alert is-good" role="status">
+      <svg viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="alert-title">Token created</div>
+      <div class="alert-body">
+        <span>Copy it now &mdash; it is not shown again.</span>
+        <div class="copy">
+          <code class="code" id="token-secret">{{ Secret }}</code>
 <button class="button is-outline is-small" type="button" data-copy="token-secret" data-copy-label="The token">Copy</button>
-</div>
-</div>
-</div>
-{% endif %}
-
-<div class="tiles is-plain">
-<div class="tile"><span class="tile-label">Storage</span><div class="tile-line"><span class="tile-value">{{ Storage }}</span></div></div>
-<div class="tile"><span class="tile-label">Tables</span><div class="tile-line"><span class="tile-value">{{ Tables }}</span></div></div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Connect</div>
-<div class="card-note">Point a libSQL client at this address with one of the tokens below.</div>
-</div>
-<div class="card-body">
-<div class="copy">
-<code class="code" id="connection-url">{{ URL }}</code>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <div class="tiles is-plain">
+    <div class="tile">
+      <span class="tile-label">Storage</span>
+      <div class="tile-line"><span class="tile-value">{{ Storage }}</span></div>
+    </div>
+    <div class="tile">
+      <span class="tile-label">Tables</span>
+      <div class="tile-line"><span class="tile-value">{{ Tables }}</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head has-border">
+      <div class="card-title">Connect</div>
+      <div class="card-note">Point a libSQL client at this address with one of the tokens below.</div>
+    </div>
+    <div class="card-body">
+      <div class="copy">
+        <code class="code" id="connection-url">{{ URL }}</code>
 <button class="button is-outline is-small" type="button" data-copy="connection-url" data-copy-label="The address">Copy</button>
-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Tokens</div>
-<div class="card-note">Each token can be revoked on its own.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.tokens.mint" name=Name %}">
-<div class="row">
-<div class="field">
-<label class="label" for="token-label">Label</label>
+      </div>
+    </div>
+  </div>
+  {% if CanManageTokens %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Tokens</div>
+        <div class="card-note">Each token can be revoked on its own.</div>
+      </div>
+      <div class="card-body">
+        <form class="stack" method="post" action="{% url "databases.tokens.mint" name=Name %}">
+          <div class="row">
+            <div class="field">
+              <label class="label" for="token-label">Label</label>
 <input class="input" id="token-label" name="label" required>
 <span class="field-note">So you can tell it apart later.</span>
-</div>
-<div class="field">
-<span class="label">Scope</span>
+            </div>
+            <div class="field">
+              <span class="label">Scope</span>
 {% include "partials/select.django" with select_name="scope" select_label="What the token may do" select_chosen="read-write" select_options=Scopes select_wide=1 %}
-</div>
-</div>
-<div class="actions">
-<button class="button" type="submit">Create token</button>
-</div>
-</form>
-</div>
-{% if Tokens %}
-<div class="table-wrap">
-<table class="table">
-<thead>
-<tr><th scope="col">Label</th><th scope="col">Token</th><th scope="col">Scope</th><th scope="col">State</th><th scope="col"></th></tr>
-</thead>
-<tbody>
-{% for token in Tokens %}
-<tr>
-<td>{{ token.Label }}</td>
-<td class="mono muted">{{ token.Prefix }}&hellip;</td>
-<td>{{ token.Scope }}</td>
-<td>
-{% if token.Revoked %}<span class="badge is-outline">Revoked</span>
-{% elif token.Expired %}<span class="badge is-outline">Expired</span>
-{% else %}<span class="badge is-secondary">Active</span>{% endif %}
-</td>
-<td class="table-actions">
-{% if not token.Revoked %}
-<form method="post" action="{% url "databases.tokens.revoke" name=Name identifier=token.Identifier %}" data-confirm="Any client using {{ token.Label }} stops working straight away. This cannot be undone." data-confirm-title="Revoke {{ token.Label }}?" data-confirm-action="Revoke token">
-<button class="button is-ghost is-small" type="submit">Revoke</button>
-</form>
-{% endif %}
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-{% endif %}
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Configuration</div>
-<div class="card-note">Blocking takes effect on the database server itself.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.settings" name=Name %}">
-{% include "partials/switch.django" with switch_field="block_reads" switch_name="Block reads" switch_note="Refuse every read on this database." switch_on=BlockReads %}
-<hr class="separator">
-{% include "partials/switch.django" with switch_field="block_writes" switch_name="Block writes" switch_note="Refuse every write on this database." switch_on=BlockWrites %}
-<hr class="separator">
-{% include "partials/switch.django" with switch_field="allow_attach" switch_name="Allow ATTACH" switch_note="Let this database attach to others." switch_on=AllowAttach %}
-<hr class="separator">
-{% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
-<div class="field">
-<label class="label" for="block_reason">Message sent to refused clients</label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="button" type="submit">Create token</button>
+          </div>
+        </form>
+      </div>
+      {% if Tokens %}
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Label</th>
+                <th scope="col">Token</th>
+                <th scope="col">Scope</th>
+                <th scope="col">State</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for token in Tokens %}
+                <tr>
+                  <td>{{ token.Label }}</td>
+                  <td class="mono muted">{{ token.Prefix }}&hellip;</td>
+                  <td>{{ token.Scope }}</td>
+                  <td>
+                    {% if token.Revoked %}
+                      <span class="badge is-outline">Revoked</span>
+                    {% elif token.Expired %}
+                      <span class="badge is-outline">Expired</span>
+                    {% else %}
+                      <span class="badge is-secondary">Active</span>
+                    {% endif %}
+                  </td>
+                  <td class="table-actions">
+                    {% if not token.Revoked %}
+                      <form method="post" action="{% url "databases.tokens.revoke" name=Name identifier=token.Identifier %}" data-confirm="Any client using {{ token.Label }} stops working straight away. This cannot be undone." data-confirm-title="Revoke {{ token.Label }}?" data-confirm-action="Revoke token">
+                        <button class="button is-ghost is-small" type="submit">Revoke</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if CanEditDatabaseSettings %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Configuration</div>
+        <div class="card-note">Blocking takes effect on the database server itself.</div>
+      </div>
+      <div class="card-body">
+        <form class="stack" method="post" action="{% url "databases.settings" name=Name %}">
+          {% include "partials/switch.django" with switch_field="block_reads" switch_name="Block reads" switch_note="Refuse every read on this database." switch_on=BlockReads %}
+          <hr class="separator">
+          {% include "partials/switch.django" with switch_field="block_writes" switch_name="Block writes" switch_note="Refuse every write on this database." switch_on=BlockWrites %}
+          <hr class="separator">
+          {% include "partials/switch.django" with switch_field="allow_attach" switch_name="Allow ATTACH" switch_note="Let this database attach to others." switch_on=AllowAttach %}
+          <hr class="separator">
+          {% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
+          <div class="field">
+            <label class="label" for="block_reason">Message sent to refused clients</label>
 <input class="input" id="block_reason" name="block_reason" value="{{ BlockReason }}" placeholder="Reads and writes are paused">
 <span class="field-note">Returned as the error when a blocked read or write is refused.</span>
-</div>
-<div class="actions">
-<button class="button" type="submit">Save configuration</button>
-</div>
-</form>
-</div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Restrict access</div>
-<div class="card-note">Limit which clients may connect, by source address. Leave empty to allow all traffic.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.rules.add" name=Name %}">
-<div class="row">
-<div class="field">
-<label class="label" for="rule-network">Address range</label>
+          </div>
+          <div class="actions">
+            <button class="button" type="submit">Save configuration</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+  {% if CanManageNetwork %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Restrict access</div>
+        <div class="card-note">Limit which clients may connect, by source address. Leave empty to allow all traffic.</div>
+      </div>
+      <div class="card-body">
+        <form class="stack" method="post" action="{% url "databases.rules.add" name=Name %}">
+          <div class="row">
+            <div class="field">
+              <label class="label" for="rule-network">Address range</label>
 <input class="input" id="rule-network" name="network" placeholder="203.0.113.0/24" required>
 <span class="field-note">In CIDR form.</span>
-</div>
-<div class="field">
-<label class="label" for="rule-note">Note</label>
+            </div>
+            <div class="field">
+              <label class="label" for="rule-note">Note</label>
 <input class="input" id="rule-note" name="note">
-</div>
-</div>
-<div class="actions">
-<button class="button is-outline" type="submit">Allow range</button>
-</div>
-</form>
-</div>
-{% if Rules %}
-<div class="table-wrap">
-<table class="table">
-<thead><tr><th scope="col">Range</th><th scope="col">Note</th><th scope="col"></th></tr></thead>
-<tbody>
-{% for rule in Rules %}
-<tr>
-<td class="mono">{{ rule.Network }}</td>
-<td class="muted">{{ rule.Note }}</td>
-<td class="table-actions">
-<form method="post" action="{% url "databases.rules.remove" name=Name rule=rule.Identifier %}" data-confirm="Clients in {{ rule.Network }} lose access unless another range covers them." data-confirm-title="Remove {{ rule.Network }}?" data-confirm-action="Remove range">
-<button class="button is-ghost is-small" type="submit">Remove</button>
-</form>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-{% endif %}
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Copy and restore</div>
-<div class="card-note">A copy is a new database. Leave the moment blank to copy it as it stands.</div>
-</div>
-<div class="card-body">
-<form class="stack" method="post" action="{% url "databases.fork" name=Name %}">
-<div class="row">
-<div class="field">
-<label class="label" for="fork-name">Name for the copy</label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="button is-outline" type="submit">Allow range</button>
+          </div>
+        </form>
+      </div>
+      {% if Rules %}
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Range</th>
+                <th scope="col">Note</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rule in Rules %}
+                <tr>
+                  <td class="mono">{{ rule.Network }}</td>
+                  <td class="muted">{{ rule.Note }}</td>
+                  <td class="table-actions">
+                    <form method="post" action="{% url "databases.rules.remove" name=Name rule=rule.Identifier %}" data-confirm="Clients in {{ rule.Network }} lose access unless another range covers them." data-confirm-title="Remove {{ rule.Network }}?" data-confirm-action="Remove range">
+                      <button class="button is-ghost is-small" type="submit">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if CanForkDatabases %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Copy and restore</div>
+        <div class="card-note">A copy is a new database. Leave the moment blank to copy it as it stands.</div>
+      </div>
+      <div class="card-body">
+        <form class="stack" method="post" action="{% url "databases.fork" name=Name %}">
+          <div class="row">
+            <div class="field">
+              <label class="label" for="fork-name">Name for the copy</label>
 <input class="input" id="fork-name" name="name" required>
-</div>
-<div class="field">
-<span class="label">As it stood at</span>
+            </div>
+            <div class="field">
+              <span class="label">As it stood at</span>
 {% include "partials/moment.django" with moment_field="moment" moment_placeholder="Latest" %}
-</div>
-</div>
-<div class="actions">
-<button class="button" type="submit">Make a copy</button>
-</div>
-</form>
-</div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Export</div>
-<div class="card-note">Take a copy away with you.</div>
-</div>
-<div class="card-body">
-<div class="actions is-left">
-<a class="button is-outline" href="{% url "databases.export.file" name=Name %}">Download SQLite file</a>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="button" type="submit">Make a copy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+  {% if CanExportDatabases %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Export</div>
+        <div class="card-note">Take a copy away with you.</div>
+      </div>
+      <div class="card-body">
+        <div class="actions is-left">
+          <a class="button is-outline" href="{% url "databases.export.file" name=Name %}">Download SQLite file</a>
 <a class="button is-outline" href="{% url "databases.export" name=Name %}">Download SQL dump</a>
-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="card-head has-border">
-<div class="card-title">Delete</div>
-<div class="card-note">This removes the database and everything in it.</div>
-</div>
-<div class="card-body">
-<form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and every row in it are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
-<button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
-</form>
-</div>
-</div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  {% if CanDeleteDatabases %}
+    <div class="card">
+      <div class="card-head has-border">
+        <div class="card-title">Delete</div>
+        <div class="card-note">This removes the database and everything in it.</div>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and every row in it are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
+          <button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

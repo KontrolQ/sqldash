@@ -1,0 +1,38 @@
+<section class="roles-panel" data-swap-panel="role-users" {% if not MemberTab %}hidden{% endif %}>
+  <div class="roles-member-toolbar"><input class="input" type="search" placeholder="Search users" aria-label="Search role members" data-role-member-search>{% if CanManageMembers %}<button class="button" type="button" data-sheet-open="add-role-users"><svg class="button-icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Add users</button>{% endif %}</div>
+  <div class="roles-member-list">
+    {% for member in Members %}
+      <div class="roles-member" data-role-member>
+        <span class="members-avatar">{% if member.Picture %}<img class="account-picture" src="{{ member.Picture }}" alt="">{% else %}{{ member.Initial }}{% endif %}</span>
+        <div class="roles-member-name"><strong>{{ member.Name }}</strong><span class="field-note">{{ member.Email }}</span></div>
+        {% if CanManageMembers and member.Manage %}
+          <form method="post" action="{% url "admin.roles.users" identifier=Editing.ID %}"><input type="hidden" name="action" value="remove"><input type="hidden" name="accounts" value="{{ member.ID }}"><button class="button is-ghost is-icon is-small" type="submit" aria-label="Remove {{ member.Name }} from role"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></svg></button></form>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="roles-members-empty">No users with this role.</div>
+    {% endfor %}
+  </div>
+</section>
+{% if CanManageMembers %}
+  <div class="sheet-veil" data-sheet="add-role-users" hidden>
+    <div class="dialog-veil" data-sheet-close></div>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-role-users-title">
+      <div class="dialog-head">
+        <h2 class="dialog-title" id="add-role-users-title">Add users to {{ Editing.Name }}</h2>
+      </div>
+      <form class="dialog-body" method="post" action="{% url "admin.roles.users" identifier=Editing.ID %}">
+        <input type="hidden" name="action" value="add">
+        <input class="input" type="search" placeholder="Search users" aria-label="Search available users" data-role-picker-search>
+        <div class="roles-user-picker">
+          {% for member in AvailableUsers %}
+            <div class="roles-picker-user" data-role-picker-user>{% include "partials/checkbox.django" with checkbox_name="accounts" checkbox_value=member.ID checkbox_id=member.ID checkbox_prefix="role-member-" checkbox_label=member.Name %}<span class="members-avatar">{% if member.Picture %}<img class="account-picture" src="{{ member.Picture }}" alt="">{% else %}{{ member.Initial }}{% endif %}</span><label for="role-member-{{ member.ID }}"><strong>{{ member.Name }}</strong><span class="field-note">{{ member.Email }}</span></label></div>
+          {% empty %}
+            <p class="field-note">No available users.</p>
+          {% endfor %}
+        </div>
+        <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button><button class="button" type="submit" {% if not AvailableUsers %}disabled{% endif %}>Add users</button></div>
+      </form>
+    </section>
+  </div>
+{% endif %}

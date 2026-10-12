@@ -6,7 +6,7 @@ import (
 
 	"sqldash/config"
 	"sqldash/models"
-	repository "sqldash/repositories/database"
+	"sqldash/services/access"
 	explorer "sqldash/services/explorer"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
@@ -16,7 +16,7 @@ import (
 )
 
 func GetIndexData(requestContext context.Context) (*IndexContext, *fiber.Error) {
-	records, findError := repository.All()
+	records, findError := access.Visible(access.FromContext(requestContext))
 	if findError != nil {
 		logger.Errorf(LogPrefix, ListFailedLog, findError)
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, ListUnavailable)

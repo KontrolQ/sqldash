@@ -1,0 +1,21 @@
+{% if Editing %}
+  <div class="sheet-veil" data-sheet="edit-user">
+    <div class="dialog-veil" data-sheet-close></div>
+    <section class="dialog is-sheet" role="dialog" aria-modal="true" aria-labelledby="user-editor-title">
+      <div class="dialog-head">
+        <div>
+          <h2 class="dialog-title" id="user-editor-title">Manage user</h2>
+          <p class="dialog-note">{{ Editing.Email }}</p>
+        </div>
+        <a class="button is-ghost is-icon is-small" href="{% url "users.index" %}" aria-label="Close user editor"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></svg></a>
+      </div>
+      <div class="members-sheet-person"><span class="members-avatar">{% if Editing.Picture %}<img class="account-picture" src="{{ Editing.Picture }}" alt="">{% else %}{{ Editing.Initial }}{% endif %}</span><div><strong>{{ Editing.Name }}</strong><span class="field-note">@{{ Editing.Username }}</span></div><span class="badge {% if Editing.Active %}is-secondary{% else %}is-outline{% endif %}">{% if Editing.Active %}Active{% else %}Deactivated{% endif %}</span></div>
+      <form class="members-sheet-form" method="post" action="{% url "users.save" identifier=Editing.ID %}" data-user-access>
+        <div class="tabs" data-swap><button class="tab is-current" type="button" data-swap-to="user-roles">Roles</button><button class="tab" type="button" data-swap-to="user-databases">Database access</button></div>
+        <div class="members-sheet-panel" data-swap-panel="user-roles"><div class="members-choices">{% for role in Roles %}<div class="members-choice">{% include "partials/checkbox.django" with checkbox_name="roles" checkbox_value=role.ID checkbox_id=role.ID checkbox_prefix="user-role-" checkbox_on=role.Selected checkbox_label=role.Name %}<label for="user-role-{{ role.ID }}"><span class="roles-dot" style="--role-color:{{ role.Color }}"></span>{{ role.Name }}</label></div>{% empty %}<span class="field-note">No roles available.</span>{% endfor %}</div></div>
+        <div class="members-sheet-panel" data-swap-panel="user-databases" hidden><div class="members-scope">{% include "partials/select.django" with select_name="all" select_label="Database access" select_chosen=ScopeValue select_options=ScopeOptions select_wide=1 %}</div><div class="members-choices" data-database-choices {% if Editing.All %}hidden{% endif %}>{% for database in Databases %}<div class="members-choice">{% include "partials/checkbox.django" with checkbox_name="databases" checkbox_value=database.ID checkbox_id=database.ID checkbox_prefix="user-database-" checkbox_on=database.Selected checkbox_disabled=database.Owned checkbox_label=database.Name %}<label for="user-database-{{ database.ID }}" class="mono">{{ database.Name }}</label>{% if database.Owned %}<span class="badge is-outline">Owner</span>{% endif %}</div>{% empty %}<span class="field-note">No databases available.</span>{% endfor %}</div></div>
+        <div class="members-sheet-footer"><a class="button is-outline" href="{% url "users.index" %}">Cancel</a><button class="button" type="submit">Save changes</button></div>
+      </form>
+    </section>
+  </div>
+{% endif %}

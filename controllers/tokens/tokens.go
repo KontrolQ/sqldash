@@ -22,7 +22,7 @@ func Mint(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	secret, mintError := service.Mint(name, asked.Label, asked.Scope)
+	secret, mintError := service.Mint(sessions.Remembered(context), name, asked.Label, asked.Scope)
 	if mintError != nil {
 		sessions.Complain(context, mintError.Message)
 		return backTo(context, name)
@@ -43,7 +43,7 @@ func Mint(context fiber.Ctx) error {
 func Revoke(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
-	if revokeError := service.Revoke(context.Params(IdentifierParameter)); revokeError != nil {
+	if revokeError := service.Revoke(name, context.Params(IdentifierParameter)); revokeError != nil {
 		sessions.Complain(context, revokeError.Message)
 	} else {
 		sessions.Report(context, TokenRevoked)

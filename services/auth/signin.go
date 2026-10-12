@@ -26,7 +26,7 @@ func SignIn(username string, password string) (*models.Account, *fiber.Error) {
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, AccountUnavailable)
 	}
 
-	if held == nil || !passwords.Matches(password, held.PasswordHash) {
+	if held == nil || !held.Active || !passwords.Matches(password, held.PasswordHash) {
 		return nil, shortcuts.ServiceError(http.StatusUnauthorized, CredentialsWrong)
 	}
 

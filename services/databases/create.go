@@ -7,6 +7,7 @@ import (
 	"sqldash/hosting"
 	"sqldash/models"
 	repository "sqldash/repositories/database"
+	"sqldash/services/access"
 	"sqldash/sqld"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
@@ -25,7 +26,7 @@ func Create(requestContext context.Context, asked string) *fiber.Error {
 		return shortcuts.ServiceError(http.StatusBadGateway, CreateRefused)
 	}
 
-	if registerError := repository.Create(&models.Database{Name: name}); registerError != nil {
+	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
 		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, CreateRefused)
 	}

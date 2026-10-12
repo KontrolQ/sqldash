@@ -16,8 +16,8 @@ type Point struct {
 	P99      float64
 }
 
-func SeriesFor(databaseName string, window Window) ([]Point, error) {
-	records, findError := rollupsIn(databaseName, window)
+func SeriesFor(databaseName string, window Window, allowed ...[]string) ([]Point, error) {
+	records, findError := rollupsIn(databaseName, window, allowed...)
 	if findError != nil {
 		return nil, findError
 	}

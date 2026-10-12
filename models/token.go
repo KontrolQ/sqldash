@@ -16,6 +16,7 @@ const (
 type Token struct {
 	gorm.Model
 	DatabaseName string     `gorm:"index;not null"`
+	AccountID    uint       `gorm:"index;not null;default:0"`
 	Label        string     `gorm:"not null"`
 	Identifier   string     `gorm:"uniqueIndex;not null"`
 	Digest       string     `gorm:"uniqueIndex;not null"`

@@ -1,6 +1,7 @@
 package insights
 
 import (
+	"sqldash/services/access"
 	service "sqldash/services/insights"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -9,7 +10,11 @@ import (
 )
 
 func Overview(context fiber.Ctx) error {
-	data, dataError := service.GetOverview("", context.Query(WindowParameter))
+	scope, scopeError := access.MonitoringScope(context.Context())
+	if scopeError != nil {
+		return scopeError
+	}
+	data, dataError := service.GetOverview("", context.Query(WindowParameter), scope...)
 	if dataError != nil {
 		return dataError
 	}

@@ -1,0 +1,117 @@
+{% extends "layouts/base.django" %}
+{% block content %}
+  {% include "partials/alert.django" %}
+  {% if Editing or Creating %}
+    <div class="roles-workbench">
+      <aside class="roles-sidebar">
+        <div class="roles-sidebar-toolbar"><a class="button is-ghost is-small" href="{% url "admin.roles" %}"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Back</a><a class="button is-ghost is-icon is-small" href="?new=1" aria-label="Create role"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></a></div>
+        <nav class="roles-sidebar-items" aria-label="Roles" data-role-order data-role-order-url="{% url "admin.roles.reorder" %}">
+      {% for role in Roles %}<a class="roles-sidebar-item {% if role.ID == Editing.ID %}is-current{% endif %}" href="?edit={{ role.ID }}" data-role-id="{{ role.ID }}" {% if role.Editable %}data-role-movable{% endif %} {% if role.ID == Editing.ID %}aria-current="page"{% endif %}>{% if role.Editable %}<span class="roles-drag-handle" role="button" tabindex="0" data-role-drag aria-label="Drag {{ role.Name }}"><svg viewBox="0 0 24 24"><circle cx="8" cy="5" r="1"/><circle cx="16" cy="5" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg></span>{% endif %}<span class="roles-dot" style="--role-color:{{ role.Color }}"></span><span class="roles-sidebar-name" data-role-name-label>{{ role.Name }}</span>{% if not role.Editable %}<svg class="roles-lock" viewBox="0 0 24 24" aria-label="Read only"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{% endif %}</a>{% empty %}<span class="field-note roles-sidebar-empty">No roles</span>{% endfor %}
+    </nav>
+      </aside>
+      <section class="roles-detail">
+        <header class="roles-detail-header">
+          <h1>{% if Creating %}Create role{% else %}Edit role — {{ Editing.Name }}{% endif %}</h1>
+          {% if not Editable %}
+            <span class="badge is-outline">Read only</span>
+          {% endif %}
+        </header>
+        <div class="tabs roles-detail-tabs" data-swap><button class="tab {% if DisplayTab %}is-current{% endif %}" type="button" data-swap-to="role-display">Display</button><button class="tab {% if not DisplayTab and not MemberTab %}is-current{% endif %}" type="button" data-swap-to="role-permissions">Permissions</button>{% if CanManageUsers and Editing %}<button class="tab {% if MemberTab %}is-current{% endif %}" type="button" data-swap-to="role-users">Manage Members <span class="roles-member-count">{{ Members|length }}</span></button>{% endif %}</div>
+        <form class="roles-form" method="post" action="{% if Editing %}{% url "admin.roles.save" identifier=Editing.ID %}{% else %}{% url "admin.roles.create" %}{% endif %}" data-role-editor {% if MemberTab %}hidden{% endif %}>
+          <div class="roles-panel" data-swap-panel="role-display" {% if not DisplayTab %}hidden{% endif %}>
+            <section class="roles-display-section">
+              <div class="field"><label class="label" for="role-name">Role name</label><input class="input" id="role-name" name="name" value="{{ Editing.Name }}" maxlength="80" required {% if not Editable %}disabled{% endif %} data-role-name></div>
+            </section>
+            <section class="roles-display-section">
+              <label class="label" for="role-color">Role colour</label>
+              <div class="roles-colour-picker"><div class="menu roles-custom-colour" data-menu data-colour-picker><input id="role-color" type="hidden" name="color" value="{% if Editing %}{{ Editing.Color }}{% else %}#3b82f6{% endif %}" data-role-colour><button class="button is-outline roles-colour-trigger" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="dialog" aria-label="Choose custom colour" {% if not Editable %}disabled{% endif %}><span data-colour-preview style="background:{% if Editing %}{{ Editing.Color }}{% else %}#3b82f6{% endif %}"></span><svg viewBox="0 0 24 24"><path d="m16 3 5 5-13 13H3v-5L16 3Z"/></svg></button><div class="menu-content roles-colour-popover" data-menu-content role="dialog" aria-label="Custom role colour" hidden><div class="roles-colour-plane" data-colour-plane tabindex="0" role="slider" aria-label="Saturation and brightness"><span class="roles-colour-cursor" data-colour-cursor></span></div><input class="roles-hue" type="range" min="0" max="360" step="1" aria-label="Hue" data-colour-hue><div class="field"><label class="label" for="role-colour-hex">Hex colour</label><input class="input mono" id="role-colour-hex" maxlength="7" spellcheck="false" autocomplete="off" data-colour-hex></div></div></div><div class="roles-swatches">{% for colour in ColourOptions %}<button class="roles-swatch" type="button" style="--swatch-colour:{{ colour }}" data-role-swatch="{{ colour }}" aria-label="Use {{ colour }}" aria-pressed="{% if Editing.Color == colour %}true{% else %}false{% endif %}" {% if not Editable %}disabled{% endif %}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>{% endfor %}</div></div>
+              <span class="badge is-outline roles-preview" data-role-preview style="--role-color:{% if Editing %}{{ Editing.Color }}{% else %}#3b82f6{% endif %}"><span class="roles-dot"></span><span data-role-preview-name>{% if Editing %}{{ Editing.Name }}{% else %}New role{% endif %}</span></span>
+            </section>
+          </div>
+          <div class="roles-panel" data-swap-panel="role-permissions" {% if MemberTab or DisplayTab %}hidden{% endif %}>
+            <div class="roles-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4-4"/></svg><input class="input" type="search" placeholder="Search permissions" aria-label="Search permissions" data-permission-search></div>
+            {% for group in Groups %}
+              <section class="roles-permission-group" data-permission-group>
+                <div class="roles-permission-heading">
+                  <h2>{{ group.Name }}</h2>
+                  {% if Editable %}
+                    <button class="button is-ghost is-small" type="button" data-permissions-clear>Clear permissions</button>
+                  {% endif %}
+                </div>
+                {% for permission in group.Permissions %}
+                  <div class="roles-permission" data-permission-row>{% include "partials/switch.django" with switch_field="permissions" switch_value=permission.Key switch_name=permission.Label switch_note=permission.Description switch_on=permission.Selected switch_disabled=permission.Disabled %}</div>
+                {% endfor %}
+              </section>
+            {% endfor %}
+          </div>
+          {% if Editable %}
+            <footer class="roles-actions">
+              <span class="field-note" data-role-save-note></span>
+              <div class="actions">{% if Editing %}<button class="button is-destructive" type="submit" form="delete-current-role">Delete role</button>{% endif %}<a class="button is-outline" href="{% url "admin.roles" %}">Cancel</a><button class="button" type="submit">Save changes</button></div>
+            </footer>
+          {% endif %}
+        </form>
+        {% if Editing and Editable %}
+          <form id="delete-current-role" method="post" action="{% url "admin.roles.delete" identifier=Editing.ID %}" data-confirm="Remove {{ Editing.Name }} from all users?" data-confirm-title="Delete role?" data-confirm-action="Delete role" hidden></form>
+        {% endif %}
+        {% if CanManageUsers and Editing %}
+          {% include "administration/rolemembers.django" %}
+        {% endif %}
+      </section>
+    </div>
+  {% else %}
+    <div class="roles-directory">
+      <header class="page-head">
+        <div class="page-title">
+          <h1>Roles & Permissions</h1>
+        </div>
+      </header>
+      <div class="roles-directory-toolbar"><div class="roles-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4-4"/></svg><input class="input" type="search" placeholder="Search roles" aria-label="Search roles" data-role-list-search></div><a class="button" href="?new=1">Create role</a></div>
+      {% if Roles %}
+        <div class="card is-table">
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Roles — {{ Roles|length }}</th>
+                  <th scope="col">Members</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody data-role-order data-role-order-url="{% url "admin.roles.reorder" %}">
+                {% for role in Roles %}
+                  <tr data-role-id="{{ role.ID }}" {% if role.Editable %}data-role-movable{% endif %}>
+                    <td>
+                      <div class="roles-directory-name">{% if role.Editable %}<button class="button is-ghost is-icon is-small roles-drag-handle" type="button" data-role-drag aria-label="Drag {{ role.Name }}"><svg viewBox="0 0 24 24"><circle cx="8" cy="5" r="1"/><circle cx="16" cy="5" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg></button>{% endif %}<a class="roles-directory-role" href="?edit={{ role.ID }}" data-role-name-label><svg class="roles-shield" style="--role-color:{{ role.Color }}" viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/><circle cx="12" cy="10" r="2"/><path d="M8 16a4 4 0 0 1 8 0"/></svg>{% if not role.Editable %}<svg class="roles-lock" viewBox="0 0 24 24" aria-label="Read only"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{% endif %}{{ role.Name }}</a></div>
+                    </td>
+                    <td><span class="roles-directory-members">{{ role.Members }}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M16 4a4 4 0 0 1 0 7M22 21v-2a7 7 0 0 0-3-6"/></svg></span></td>
+                    <td class="table-actions">
+                      <div class="actions">
+                        <a class="button is-outline is-icon" href="?edit={{ role.ID }}" aria-label="{% if role.Editable %}Edit{% else %}View{% endif %} {{ role.Name }}"><svg viewBox="0 0 24 24">{% if role.Editable %}<path d="m16 3 5 5-13 13H3v-5L16 3Z"/>{% else %}<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>{% endif %}</svg></a>
+                        {% if role.Editable %}
+                          <div class="menu" data-menu>
+                            <button class="button is-outline is-icon" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="menu" aria-label="Actions for {{ role.Name }}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+                            <div class="menu-content" data-menu-content hidden>
+                              <a class="menu-check" href="?edit={{ role.ID }}">Edit role</a>
+                              <form method="post" action="{% url "admin.roles.delete" identifier=role.ID %}" data-confirm="Remove {{ role.Name }} from all users?" data-confirm-title="Delete role?" data-confirm-action="Delete role"><button class="menu-check is-destructive" type="submit">Delete role</button></form>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% else %}
+        <section class="roles-empty">
+          <svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/></svg>
+          <h2>No roles</h2>
+          <a class="button is-outline" href="?new=1">Create role</a>
+        </section>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
