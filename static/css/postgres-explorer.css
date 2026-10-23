@@ -1,0 +1,208 @@
+.explorer-postgres .tabs, .explorer-data .tabs {
+  flex: 0 0 auto;
+  width: max-content;
+}
+
+.explorer-postgres .tab, .explorer-data .tab {
+  flex: 0 0 auto;
+}
+
+.explorer-schema {
+  display: block;
+}
+
+.explorer-schema .field {
+  width: 100%;
+}
+
+.explorer-postgres .select, .explorer-object-manager .select {
+  width: 100%;
+  min-width: 0;
+}
+
+.explorer-postgres .select-trigger, .explorer-object-manager .select-trigger {
+  width: 100%;
+}
+
+.explorer-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.explorer-fields .field {
+  min-width: 0;
+}
+
+.explorer-fields textarea.input {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.explorer-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explorer-column-definition {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.explorer-column-properties {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.explorer-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explorer-definition {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+.explorer-object-manager [hidden], .explorer-postgres [hidden], [data-console-results] [hidden] {
+  display: none !important;
+}
+
+.explorer-completion-schema {
+  width: 100%;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.explorer-completion-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.explorer-completion-controls .select {
+  flex: 0 1 240px;
+}
+
+.explorer-completion-controls .field-note {
+  flex: 1 1 240px;
+}
+
+.explorer-result-tabs {
+  overflow: auto;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.explorer-postgres:not(.explorer-data) .workbar {
+  height: auto;
+  min-height: 46px;
+  flex-wrap: wrap;
+  padding-block: 8px;
+}
+
+.explorer-postgres:not(.explorer-data) .workbar.is-second {
+  min-height: 42px;
+}
+
+.explorer-postgres [data-console-output], .explorer-postgres [data-console-results] {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.explorer-result-panel {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.explorer-object-manager {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.explorer-relation-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explorer-key-note {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.explorer-grid-editor {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  max-height: calc(100vh - 32px);
+  flex-direction: column;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--popover);
+  box-shadow: var(--shadow-lg);
+  color: var(--popover-foreground);
+  gap: 8px;
+}
+
+.explorer-grid-editor textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+}
+
+.explorer-grid-editor .actions {
+  justify-content: flex-end;
+}
+
+.explorer-data .is-default {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.explorer-data .workbar {
+  height: auto;
+  min-height: 46px;
+  flex-wrap: wrap;
+  padding-block: 8px;
+}
+
+.explorer-data .workbar.is-second {
+  min-height: 42px;
+}
+
+@media (max-width: 700px) {
+  .explorer-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .explorer-column-definition {
+    grid-template-columns: 1fr;
+  }
+
+  .explorer-search {
+    width: 100%;
+  }
+
+  .explorer-postgres:not(.explorer-data) .workbar {
+    flex-wrap: wrap;
+  }
+}

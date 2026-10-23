@@ -1,6 +1,7 @@
 package audit
 
 import (
+	"sqldash/models"
 	"sqldash/services/auth"
 	"sqldash/utils/meta"
 
@@ -17,5 +18,13 @@ func ActorOf(context fiber.Ctx) string {
 }
 
 func Note(context fiber.Ctx, databaseName string, action string, detail string) {
+	if record, matched := context.Locals("DatabaseRecord").(*models.Database); matched && record != nil && record.Name == databaseName {
+		NoteDatabase(context, record, action, detail)
+		return
+	}
 	Record(ActorOf(context), databaseName, action, detail)
+}
+
+func NoteDatabase(context fiber.Ctx, record *models.Database, action string, detail string) {
+	RecordDatabase(ActorOf(context), record, action, detail)
 }

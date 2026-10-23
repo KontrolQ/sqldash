@@ -7,8 +7,10 @@ import (
 )
 
 type chartPoint struct {
-	Label  string    `json:"label"`
-	Values []float64 `json:"values"`
+	Label       string     `json:"label"`
+	Values      []*float64 `json:"values"`
+	BreakBefore bool       `json:"break_before,omitempty"`
+	Note        string     `json:"note,omitempty"`
 }
 
 type chartData struct {
@@ -17,6 +19,7 @@ type chartData struct {
 	Axis   string       `json:"axis"`
 	Series []string     `json:"series"`
 	Points []chartPoint `json:"points"`
+	Table  bool         `json:"table,omitempty"`
 }
 
 func trafficChart(points []analytics.Point) string {
@@ -31,7 +34,7 @@ func trafficChart(points []analytics.Point) string {
 
 		held.Points = append(held.Points, chartPoint{
 			Label:  point.At.Local().Format(MomentLayout),
-			Values: []float64{float64(point.Reads), float64(point.Writes)},
+			Values: chartValues(float64(point.Reads), float64(point.Writes)),
 		})
 	}
 
@@ -54,7 +57,7 @@ func latencyChart(points []analytics.Point) string {
 
 		held.Points = append(held.Points, chartPoint{
 			Label:  point.At.Local().Format(MomentLayout),
-			Values: []float64{point.P50, point.P95, point.P99},
+			Values: chartValues(point.P50, point.P95, point.P99),
 		})
 	}
 
@@ -63,6 +66,14 @@ func latencyChart(points []analytics.Point) string {
 	}
 
 	return encode(held)
+}
+
+func chartValues(values ...float64) []*float64 {
+	held := make([]*float64, len(values))
+	for index, value := range values {
+		held[index] = &value
+	}
+	return held
 }
 
 func encode(held chartData) string {

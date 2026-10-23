@@ -6,8 +6,16 @@
     const roleColour = roleForm.querySelector('[data-role-colour]');
     const preview = roleForm.querySelector('[data-role-preview]');
     const search = roleForm.querySelector('[data-permission-search]');
-    const writePermission = roleForm.querySelector('[value="data.write"]');
-    const dependants = [...roleForm.querySelectorAll('[value="sql.execute"], [value="tokens.manage"]')];
+    const permissionInputs = new Map([...roleForm.querySelectorAll('input[name="permissions"]')].map(function (input) { return [input.value, input]; }));
+    const permissionDependencies = {
+      'libsql.sql.execute': ['libsql.data.write'],
+      'libsql.tokens.manage': ['libsql.data.write'],
+      'postgres.data.write': ['postgres.data.read'],
+      'postgres.sql.execute': ['postgres.data.read'],
+      'postgres.credentials.manage': ['postgres.data.read', 'postgres.data.write'],
+      'postgres.objects.manage': ['postgres.data.read', 'postgres.data.write'],
+      'postgres.activity.manage': ['postgres.activity.view']
+    };
 
     function updatePreview() {
       preview.style.setProperty('--role-color', roleColour.value);
@@ -48,20 +56,31 @@
       });
     });
 
-    dependants.forEach(function (permission) {
-      permission.addEventListener('change', function () {
-        if (permission.checked && !writePermission.disabled) {
-          writePermission.checked = true;
-        }
+    function requireDependencies(key) {
+      return (permissionDependencies[key] || []).every(function (dependency) {
+        const input = permissionInputs.get(dependency);
+        if (!input || (!input.checked && input.disabled)) { return false; }
+        input.checked = true;
+        return requireDependencies(dependency);
       });
-    });
+    }
 
-    writePermission.addEventListener('change', function () {
-      if (!writePermission.checked) {
-        dependants.forEach(function (permission) {
-          if (!permission.disabled) { permission.checked = false; }
-        });
-      }
+    permissionInputs.forEach(function (permission) {
+      permission.addEventListener('change', function () {
+        const administrator = permissionInputs.get('administrator');
+        if (administrator && administrator.checked) { updateChanges(); return; }
+        if (permission.checked && !requireDependencies(permission.value)) { permission.checked = false; }
+        let changed = true;
+        while (changed) {
+          changed = false;
+          permissionInputs.forEach(function (candidate) {
+            if (!candidate.checked || candidate.disabled) { return; }
+            const missing = (permissionDependencies[candidate.value] || []).some(function (dependency) { return !permissionInputs.get(dependency)?.checked; });
+            if (missing) { candidate.checked = false; changed = true; }
+          });
+        }
+        updateChanges();
+      });
     });
 
     roleForm.addEventListener('invalid', function (event) {

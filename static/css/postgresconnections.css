@@ -1,0 +1,85 @@
+.postgres-credentials .field {
+  min-width: 0;
+}
+
+.postgres-credentials .row {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.postgres-credentials .postgres-credential-fields {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+
+.postgres-credential-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.postgres-credential-control > .postgres-input {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.postgres-input {
+  position: relative;
+  min-width: 0;
+}
+
+.postgres-input .input {
+  padding-right: 44px;
+}
+
+.postgres-input.password .input {
+  padding-right: 80px;
+}
+
+.postgres-input-actions {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  bottom: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.postgres-input-actions > .password-toggle {
+  position: static;
+  height: 34px;
+}
+
+.postgres-input-copy {
+  display: inline-flex;
+  width: 36px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color var(--ease);
+}
+
+.postgres-input-copy:hover {
+  color: var(--foreground);
+}
+
+.postgres-input-copy:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.postgres-input-copy svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}

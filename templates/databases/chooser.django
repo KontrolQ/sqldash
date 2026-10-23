@@ -1,0 +1,22 @@
+<div class="sheet-veil" data-sheet="new-database" hidden>
+  <div class="dialog-veil" data-sheet-close></div><div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
+    <div class="dialog-head"><div class="dialog-title" id="new-database-title">Choose a database engine</div></div>
+    <div class="database-engine-choices">
+      {% for option in CreateEngines %}
+      <button class="database-engine-choice" type="button" data-sheet-open="new-database-{{ option.Value }}" data-engine-choice="{{ option.Value }}">
+        <span class="database-engine-logo"><img src="{% if option.Value == "postgres" %}{% static "images/postgresql-white.svg" %}{% else %}{% static "images/libsql-white.svg" %}{% endif %}" alt="" width="88" height="56"></span>
+        <span class="database-engine-title">{{ option.Label }}</span>
+        <span class="database-engine-note">{% if option.Value == "postgres" %}Native PostgreSQL connections.{% else %}SQLite-compatible, with HTTP clients.{% endif %}</span>
+      </button>
+      {% endfor %}
+    </div>
+    <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button></div>
+  </div>
+</div>
+{% for option in CreateEngines %}
+  {% if option.Value == "postgres" %}
+    {% include "databases/create.django" with create_engine=option.Value create_label=option.Label can_import=CanImportPostgres %}
+  {% else %}
+    {% include "databases/create.django" with create_engine=option.Value create_label=option.Label can_import=CanImportLibSQL %}
+  {% endif %}
+{% endfor %}

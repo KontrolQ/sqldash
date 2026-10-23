@@ -2,12 +2,13 @@ package explorer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"sqldash/config"
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -16,6 +17,7 @@ import (
 
 type Ask struct {
 	Database  string
+	Schema    string
 	Table     string
 	Page      int
 	Sort      string
@@ -25,6 +27,13 @@ type Ask struct {
 }
 
 func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.Error) {
+	record, permissionError := authorizedDatabase(requestContext, asked.Database, "libsql.data.read")
+	if permissionError != nil {
+		return nil, permissionError
+	}
+	if record.Kind() == "postgres" {
+		return browsePostgres(requestContext, record, asked)
+	}
 	tables, tablesError := Tables(requestContext, asked.Database)
 	if tablesError != nil {
 		return nil, tablesError
@@ -114,6 +123,9 @@ func Browse(requestContext context.Context, asked Ask) (*BrowseContext, *fiber.E
 	attachPeeks(requestContext, asked.Database, columns, rows)
 
 	shown.Rows = rows
+	if gridError := prepareGrid(shown, "libsql"); gridError != nil {
+		return nil, gridError
+	}
 	shown.ColumnNames = namesOf(columns)
 	shown.View = viewOf(shown)
 
@@ -178,7 +190,7 @@ func readRows(requestContext context.Context, databaseName string, table string,
 
 func cellFor(value any, column ColumnView) CellView {
 	if value == nil {
-		return CellView{Column: column.Name, IsNull: true}
+		return CellView{Column: column.Name, IsNull: true, ReadOnly: column.ReadOnly}
 	}
 
 	text := fmt.Sprint(value)
@@ -187,7 +199,7 @@ func cellFor(value any, column ColumnView) CellView {
 		text = fmt.Sprintf(BytesFormat, len(held))
 	}
 
-	cell := CellView{Column: column.Name, Text: text}
+	cell := CellView{Column: column.Name, Text: text, Value: text, ReadOnly: column.ReadOnly}
 
 	if len(text) > MaximumCellText {
 		cell.Text = text[:MaximumCellText]
@@ -200,6 +212,36 @@ func cellFor(value any, column ColumnView) CellView {
 	}
 
 	return cell
+}
+
+func prepareGrid(shown *BrowseContext, engine string) *fiber.Error {
+	type gridValue struct {
+		Column string
+		Value  string
+		IsNull bool
+	}
+	type gridRow struct {
+		Key   string
+		Cells []gridValue
+	}
+	rows := make([]gridRow, 0, len(shown.Rows))
+	for _, row := range shown.Rows {
+		values := make([]gridValue, 0, len(row.Cells))
+		for _, cell := range row.Cells {
+			values = append(values, gridValue{Column: cell.Column, Value: cell.Value, IsNull: cell.IsNull})
+		}
+		rows = append(rows, gridRow{Key: row.Key, Cells: values})
+	}
+	encoded, encodeError := json.Marshal(struct {
+		Columns []ColumnView
+		Rows    []gridRow
+	}{Columns: shown.Columns, Rows: rows})
+	if encodeError != nil {
+		return shortcuts.ServiceError(http.StatusInternalServerError, "The grid values are unavailable.")
+	}
+	shown.GridData = string(encoded)
+	shown.GridEditor = engine
+	return nil
 }
 
 func countRows(requestContext context.Context, databaseName string, table string, where string, arguments []any) (int64, *fiber.Error) {

@@ -50,7 +50,7 @@ func LoadWith(store *gorm.DB, accountID uint) (*AccountAccess, error) {
 }
 
 func (self *AccountAccess) Can(permission string) bool {
-	return self != nil && self.Account.Active && (self.Owner || self.Super || (self.Grants[permission] && ((permission != permissions.SQLExecute && permission != permissions.TokenManage) || self.Grants[permissions.DataWrite])))
+	return self != nil && self.Account.Active && permission != "" && (self.Owner || self.Super || permissions.Satisfied(self.Grants, permission))
 }
 
 func (self *AccountAccess) All() bool {

@@ -9,11 +9,35 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+	"github.com/gofiber/fiber/v3"
 	"sqldash/config"
-	"sqldash/sqld"
+	"sqldash/engines"
+	"sqldash/models"
+	"sqldash/permissions"
+	"sqldash/pgtransfer"
 )
 
+func authorizeExport(ctx context.Context, name string) (context.Context, *models.Database, *fiber.Error) {
+	fresh, record, err := Authorize(ctx, name, permissions.DatabaseExport, true)
+	if err != nil {
+		return fresh, nil, err
+	}
+	if expected := engines.CurrentDatabase(ctx); expected != nil && expected.Name == name && expected.ID != record.ID {
+		return fresh, nil, fiber.NewError(fiber.StatusNotFound, DatabaseMissing)
+	}
+	return fresh, record, nil
+}
+
 func WriteFile(requestContext context.Context, databaseName string, writer io.Writer) error {
+	fresh, record, err := authorizeExport(requestContext, databaseName)
+	if err != nil {
+		return err
+	}
+	if record.Kind() != models.EngineLibSQL {
+		return errors.New(EngineRefused)
+	}
+	requestContext = fresh
 	stamp := time.Now().UnixNano()
 	staged := filepath.Join(config.ImportsPath(), fmt.Sprintf(StagedNameFormat, databaseName, stamp))
 	built := filepath.Join(config.ImportsPath(), fmt.Sprintf(FileNameFormat, databaseName, stamp))
@@ -50,11 +74,105 @@ func WriteFile(requestContext context.Context, databaseName string, writer io.Wr
 }
 
 func WriteDump(requestContext context.Context, databaseName string, writer io.Writer) error {
+	fresh, record, err := authorizeExport(requestContext, databaseName)
+	if err != nil {
+		return err
+	}
+	if record.Kind() == models.EnginePostgres {
+		return WritePostgres(fresh, databaseName, writer, "sql")
+	}
+	return writeLibSQLDump(fresh, databaseName, writer)
+}
+
+func WritePostgres(ctx context.Context, name string, writer io.Writer, format string) error {
+	fresh, record, err := authorizeExport(ctx, name)
+	if err != nil {
+		return err
+	}
+	if record.Kind() != models.EnginePostgres {
+		return errors.New(EngineRefused)
+	}
+	return pgtransfer.ExportWithOptions(fresh, record, writer, format, pgtransfer.Options{Authorize: func(step context.Context) error {
+		_, current, err := Authorize(step, name, permissions.DatabaseExport, true)
+		if err != nil {
+			return err
+		}
+		if current.ID != record.ID {
+			return errors.New(DatabaseMissing)
+		}
+		return nil
+	}})
+}
+
+type stagedExport struct {
+	*os.File
+	path       string
+	ctx        context.Context
+	name       string
+	databaseID uint
+	checkedAt  time.Time
+}
+
+func (self *stagedExport) Read(buffer []byte) (int, error) {
+	if self.ctx != nil && time.Since(self.checkedAt) >= time.Second {
+		_, record, err := Authorize(self.ctx, self.name, permissions.DatabaseExport, true)
+		if err != nil {
+			return 0, err
+		}
+		if record.ID != self.databaseID {
+			return 0, errors.New(DatabaseMissing)
+		}
+		self.checkedAt = time.Now()
+	}
+	return self.File.Read(buffer)
+}
+
+func (self *stagedExport) Close() error {
+	err := self.File.Close()
+	removeError := os.Remove(self.path)
+	if err != nil {
+		return err
+	}
+	return removeError
+}
+
+func PostgresExport(ctx context.Context, name, format string) (io.ReadCloser, error) {
+	fresh, record, authorityError := authorizeExport(ctx, name)
+	if authorityError != nil {
+		return nil, authorityError
+	}
+	if record.Kind() != models.EnginePostgres {
+		return nil, errors.New(EngineRefused)
+	}
+	if err := os.MkdirAll(config.PostgresStagingPath(), 0700); err != nil {
+		return nil, err
+	}
+	handle, err := os.CreateTemp(config.PostgresStagingPath(), "download-*")
+	if err != nil {
+		return nil, err
+	}
+	held := &stagedExport{File: handle, path: handle.Name(), ctx: fresh, name: record.Name, databaseID: record.ID}
+	if err := handle.Chmod(0600); err != nil {
+		held.Close()
+		return nil, err
+	}
+	if err := WritePostgres(fresh, name, handle, format); err != nil {
+		held.Close()
+		return nil, err
+	}
+	if _, err := handle.Seek(0, io.SeekStart); err != nil {
+		held.Close()
+		return nil, err
+	}
+	return held, nil
+}
+
+func writeLibSQLDump(requestContext context.Context, databaseName string, writer io.Writer) error {
 	if _, writeError := io.WriteString(writer, DumpHeader); writeError != nil {
 		return writeError
 	}
 
-	schema, schemaError := sqld.Query(requestContext, databaseName, SchemaSQL)
+	schema, schemaError := engines.Query(requestContext, databaseName, SchemaSQL)
 	if schemaError != nil {
 		return schemaError
 	}
@@ -90,8 +208,12 @@ func writeRows(requestContext context.Context, databaseName string, table string
 	offset := 0
 
 	for {
-		held, queryError := sqld.Query(
-			requestContext, databaseName,
+		fresh, _, authorityError := authorizeExport(requestContext, databaseName)
+		if authorityError != nil {
+			return authorityError
+		}
+		held, queryError := engines.Query(
+			fresh, databaseName,
 			fmt.Sprintf(PageSQL, quoted(table), ExportPageSize, offset),
 		)
 

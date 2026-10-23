@@ -1,0 +1,7 @@
+<div class="alert" role="status" aria-live="polite" aria-atomic="true" tabindex="-1" data-clone-status hidden>
+  <div class="alert-title">Cloning database</div>
+  <div class="alert-body">
+    <span>Larger databases can take a while. Keep this page open until the request completes.</span>
+    <progress class="clone-progress" aria-label="Cloning database">Cloning…</progress>
+  </div>
+</div>

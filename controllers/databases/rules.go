@@ -22,7 +22,7 @@ func AllowNetwork(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	if allowError := service.AllowNetwork(name, asked.Network, asked.Note); allowError != nil {
+	if allowError := service.AllowNetwork(context.Context(), name, asked.Network, asked.Note); allowError != nil {
 		sessions.Complain(context, allowError.Message)
 	} else {
 		sessions.Report(context, service.NetworkAllowed)
@@ -41,7 +41,7 @@ func RemoveNetwork(context fiber.Ctx) error {
 		return backTo(context, name)
 	}
 
-	if removeError := service.RemoveNetwork(name, uint(identifier)); removeError != nil {
+	if removeError := service.RemoveNetwork(context.Context(), name, uint(identifier)); removeError != nil {
 		sessions.Complain(context, removeError.Message)
 	} else {
 		sessions.Report(context, service.NetworkRemoved)

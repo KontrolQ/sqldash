@@ -1,0 +1,11 @@
+<div class="menu" data-menu>
+  <button class="button is-outline is-small" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true">Filters{% if Filters %}<span class="badge is-secondary">{{ Filters|length }}</span>{% endif %}</button>
+  <div class="menu-content is-filters" data-menu-content hidden>
+    <div class="filter-rows" data-filter-rows>
+      {% for filter in Filters %}{% include "partials/filterrow.django" with filter_column=filter.Column filter_operator=filter.Operator filter_value=filter.Value %}{% endfor %}
+      {% if not Filters %}{% include "partials/filterrow.django" with filter_column="" filter_operator="contains" filter_value="" %}{% endif %}
+    </div>
+    <div class="filter-foot"><button class="button is-ghost is-small" type="button" data-filter-add>Add filter</button><span class="tab-bar-spacer"></span>{% if Filters %}<a class="button is-ghost is-small" href="{{ BrowsePath }}?{{ RelationQuery }}">Clear all</a>{% endif %}<button class="button is-small" type="submit" form="filter-form">Apply</button></div>
+    <template data-filter-template>{% include "partials/filterrow.django" with filter_column="" filter_operator="contains" filter_value="" %}</template>
+  </div>
+</div>

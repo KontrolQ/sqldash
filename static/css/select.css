@@ -75,10 +75,13 @@
 }
 
 .select-content {
-  position: absolute;
+  position: fixed;
   z-index: 50;
-  top: calc(100% + 4px);
+  top: 0;
+  right: auto;
+  bottom: auto;
   left: 0;
+  margin: 0;
   min-width: 128px;
   max-height: 320px;
   overflow-x: hidden;
@@ -105,9 +108,11 @@
   font-size: 14px;
   gap: 8px;
   line-height: 20px;
+  min-width: 0;
   outline: none;
+  overflow-wrap: anywhere;
   user-select: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .select-item:hover, .select-item.is-active {

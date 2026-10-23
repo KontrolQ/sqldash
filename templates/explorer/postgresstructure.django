@@ -1,0 +1,89 @@
+<div class="workspace explorer-postgres">
+  {% include "explorer/rail.django" with rail_base=StructurePath %}
+  <div class="bench">
+    <div class="workbar">
+      <div class="tabs is-compact">{% if Table %}<a class="tab" href="{{ BrowsePath }}?{{ RelationQuery }}">Data</a>{% endif %}<a class="tab is-current" href="{{ StructurePath }}?{{ RelationQuery }}">Structure</a></div>
+      <span class="badge is-outline">{{ Schema }}{% if Table %}.{{ Table }}{% endif %}</span>
+      {% if ReadOnlySchema %}<span class="badge is-outline">read-only system schema</span>{% endif %}
+      {% if CanManageObjects %}<button class="button is-small" type="button" data-reveal="object-manager">Manage objects</button>{% endif %}
+    </div>
+    <div class="sheet is-padded">
+      <div class="plan">
+        {% if Unavailable %}
+          <div class="sheet-empty" role="status"><strong>Structure unavailable</strong><span>{{ Unavailable }}</span></div>
+        {% endif %}
+        {% if Columns %}
+          <div class="plan-group"><div class="plan-label">Columns</div><div class="plan-rows">{% for column in Columns %}<div class="plan-row"><span class="plan-column">{{ column.Name }}</span><span class="plan-type">{{ column.Kind }}</span>{% if column.PrimaryKey %}<span class="plan-flag">PRIMARY KEY ({{ column.PrimaryPosition }})</span>{% endif %}{% if column.NotNull %}<span class="plan-flag">NOT NULL</span>{% endif %}{% if column.Identity %}<span class="plan-flag">IDENTITY</span>{% endif %}{% if column.Generated %}<span class="plan-flag">GENERATED</span>{% endif %}{% if column.Default %}<span class="plan-flag">DEFAULT {{ column.Default }}</span>{% endif %}</div>{% endfor %}</div></div>
+        {% endif %}
+        {% if Constraints %}
+          <div class="plan-group">
+            <div class="plan-label">Constraints</div>
+            <div class="plan-rows">
+              {% for constraint in Constraints %}
+                <div class="plan-row is-stacked">
+                  <span class="plan-column">{{ constraint.Name }}</span>
+                  <pre class="code is-block">{{ constraint.Definition }}</pre>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if Indexes %}
+          <div class="plan-group"><div class="plan-label">Indexes</div><div class="plan-rows">{% for index in Indexes %}<div class="plan-row"><span class="plan-column">{{ index.Name }}</span><span class="plan-type">{{ index.Columns|join:", " }}</span>{% if index.Unique %}<span class="plan-flag">UNIQUE</span>{% endif %}<span class="plan-flag">{{ index.Origin }}</span></div>{% endfor %}</div></div>
+        {% endif %}
+        {% if Triggers %}
+          <div class="plan-group">
+            <div class="plan-label">Triggers</div>
+            <div class="plan-rows">
+              {% for trigger in Triggers %}
+                <div class="plan-row is-stacked">
+                  <span class="plan-column">{{ trigger.Name }}</span>
+                  <pre class="code is-block">{{ trigger.Definition }}</pre>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if Functions %}
+          <div class="plan-group">
+            <div class="plan-label">Functions</div>
+            <div class="plan-rows">
+              {% for function in Functions %}
+                <div class="plan-row is-stacked">
+                  <span class="plan-column">{{ function.Name }}</span>
+                  <pre class="code is-block">{{ function.Definition }}</pre>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if Sequences %}
+          <div class="plan-group">
+            <div class="plan-label">Sequences</div>
+            <div class="plan-rows">
+              {% for sequence in Sequences %}
+                <div class="plan-row is-stacked">
+                  <span class="plan-column">{{ sequence.Name }}</span>
+                  <pre class="code is-block">{{ sequence.Definition }}</pre>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if Definition %}
+          <div class="plan-group">
+            <div class="plan-label">Definition</div>
+            <pre class="code is-block" id="table-definition">{{ Definition }}</pre>
+            <button class="button is-outline is-small" type="button" data-copy="table-definition">Copy definition</button>
+          </div>
+        {% endif %}
+        {% if not Unavailable and not Table and not Functions and not Sequences %}
+          <div class="sheet-empty"><strong>No relation selected</strong><span>{% if ReadOnlySchema %}Select a relation to inspect its structure. System schemas are read-only.{% else %}Select a relation or manage objects in this schema.{% endif %}</span></div>
+        {% endif %}
+      </div>
+    </div>
+    {% if CanManageObjects %}
+      {% include "explorer/objectforms.django" %}
+    {% endif %}
+  </div>
+</div>

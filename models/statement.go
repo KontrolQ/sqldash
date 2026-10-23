@@ -5,6 +5,7 @@ import "time"
 type Statement struct {
 	ID           uint      `gorm:"primarykey"`
 	DatabaseName string    `gorm:"index;not null"`
+	DatabaseID   uint      `gorm:"index;not null;default:0"`
 	Digest       string    `gorm:"index;not null"`
 	DurationMs   float64   `gorm:"not null"`
 	RowsRead     int64     `gorm:"not null"`

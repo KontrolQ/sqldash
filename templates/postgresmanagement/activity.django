@@ -1,0 +1,90 @@
+{% extends "layouts/base.django" %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Title }}</h1>
+      <p class="page-subtitle">{{ Connections }} managed connections · {{ ActiveQueries }} active queries · sampled {{ CollectedAt }}.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button is-outline" href="{% url "databases.connections" name=Name %}">Refresh</a>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <div class="card is-panel is-table">
+    <div class="card-head">
+      <div class="card-title">Database connections</div>
+      {% include "partials/hint.django" with hint_text="Only this database's managed client sessions are shown. Application names are supplied by clients." %}
+    </div>
+    {% if Rows %}
+      <div class="table-wrap">
+        <table class="table is-queries">
+          <thead>
+            <tr>
+              <th scope="col">Connection</th>
+              <th scope="col">Account / credential</th>
+              <th scope="col">Client</th>
+              <th scope="col">State / wait</th>
+              <th scope="col">Query</th>
+              <th scope="col">Query age</th>
+              <th scope="col">Transaction age</th>
+              {% if CanManage %}
+                <th scope="col">Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in Rows %}
+              <tr>
+                <td>
+                  <code>{{ row.PID }}</code>
+                  <div class="field-note">{{ row.StartedAt }}</div>
+                </td>
+                <td>
+                  {{ row.Account }}
+                  {% if row.Label %}
+                    <div class="field-note">{{ row.Label }}</div>
+                  {% endif %}
+                  <div><code>{{ row.Username }}</code></div>
+                </td>
+                <td>
+                  {{ row.ClientAddress|default:"Local" }}
+                  <div class="field-note">{{ row.Application|default:"—" }}</div>
+                </td>
+                <td>
+                  {{ row.State }}
+                  <div class="field-note">{{ row.Wait|default:"—" }}</div>
+                </td>
+                <td class="statement"><code>{{ row.Query|default:"—" }}</code></td>
+                <td class="table-numeric">{{ row.QueryAge }}</td>
+                <td class="table-numeric">{{ row.TransactionAge }}</td>
+                {% if CanManage %}
+                  <td>
+                    {% if row.Manageable %}
+                      {% if row.State == "active" %}
+                        <form method="post" action="{% url "databases.activity.cancel" name=Name %}" data-confirm="Request cancellation of this connection's current query?" data-confirm-title="Cancel query?" data-confirm-action="Cancel query">
+                          <input type="hidden" name="pid" value="{{ row.PID }}">
+                          <input type="hidden" name="backend_start" value="{{ row.BackendStart }}">
+                          <button class="button is-outline is-small" type="submit">Cancel query</button>
+                        </form>
+                      {% endif %}
+                      <form method="post" action="{% url "databases.activity.terminate" name=Name %}" data-confirm="This disconnects the client and rolls back its open transaction." data-confirm-title="Terminate connection?" data-confirm-action="Terminate connection">
+                        <input type="hidden" name="pid" value="{{ row.PID }}">
+                        <input type="hidden" name="backend_start" value="{{ row.BackendStart }}">
+                        <button class="button is-outline is-small is-destructive" type="submit">Terminate</button>
+                      </form>
+                    {% else %}
+                      <span class="field-note">Protected</span>
+                    {% endif %}
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="card-body"><div class="empty"><span class="empty-title">No managed connections</span><span>Client sessions appear here while connected.</span></div></div>
+    {% endif %}
+  </div>
+{% endblock %}

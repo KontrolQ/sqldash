@@ -1,7 +1,6 @@
 package insights
 
 import (
-	"sqldash/services/access"
 	service "sqldash/services/insights"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -10,11 +9,7 @@ import (
 )
 
 func Overview(context fiber.Ctx) error {
-	scope, scopeError := access.MonitoringScope(context.Context())
-	if scopeError != nil {
-		return scopeError
-	}
-	data, dataError := service.GetOverview("", context.Query(WindowParameter), scope...)
+	data, dataError := service.GetScopedOverview(context.Context(), "", context.Query(WindowParameter), context.Query("engine"))
 	if dataError != nil {
 		return dataError
 	}
@@ -22,5 +17,7 @@ func Overview(context fiber.Ctx) error {
 	meta.SetPageTitle(context, data.Title)
 	meta.SetCrumbs(context, meta.Crumb{Label: InsightsLabel})
 
+	context.Set("Cache-Control", "no-store")
+	context.Set("Referrer-Policy", "no-referrer")
 	return shortcuts.Render(context, OverviewTemplate, data)
 }

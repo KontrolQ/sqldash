@@ -1,0 +1,43 @@
+<div class="table-wrap">
+  <table class="table is-queries">
+    <thead>
+      <tr>
+        <th scope="col"><a class="column-sort" href="{{ DatabaseSortPath }}">Database{% if Sort == "database" %}<span aria-hidden="true">{% if Direction == "asc" %} ↑{% else %} ↓{% endif %}</span>{% endif %}</a></th>
+        <th scope="col"><a class="column-sort" href="{{ StatementSortPath }}">Query{% if Sort == "statement" %}<span aria-hidden="true">{% if Direction == "asc" %} ↑{% else %} ↓{% endif %}</span>{% endif %}</a></th>
+        {% for column in TableColumns %}
+          <th scope="col" class="table-numeric" title="{{ column.Help }}"><a class="column-sort" href="{{ column.Path }}">{{ column.Label }}{% if Sort == column.Key %}<span aria-hidden="true">{% if Direction == "asc" %} ↑{% else %} ↓{% endif %}</span>{% endif %}</a></th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for query in TableRows %}
+        <tr class="query-row">
+          <td>
+            <a class="link" href="{{ query.DatabasePath }}?window={{ Window }}&engine={{ query.Engine }}&sort={{ Sort }}&direction={{ Direction }}">{{ query.Database }}</a>
+            <div class="field-note">{{ query.EngineLabel }}</div>
+          </td>
+          <td>
+            <div class="statement">
+              {% if query.FullStatement %}
+                <button class="query-open" type="button" data-statement-open="{{ query.StatementID }}" data-statement-label="{{ query.StatementLabel }}" aria-label="Show the complete stored statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+                <template id="{{ query.StatementID }}" data-statement-preserve>{{ query.FullStatement }}</template>
+              {% endif %}
+              <code>{{ query.Statement }}</code>
+            </div>
+          </td>
+          {% for cell in query.Cells %}
+            <td class="table-numeric"{% if cell.Reason %} title="{{ cell.Reason }}"{% endif %}>{{ cell.Value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="sheet-veil" data-statement-veil hidden>
+  <div class="dialog-veil" data-statement-close></div>
+  <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="query-statement-title">
+    <div class="dialog-head"><div class="dialog-title" id="query-statement-title">Statement</div><div class="dialog-note" data-statement-note>Representative stored statement.</div></div>
+    <pre class="code is-block" data-statement-body></pre>
+    <div class="dialog-foot"><button class="button is-outline" type="button" data-statement-copy>Copy</button><button class="button" type="button" data-statement-close>Close</button></div>
+  </div>
+</div>

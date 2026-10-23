@@ -1,0 +1,52 @@
+{% if Editable and GridEditor != "postgres" %}
+  {% for row in Rows %}
+    <div class="drawer" id="edit-row-{{ forloop.Counter }}" hidden>
+      <div class="drawer-head"><span class="card-title">Edit record</span><button class="button is-ghost is-small" type="button" data-reveal="edit-row-{{ forloop.Counter }}">Close</button></div>
+      <form class="drawer-body" method="post" action="{% url "databases.explore.cell" name=Database %}">
+        <input type="hidden" name="schema" value="{{ Schema }}">
+        <input type="hidden" name="table" value="{{ Table }}">
+        <input type="hidden" name="back" value="{{ View }}">
+        <div class="explorer-fields">
+          {% for cell in row.Cells %}
+            {% if not cell.ReadOnly %}
+              <div class="field">
+                <label class="label" for="edit-value-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}">{{ cell.Column }}</label>
+                <input type="hidden" name="column" value="{{ cell.Column }}">
+                <input type="hidden" name="key" value="{{ row.Key }}">
+                <div class="select is-wide" data-select><select name="state" aria-label="{{ cell.Column }} field state"><option value="keep">Keep current value{% if cell.IsNull %} (NULL){% endif %}</option><option value="value">Value (empty text is allowed)</option><option value="null">NULL</option><option value="default">DEFAULT</option></select><button class="select-trigger is-wide" type="button" data-select-trigger aria-haspopup="listbox" aria-expanded="false"><span data-select-label></span></button><div class="select-content" role="listbox" data-select-content hidden></div></div>
+                <textarea class="input" id="edit-value-{{ forloop.Parentloop.Counter }}-{{ forloop.Counter }}" name="value" rows="2">{{ cell.Value }}</textarea>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="actions"><button class="button" type="submit">Save changes</button></div>
+      </form>
+    </div>
+  {% endfor %}
+{% endif %}
+{% if Insertable %}
+  <div class="drawer" id="add-row" hidden>
+    <div class="drawer-head"><span class="card-title">Add a record to {{ Schema }}.{{ Table }}</span><button class="step" type="button" data-reveal="add-row" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <form class="drawer-body" method="post" action="{% url "databases.explore.insert" name=Database %}">
+      <input type="hidden" name="schema" value="{{ Schema }}">
+      <input type="hidden" name="table" value="{{ Table }}">
+      <input type="hidden" name="back" value="{{ View }}">
+      <div class="explorer-fields">
+        {% for column in Columns %}
+          {% if not column.ReadOnly %}
+            <div class="field">
+              <label class="label" for="new-value-{{ forloop.Counter }}">{{ column.Name }}</label>
+              <input type="hidden" name="column" value="{{ column.Name }}">
+              <div class="select is-wide" data-select><select name="state" aria-label="{{ column.Name }} field state"><option value="default">DEFAULT</option><option value="value">Value (empty text is allowed)</option>{% if not column.NotNull %}<option value="null">NULL</option>{% endif %}</select><button class="select-trigger is-wide" type="button" data-select-trigger aria-haspopup="listbox" aria-expanded="false"><span data-select-label></span></button><div class="select-content" role="listbox" data-select-content hidden></div></div>
+              <textarea class="input" id="new-value-{{ forloop.Counter }}" name="value" rows="2"></textarea>
+              <span class="field-note">{{ column.Kind }}{% if column.NotNull %} &middot; required{% endif %}{% if column.Default %} &middot; default {{ column.Default }}{% endif %}</span>
+            </div>
+          {% else %}
+            <div class="field"><span class="label">{{ column.Name }}</span><span class="field-note">{{ column.Kind }} &middot; generated automatically</span></div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="actions"><button class="button is-ghost" type="button" data-reveal="add-row">Cancel</button><button class="button" type="submit">Add record</button></div>
+    </form>
+  </div>
+{% endif %}

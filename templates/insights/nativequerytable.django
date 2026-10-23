@@ -1,0 +1,43 @@
+{% if Native.Rows %}
+  <div class="table-wrap">
+    <table class="table is-queries insights-native-queries">
+      <thead>
+        <tr>
+          <th scope="col">Database / query</th>
+          {% for column in Native.Columns %}
+            <th scope="col" class="table-numeric">
+              {% if native_sortable %}<a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres&sort={{ column.Key }}&direction={% if Native.Sort == column.Key and Native.Direction == "desc" %}asc{% else %}desc{% endif %}">{{ column.Label }}{% if Native.Sort == column.Key %}<span aria-hidden="true">{% if Native.Direction == "asc" %} ↑{% else %} ↓{% endif %}</span>{% endif %}</a>{% else %}{{ column.Label }}{% endif %}
+            </th>
+          {% endfor %}
+          <th scope="col">Native minimum</th>
+          <th scope="col">Native maximum</th>
+          <th scope="col">Local blocks hit / read</th>
+          <th scope="col">Temporary blocks read / written</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for query in Native.Rows %}
+          <tr>
+            <td class="statement">
+              <div class="field-note">{{ query.Database }}</div>
+              <code>{{ query.Statement }}</code>
+            </td>
+            <td class="table-numeric">{{ query.Share }}</td>
+            <td class="table-numeric">{{ query.Calls }}</td>
+            <td class="table-numeric">{{ query.TotalTime }}</td>
+            <td class="table-numeric">{{ query.MeanTime }}</td>
+            <td class="table-numeric">{{ query.Rows }}</td>
+            <td class="table-numeric">{{ query.SharedHit }}</td>
+            <td class="table-numeric">{{ query.SharedRead }}</td>
+            <td class="table-numeric">{{ query.MinimumTime }}</td>
+            <td class="table-numeric">{{ query.MaximumTime }}</td>
+            <td class="table-numeric">{{ query.LocalHit }} / {{ query.LocalRead }}</td>
+            <td class="table-numeric">{{ query.TemporaryRead }} / {{ query.TemporaryWritten }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card-body"><div class="empty"><span class="empty-title">{{ Native.EmptyTitle }}</span><span>{{ Native.EmptyNote }}</span></div></div>
+{% endif %}

@@ -1,0 +1,106 @@
+{% extends "layouts/base.django" %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/extensions.css" %}">
+{% endblock %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>Extensions</h1>
+      <p class="page-subtitle">Enable or disable extensions for {{ Name }}.</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <div class="stack" data-extension-catalog>
+    {% if Rows %}
+      <div class="extension-toolbar">
+        <input class="input" type="search" placeholder="Search extensions" aria-label="Search extensions by name or description" aria-controls="extension-table" data-extension-search disabled>
+        <span class="tally" role="status" aria-live="polite" aria-atomic="true" data-extension-search-status></span>
+      </div>
+    {% endif %}
+    <div class="card is-panel is-table">
+      <div class="card-head">
+        <div class="card-title">Available extensions</div>
+        {% include "partials/hint.django" with hint_text="Disabling is refused if database objects depend on the extension." %}
+      </div>
+      {% if Rows %}
+        <div class="table-wrap" data-extension-table>
+          <table class="table" id="extension-table">
+            <thead>
+              <tr>
+                <th scope="col">Extension</th>
+                <th scope="col">Version</th>
+                <th scope="col">Source</th>
+                <th scope="col">State</th>
+                <th scope="col">Enabled</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for extension in Rows %}
+                <tr data-extension-row>
+                  <td data-extension-search-text>
+                    <code>{{ extension.Label|default:extension.Name }}</code>
+                    {% if extension.Label and extension.Label != extension.Name %}
+                      <div class="field-note"><code>{{ extension.Name }}</code></div>
+                    {% endif %}
+                    {% if extension.Type == "module" %}
+                      <div class="field-note">Module</div>
+                    {% endif %}
+                    <div class="field-note">{{ extension.Description }}</div>
+                  </td>
+                  <td>
+                    {{ extension.InstalledVersion|default:extension.DefaultVersion|default:"—" }}
+                    {% if extension.InstalledVersion and extension.DefaultVersion != extension.InstalledVersion %}
+                      <div class="field-note">Available {{ extension.DefaultVersion|default:"—" }}</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {{ extension.Source|default:"—" }}
+                    {% if extension.NativeUsage %}
+                      <div class="field-note">{{ extension.NativeUsage }}</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if extension.Protected %}
+                      Required
+                      {% if not extension.Enabled %}
+                        <div class="field-note">Not enabled</div>
+                      {% endif %}
+                    {% elif extension.Enabled %}
+                      Enabled
+                    {% else %}
+                      Disabled
+                    {% endif %}
+                    {% if extension.Reason %}
+                      <div class="field-note">{{ extension.Reason }}</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if extension.Protected %}
+                      <span class="field-note">{% if extension.Enabled %}Always enabled{% else %}Unavailable{% endif %}</span>
+                    {% else %}
+                      <form method="post" action="{% url "databases.extensions.manage" name=Name %}"{% if extension.Enabled %} data-confirm="Disable {{ extension.Name }}? This is refused while other database objects depend on it." data-confirm-title="Disable extension?" data-confirm-action="Disable extension"{% endif %}>
+                      <input type="hidden" name="extension" value="{{ extension.Name }}">
+                      <input type="hidden" name="operation" value="{% if extension.Enabled %}remove{% else %}install{% endif %}">
+                      <label class="switch">
+                        <input type="checkbox" role="switch" aria-label="Enable {{ extension.Label|default:extension.Name }}" data-extension-toggle data-enabled="{% if extension.Enabled %}true{% else %}false{% endif %}" data-manageable="{% if extension.CanChange %}true{% else %}false{% endif %}" disabled{% if extension.Enabled %} checked{% endif %}>
+                        <span class="switch-thumb"></span>
+                      </label>
+                      <noscript><button class="button is-outline is-small" type="submit"{% if not extension.CanChange %} disabled{% endif %}>{% if extension.Enabled %}Disable{% else %}Enable{% endif %}</button></noscript>
+                    </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-body" data-extension-search-empty hidden>
+        <div class="empty"><span class="empty-title">No matching extensions</span><span>Try a different search.</span></div>
+      </div>
+      {% else %}
+        <div class="card-body"><div class="empty"><span class="empty-title">No extensions available</span><span>No supported extensions are available for this database.</span></div></div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

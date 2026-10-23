@@ -1,0 +1,22 @@
+.insights-engines .tabs {
+  flex: 0 0 auto;
+  width: max-content;
+}
+
+.insights-engines .tab {
+  flex: 0 0 auto;
+}
+
+.insights-native-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.insights-native-snapshot-note {
+  margin-top: var(--sp-1);
+}
+
+.insights-native-queries .statement > .field-note {
+  margin-bottom: var(--sp-2);
+}

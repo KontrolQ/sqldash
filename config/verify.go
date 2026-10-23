@@ -8,6 +8,10 @@ import (
 )
 
 func verifyConfig() error {
+	if postgresError := VerifyPostgres(); postgresError != nil {
+		return postgresError
+	}
+
 	if Server.MaximumImageUploadBytes <= 0 || Server.MaximumImageUploadBytes > math.MaxInt-MultipartUploadOverhead {
 		return errors.New(ImageUploadLimitInvalid)
 	}

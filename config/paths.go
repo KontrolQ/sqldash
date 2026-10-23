@@ -22,6 +22,41 @@ func StatePath() string {
 	return filepath.Join(Data.Directory, StateFileName)
 }
 
+func PostgresDirectory() string {
+	return filepath.Join(Data.Directory, "postgres")
+}
+
+func PostgresDataPath() string {
+	return filepath.Join(PostgresDirectory(), "18", "data")
+}
+
+func PostgresConfigPath() string {
+	return filepath.Join(PostgresDirectory(), "config")
+}
+
+func PostgresRuntimePath() string {
+	return filepath.Join(PostgresDirectory(), "run")
+}
+
+func PostgresStagingPath() string {
+	return filepath.Join(PostgresDirectory(), "staging")
+}
+
+func PostgresSecretsPath() string {
+	return filepath.Join(PostgresDirectory(), "secrets")
+}
+
+func PostgresTLSPath() string {
+	return filepath.Join(PostgresDirectory(), "tls")
+}
+
+func PostgresHost() string {
+	if Postgres.PublicHost != "" {
+		return Postgres.PublicHost
+	}
+	return Server.Domain
+}
+
 func SqldURL() string {
 	return "http://" + Sqld.Address
 }

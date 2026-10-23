@@ -1,0 +1,13 @@
+<div class="sheet-veil" data-sheet="connection-details-{{ connection.Identifier }}" hidden>
+  <div class="dialog-veil" data-sheet-close></div>
+  <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="connection-details-title-{{ connection.Identifier }}">
+    <div class="dialog-head"><div class="dialog-title" id="connection-details-title-{{ connection.Identifier }}">{{ connection.Label }}</div><div class="dialog-note">{{ connection.Scope }} access to {{ Database }}.</div></div>
+    <div class="stack">
+      <div class="row"><div class="field"><span class="label">Hostname</span><code class="code">{{ Host }}</code></div><div class="field"><span class="label">Port</span><code class="code">{{ Port }}</code></div><div class="field"><span class="label">Database</span><code class="code">{{ Database }}</code></div></div>
+      <div class="field"><span class="label">Username</span><div class="copy"><code class="code" id="connection-username-{{ connection.Identifier }}">{{ connection.Username }}</code><button class="button is-outline is-small" type="button" data-copy="connection-username-{{ connection.Identifier }}" data-copy-label="The username">Copy</button></div></div>
+      <div class="field"><span class="label">Connection URL (without password)</span><div class="copy"><code class="code" id="connection-url-{{ connection.Identifier }}">{{ connection.URL }}</code><button class="button is-outline is-small" type="button" data-copy="connection-url-{{ connection.Identifier }}" data-copy-label="The connection URL">Copy</button></div></div>
+      <p class="field-note">Use <code>psql</code> with this URL and <code>sslrootcert=/path/to/ca.pem</code>, then enter your password when prompted. Rotate this connection if you need a new password.</p>
+      <div class="dialog-foot"><button class="button" type="button" data-sheet-close>Done</button></div>
+    </div>
+  </div>
+</div>

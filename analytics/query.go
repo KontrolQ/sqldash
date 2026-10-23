@@ -1,6 +1,7 @@
 package analytics
 
 import (
+	"context"
 	"time"
 
 	"sqldash/database"
@@ -67,9 +68,13 @@ func rollupsIn(databaseName string, window Window, allowed ...[]string) ([]model
 }
 
 func rollupsBetween(databaseName string, resolution models.Resolution, from time.Time, to time.Time, allowed ...[]string) ([]models.Rollup, error) {
+	return rollupsBetweenContext(context.Background(), databaseName, resolution, from, to, allowed...)
+}
+
+func rollupsBetweenContext(ctx context.Context, databaseName string, resolution models.Resolution, from time.Time, to time.Time, allowed ...[]string) ([]models.Rollup, error) {
 	records := make([]models.Rollup, 0)
 
-	query := database.DB.
+	query := currentLibSQL(database.DB.WithContext(ctx).Model(&models.Rollup{}), "rollups").
 		Where("resolution = ? AND bucket_start >= ? AND bucket_start < ?", resolution, from, to)
 
 	if databaseName != "" {
@@ -201,7 +206,7 @@ func nameThem(databaseName string, summaries []QuerySummary, allowed ...[]string
 
 	fingerprints := make([]models.Fingerprint, 0)
 
-	query := database.DB.Where("digest IN ?", digests)
+	query := currentLibSQL(database.DB.Model(&models.Fingerprint{}), "fingerprints").Where("digest IN ?", digests)
 	if databaseName != "" {
 		query = query.Where("database_name = ?", databaseName)
 	}

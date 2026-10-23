@@ -60,3 +60,16 @@ const (
 	NetworkAllowed  = "That range may now connect."
 	NetworkRemoved  = "That range was removed."
 )
+
+const (
+	AuthorityRefused           = "You no longer have permission to perform that action."
+	EngineRefused              = "That database engine or operation is not supported."
+	PostgresUnavailable        = "PostgreSQL is not available on this instance."
+	DatabaseNotReady           = "This database is not ready. Its operation is pending or needs recovery."
+	OperationFailed            = "The operation could not be completed. The database remains unavailable until recovery or deletion completes."
+	SettingsUnavailable        = "The current database settings could not be read."
+	ExtensionsAuthorityRefused = "Copying or restoring installed extensions requires permission to manage PostgreSQL extensions."
+	RemoteRefused              = "The remote PostgreSQL database could not be inspected or copied. Check its address, credentials and TLS settings."
+	RemoteConnectionRefused    = "Could not connect to the source PostgreSQL database. Check its hostname, port, credentials and TLS settings."
+	ExtensionsMustBeManaged    = "This source requires PostgreSQL extensions. Importing or cloning extension-dependent databases is not supported. Extensions can only be enabled after a database has been created."
+)

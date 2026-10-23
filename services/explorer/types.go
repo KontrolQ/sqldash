@@ -1,19 +1,27 @@
 package explorer
 
 type TableView struct {
+	Schema string
+	Kind   string
+	Query  string
 	Name   string
 	IsView bool
 	Rows   int64
 }
 
 type ColumnView struct {
-	Name       string
-	Kind       string
-	NotNull    bool
-	PrimaryKey bool
-	Default    string
-	References string
-	OnColumn   string
+	Generated       bool
+	Identity        bool
+	ReadOnly        bool
+	PrimaryPosition int
+	ReferenceSchema string
+	Name            string
+	Kind            string
+	NotNull         bool
+	PrimaryKey      bool
+	Default         string
+	References      string
+	OnColumn        string
 }
 
 type ChoiceView struct {
@@ -30,6 +38,9 @@ type FilterView struct {
 }
 
 type CellView struct {
+	ReadOnly   bool
+	Value      string
+	LinkQuery  string
 	Column     string
 	Text       string
 	IsNull     bool
@@ -56,37 +67,46 @@ type RowView struct {
 }
 
 type BrowseContext struct {
-	Title         string
-	Database      string
-	Address       string
-	Table         string
-	IsView        bool
-	Tables        []TableView
-	Columns       []ColumnView
-	Rows          []RowView
-	Total         int64
-	Page          int
-	Pages         int
-	PageSize      int
-	Sort          string
-	Direction     string
-	Search        string
-	Editable      bool
-	KeyColumn     string
-	Filters       []FilterView
-	Operators     []ChoiceView
-	ColumnChoices []ChoiceView
-	Carry         string
-	CarryNoSearch string
-	View          string
-	Duration      string
-	PreviousPage  int
-	NextPage      int
-	FirstRow      int
-	LastRow       int
-	ColumnNames   string
-	BrowsePath    string
-	StructurePath string
+	ReadOnlySchema bool
+	Unavailable    string
+	GridEditor     string
+	GridData       string
+	Engine         string
+	Schema         string
+	Schemas        []ChoiceView
+	RelationQuery  string
+	Insertable     bool
+	Title          string
+	Database       string
+	Address        string
+	Table          string
+	IsView         bool
+	Tables         []TableView
+	Columns        []ColumnView
+	Rows           []RowView
+	Total          int64
+	Page           int
+	Pages          int
+	PageSize       int
+	Sort           string
+	Direction      string
+	Search         string
+	Editable       bool
+	KeyColumn      string
+	Filters        []FilterView
+	Operators      []ChoiceView
+	ColumnChoices  []ChoiceView
+	Carry          string
+	CarryNoSearch  string
+	View           string
+	Duration       string
+	PreviousPage   int
+	NextPage       int
+	FirstRow       int
+	LastRow        int
+	ColumnNames    string
+	BrowsePath     string
+	StructurePath  string
 }
 
 type SnippetView struct {
@@ -96,29 +116,38 @@ type SnippetView struct {
 }
 
 type SchemaTable struct {
+	Schema  string
+	Kind    string
 	Name    string
 	Columns []string
 }
 
 type ConsoleContext struct {
-	Title      string
-	Database   string
-	Address    string
-	Tables     []TableView
-	BrowsePath string
-	Table      string
-	Schema     string
-	Statement  string
-	Columns    []string
-	Rows       [][]string
-	Affected   int64
-	Duration   string
-	RowsRead   int64
-	Failure    string
-	Ran        bool
-	Snippets   []SnippetView
-	SnippetID  uint
-	Name       string
+	Engine            string
+	CurrentSchema     string
+	Schemas           []ChoiceView
+	Results           []ConsoleResult
+	RowsReadAvailable bool
+	CancelPath        string
+	RunID             string
+	Title             string
+	Database          string
+	Address           string
+	Tables            []TableView
+	BrowsePath        string
+	Table             string
+	Schema            string
+	Statement         string
+	Columns           []string
+	Rows              [][]string
+	Affected          int64
+	Duration          string
+	RowsRead          int64
+	Failure           string
+	Ran               bool
+	Snippets          []SnippetView
+	SnippetID         uint
+	Name              string
 }
 
 type IndexView struct {
@@ -129,20 +158,33 @@ type IndexView struct {
 }
 
 type StructureContext struct {
-	Title         string
-	BrowsePath    string
-	StructurePath string
-	Database      string
-	Address       string
-	Table         string
-	IsView        bool
-	Tables        []TableView
-	Columns       []ColumnView
-	Indexes       []IndexView
-	Triggers      []TriggerView
-	Relations     []RelationView
-	UsedBy        []RelationView
-	Definition    string
+	ReadOnlySchema   bool
+	Unavailable      string
+	MutableSchemas   []ChoiceView
+	Engine           string
+	Schema           string
+	Schemas          []ChoiceView
+	RelationQuery    string
+	Constraints      []ConstraintView
+	Functions        []TriggerView
+	Sequences        []TriggerView
+	CanManageObjects bool
+	ObjectPath       string
+	Kinds            []ChoiceView
+	Title            string
+	BrowsePath       string
+	StructurePath    string
+	Database         string
+	Address          string
+	Table            string
+	IsView           bool
+	Tables           []TableView
+	Columns          []ColumnView
+	Indexes          []IndexView
+	Triggers         []TriggerView
+	Relations        []RelationView
+	UsedBy           []RelationView
+	Definition       string
 }
 
 type TriggerView struct {

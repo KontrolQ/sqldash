@@ -13,6 +13,11 @@
   const TICK_LENGTH = 5;
   const TICK_GAP = 6;
   const RESTING = '—';
+  const UNAVAILABLE = 'Unavailable';
+
+  function isMeasurement(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
 
   function make(name, attributes) {
     const node = document.createElementNS(SVG, name);
@@ -41,6 +46,10 @@
   }
 
   function trim(value) {
+    if (!isMeasurement(value)) {
+      return UNAVAILABLE;
+    }
+
     const text = value.toFixed(value >= 10 || Number.isInteger(value) ? 0 : 1);
 
     return text.indexOf('.') < 0 ? text : text.replace(/\.?0+$/, '');
@@ -54,11 +63,40 @@
     return trim(value) + ' ms';
   }
 
+  function humanBytes(value) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+    let amount = value;
+    let unitIndex = 0;
+
+    while (Math.abs(amount) >= 1024 && unitIndex < units.length - 1) {
+      amount /= 1024;
+      unitIndex += 1;
+    }
+
+    return trim(amount) + ' ' + units[unitIndex];
+  }
+
   function label(value, unit) {
+    if (!isMeasurement(value)) {
+      return UNAVAILABLE;
+    }
+
+    if (unit === 'bytes') {
+      return humanBytes(value);
+    }
+
     return unit === 'ms' ? duration(value) : readable(value);
   }
 
   function bare(value, unit) {
+    if (!isMeasurement(value)) {
+      return UNAVAILABLE;
+    }
+
+    if (unit === 'bytes') {
+      return humanBytes(value);
+    }
+
     if (unit !== 'ms') {
       return readable(value);
     }
@@ -71,11 +109,20 @@
       return 'ms';
     }
 
-    return chart.axis || '';
+    return chart.axis || (chart.unit === 'bytes' ? 'bytes' : '');
   }
 
   function niceStep(rough) {
+    if (!isMeasurement(rough) || rough <= 0) {
+      return 1;
+    }
+
     const power = Math.pow(10, Math.floor(Math.log10(rough)));
+
+    if (power === 0) {
+      return rough;
+    }
+
     const share = rough / power;
 
     if (share <= 1) {
@@ -98,15 +145,85 @@
   }
 
   function ticksFor(tallest) {
-    const step = niceStep(tallest / 4);
-    const top = Math.ceil(tallest / step) * step;
+    const maximum = isMeasurement(tallest) && tallest > 0 ? tallest : 1;
+    const step = niceStep(maximum / 4);
+    const roundedTop = Math.ceil(maximum / step) * step;
+    const top = isMeasurement(roundedTop) && roundedTop > 0 ? roundedTop : maximum;
+    const tickCount = Math.floor(top / step + 0.5);
     const marks = [];
 
-    for (let value = 0; value <= top + step / 2; value += step) {
-      marks.push(value);
+    for (let tickIndex = 0; tickIndex <= tickCount; tickIndex += 1) {
+      const value = tickIndex * step;
+
+      if (isMeasurement(value)) {
+        marks.push(value);
+      }
     }
 
-    return { top: top || 1, marks: marks };
+    return { top: top, marks: marks };
+  }
+
+  function appendMeasurementCell(row, name, text, scope) {
+    const cell = document.createElement(name);
+    cell.textContent = text;
+
+    if (scope) {
+      cell.scope = scope;
+    }
+
+    row.appendChild(cell);
+  }
+
+  function measurementsTable(chart, series) {
+    const details = document.createElement('details');
+    details.className = 'chart-measurements';
+
+    const summary = document.createElement('summary');
+    summary.textContent = 'Measurements';
+    details.appendChild(summary);
+
+    const table = document.createElement('table');
+    table.className = 'table';
+    table.setAttribute('aria-label', 'Measurements');
+
+    const heading = table.createTHead().insertRow();
+    const measurementUnit = chart.unit || chart.axis || '';
+    const hasNotes = chart.points.some(function (point) { return Boolean(point.note); });
+    appendMeasurementCell(heading, 'th', 'Label', 'col');
+
+    series.forEach(function (name) {
+      appendMeasurementCell(heading, 'th', name + (measurementUnit ? ' (' + measurementUnit + ')' : ''), 'col');
+    });
+
+    if (hasNotes) {
+      appendMeasurementCell(heading, 'th', 'Coverage', 'col');
+    }
+
+    const body = table.createTBody();
+
+    chart.points.forEach(function (point) {
+      const row = body.insertRow();
+      appendMeasurementCell(row, 'th', point.label, 'row');
+
+      series.forEach(function (name, band) {
+        const value = point.values[band];
+        appendMeasurementCell(row, 'td', isMeasurement(value) ? String(value) : UNAVAILABLE);
+      });
+
+      if (hasNotes) {
+        appendMeasurementCell(row, 'td', point.note || (point.values.some(isMeasurement) ? 'Recorded statement coverage' : UNAVAILABLE));
+      }
+    });
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-wrap';
+    wrapper.tabIndex = 0;
+    wrapper.setAttribute('role', 'region');
+    wrapper.setAttribute('aria-label', series.join(', ') + ' measurements');
+    wrapper.appendChild(table);
+    details.appendChild(wrapper);
+
+    return details;
   }
 
   holders.forEach(function (holder) {
@@ -134,17 +251,21 @@
     const stacked = chart.kind === 'stacked';
     const series = chart.series || [];
     const readings = [];
+    const interactive = chart.table === true;
+    let selectedIndex = null;
 
-    function summarise(band) {
-      if (stacked) {
-        return chart.points.reduce(function (total, point) {
-          return total + point.values[band];
-        }, 0);
+    if (!canvas) {
+      return;
+    }
+
+    if (interactive) {
+      holder.appendChild(measurementsTable(chart, series));
+
+      if (tip) {
+        tip.setAttribute('role', 'status');
+        tip.setAttribute('aria-live', 'polite');
+        tip.setAttribute('aria-atomic', 'true');
       }
-
-      return chart.points.reduce(function (highest, point) {
-        return Math.max(highest, point.values[band]);
-      }, 0);
     }
 
     if (key) {
@@ -189,21 +310,55 @@
     }
 
     function draw() {
+      const restoreFocus = interactive && canvas.contains(document.activeElement);
       const width = Math.max(canvas.clientWidth, 360);
       const height = PLOT_HEIGHT + AXIS_HEIGHT + TOP_ROOM;
       const plotWidth = width - AXIS_WIDTH;
 
       let tallest = 0;
+      let hasMeasurements = false;
 
       chart.points.forEach(function (point) {
-        const value = stacked
-          ? point.values.reduce(function (a, b) { return a + b; }, 0)
-          : Math.max.apply(null, point.values);
+        let stackedHeight = 0;
 
-        tallest = Math.max(tallest, value);
+        series.forEach(function (name, band) {
+          const value = point.values[band];
+
+          if (!isMeasurement(value)) {
+            return;
+          }
+
+          hasMeasurements = true;
+
+          if (stacked) {
+            stackedHeight += value;
+          } else {
+            tallest = Math.max(tallest, value);
+          }
+        });
+
+        if (stacked && isMeasurement(stackedHeight)) {
+          tallest = Math.max(tallest, stackedHeight);
+        }
       });
 
-      const axis = ticksFor(tallest || 1);
+      canvas.innerHTML = '';
+      rest();
+
+      if (tip) {
+        tip.hidden = true;
+      }
+
+      if (!hasMeasurements) {
+        const empty = document.createElement('div');
+        empty.className = 'chart-empty';
+        empty.textContent = 'No measurements available.';
+        canvas.appendChild(empty);
+
+        return;
+      }
+
+      const axis = ticksFor(tallest);
 
       const svg = make('svg', {
         class: 'chart-canvas',
@@ -213,7 +368,13 @@
       });
 
       const scale = function (value) {
-        return TOP_ROOM + PLOT_HEIGHT - (value / axis.top) * PLOT_HEIGHT;
+        if (!isMeasurement(value)) {
+          return null;
+        }
+
+        const position = TOP_ROOM + PLOT_HEIGHT - (value / axis.top) * PLOT_HEIGHT;
+
+        return isMeasurement(position) ? position : null;
       };
 
       axis.marks.forEach(function (value) {
@@ -270,19 +431,32 @@
         chart.points.forEach(function (point, index) {
           let bottom = 0;
 
-          point.values.forEach(function (value, band) {
-            if (value <= 0) {
+          series.forEach(function (name, band) {
+            const value = point.values[band];
+
+            if (!isMeasurement(value) || value <= 0) {
               return;
             }
 
             const top = bottom + value;
 
+            if (!isMeasurement(top)) {
+              return;
+            }
+
+            const topPosition = scale(top);
+            const bottomPosition = scale(bottom);
+
+            if (!isMeasurement(topPosition) || !isMeasurement(bottomPosition)) {
+              return;
+            }
+
             svg.appendChild(make('rect', {
               class: 'chart-band is-' + band,
               x: AXIS_WIDTH + index * slot + slot * 0.18,
-              y: scale(top),
+              y: topPosition,
               width: Math.max(slot * 0.64, 1),
-              height: Math.max(scale(bottom) - scale(top), 1),
+              height: Math.max(bottomPosition - topPosition, 1),
             }));
 
             bottom = top;
@@ -291,12 +465,49 @@
       } else {
         series.forEach(function (one, band) {
           let path = '';
+          let connected = false;
 
           chart.points.forEach(function (point, index) {
-            path += (index === 0 ? 'M' : 'L') + centreOf(index) + ' ' + scale(point.values[band]) + ' ';
+            const value = point.values[band];
+
+            if (!isMeasurement(value)) {
+              connected = false;
+
+              return;
+            }
+
+            const position = scale(value);
+
+            if (!isMeasurement(position)) {
+              connected = false;
+
+              return;
+            }
+
+            if (point.break_before === true) {
+              connected = false;
+            }
+
+            const nextPoint = chart.points[index + 1];
+            const connectsAfter = nextPoint && nextPoint.break_before !== true
+              && isMeasurement(nextPoint.values[band]) && isMeasurement(scale(nextPoint.values[band]));
+
+            if (!connected && !connectsAfter) {
+              svg.appendChild(make('circle', {
+                class: 'chart-dot is-' + band,
+                r: 3.5,
+                cx: centreOf(index),
+                cy: position,
+              }));
+            }
+
+            path += (connected ? 'L' : 'M') + centreOf(index) + ' ' + position + ' ';
+            connected = true;
           });
 
-          svg.appendChild(make('path', { class: 'chart-line is-' + band, d: path }));
+          if (path) {
+            svg.appendChild(make('path', { class: 'chart-line is-' + band, d: path }));
+          }
         });
       }
 
@@ -351,12 +562,10 @@
         return dot;
       });
 
-      svg.addEventListener('mousemove', function (event) {
-        const box = svg.getBoundingClientRect();
-        const inside = (event.clientX - box.left) * (width / box.width) - AXIS_WIDTH;
-        const index = Math.min(Math.max(Math.floor(inside / slot), 0), chart.points.length - 1);
+      function selectPoint(index) {
         const point = chart.points[index];
         const x = centreOf(index);
+        selectedIndex = index;
 
         crosshair.setAttribute('x1', x);
         crosshair.setAttribute('x2', x);
@@ -364,13 +573,33 @@
 
         if (!stacked) {
           dots.forEach(function (dot, band) {
+            const value = point.values[band];
+            const position = isMeasurement(value) ? scale(value) : null;
+
+            if (!isMeasurement(position)) {
+              dot.style.opacity = '0';
+
+              return;
+            }
+
             dot.setAttribute('cx', x);
-            dot.setAttribute('cy', scale(point.values[band]));
+            dot.setAttribute('cy', position);
             dot.style.opacity = '1';
           });
         }
 
         show(point);
+
+        if (interactive) {
+          const description = series.map(function (name, band) {
+            return name + ': ' + label(point.values[band], chart.unit);
+          }).join('. ');
+          svg.setAttribute('aria-label', point.label + '. ' + description + '. ' + (point.note ? point.note + ' ' : '') + 'Use Left and Right Arrow keys to read measurements.');
+        }
+
+        if (!tip) {
+          return;
+        }
 
         const when = document.createElement('span');
         when.className = 'chart-tip-when';
@@ -398,21 +627,93 @@
           tip.appendChild(row);
         });
 
-        tip.hidden = false;
-        tip.style.left = Math.min(Math.max((x / width) * box.width - 70, 0), box.width - 170) + 'px';
-      });
+        if (point.note) {
+          const note = document.createElement('span');
+          note.textContent = point.note;
+          tip.appendChild(note);
+        }
 
-      svg.addEventListener('mouseleave', function () {
+        const box = svg.getBoundingClientRect();
+        tip.hidden = false;
+        tip.style.left = Math.min(Math.max((x / width) * box.width - 70, 0), Math.max(box.width - 170, 0)) + 'px';
+      }
+
+      function clearSelection() {
         crosshair.style.opacity = '0';
         dots.forEach(function (dot) {
           dot.style.opacity = '0';
         });
-        tip.hidden = true;
+
+        if (tip) {
+          tip.hidden = true;
+        }
+
         rest();
+      }
+
+      let hovering = false;
+
+      svg.addEventListener('mousemove', function (event) {
+        const box = svg.getBoundingClientRect();
+
+        if (box.width <= 0) {
+          return;
+        }
+
+        const inside = (event.clientX - box.left) * (width / box.width) - AXIS_WIDTH;
+        const index = Math.min(Math.max(Math.floor(inside / slot), 0), chart.points.length - 1);
+        hovering = true;
+        selectPoint(index);
       });
 
-      canvas.innerHTML = '';
+      svg.addEventListener('mouseleave', function () {
+        hovering = false;
+
+        if (!interactive || document.activeElement !== svg) {
+          clearSelection();
+        }
+      });
+
+      if (interactive) {
+        svg.setAttribute('tabindex', '0');
+        svg.setAttribute('role', 'group');
+        svg.setAttribute('aria-label', 'Measurements chart. Use Left and Right Arrow keys to read measurements.');
+
+        svg.addEventListener('focus', function () {
+          selectPoint(selectedIndex === null ? 0 : selectedIndex);
+        });
+
+        svg.addEventListener('blur', function () {
+          if (!hovering) {
+            clearSelection();
+          }
+        });
+
+        svg.addEventListener('keydown', function (event) {
+          let index = selectedIndex === null ? 0 : selectedIndex;
+
+          if (event.key === 'ArrowLeft') {
+            index = Math.max(index - 1, 0);
+          } else if (event.key === 'ArrowRight') {
+            index = Math.min(index + 1, chart.points.length - 1);
+          } else if (event.key === 'Home') {
+            index = 0;
+          } else if (event.key === 'End') {
+            index = chart.points.length - 1;
+          } else {
+            return;
+          }
+
+          event.preventDefault();
+          selectPoint(index);
+        });
+      }
+
       canvas.appendChild(svg);
+
+      if (restoreFocus) {
+        svg.focus();
+      }
     }
 
     draw();

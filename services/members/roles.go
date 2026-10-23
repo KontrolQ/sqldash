@@ -60,8 +60,12 @@ func SaveRole(actor *access.AccountAccess, identifier uint, name string, color s
 			}
 			allowed[key] = true
 		}
-		if !allowed[permissions.Administrator] && (allowed[permissions.SQLExecute] || allowed[permissions.TokenManage]) && !allowed[permissions.DataWrite] {
-			return DependenciesInvalid
+		if !allowed[permissions.Administrator] {
+			for key := range allowed {
+				if !permissions.Satisfied(allowed, key) {
+					return DependenciesInvalid
+				}
+			}
 		}
 		role.Name = name
 		role.Color = color

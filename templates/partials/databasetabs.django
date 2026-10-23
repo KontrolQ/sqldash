@@ -14,6 +14,12 @@
         <a class="tab {% if Section == "insights" %}is-current{% endif %}" href="{% url "databases.insights" name=Database %}">Insights</a>
     <a class="tab {% if Section == "queries" %}is-current{% endif %}" href="{% url "databases.queries" name=Database %}">Top queries</a>
       {% endif %}
+      {% if IsPostgres and CanViewActivity %}
+        <a class="tab {% if Section == "connections" or Section == "activity" %}is-current{% endif %}" href="{% url "databases.connections" name=Database %}">Connections</a>
+      {% endif %}
+      {% if IsPostgres and CanManageExtensions %}
+        <a class="tab {% if Section == "extensions" %}is-current{% endif %}" href="{% url "databases.extensions" name=Database %}">Extensions</a>
+      {% endif %}
       {% if CanShareDatabase %}
         <a class="tab {% if Section == "sharing" %}is-current{% endif %}" href="{% url "databases.sharing" name=Database %}">Sharing</a>
       {% endif %}

@@ -2,86 +2,86 @@ package databases
 
 import (
 	"context"
-	"net/http"
 
 	"sqldash/config"
+	"sqldash/engines"
+	"sqldash/models"
+	"sqldash/permissions"
+	"sqldash/pgcluster/control"
 	ruleRepository "sqldash/repositories/accessrule"
-	repository "sqldash/repositories/database"
-	explorer "sqldash/services/explorer"
+	"sqldash/services/access"
+	"sqldash/services/databases/overviewhelper"
 	tokenservice "sqldash/services/tokens"
-	"sqldash/sqld"
 	"sqldash/utils/collections"
-	"sqldash/utils/logger"
-	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func GetShowData(requestContext context.Context, name string, secret string) (*ShowContext, *fiber.Error) {
-	held, findError := repository.FindByName(name)
-	if findError != nil {
-		logger.Errorf(LogPrefix, ListFailedLog, findError)
-		return nil, shortcuts.ServiceError(http.StatusInternalServerError, ListUnavailable)
+func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber.Error) {
+	fresh, record, err := Authorize(ctx, name, permissions.DatabaseView, false)
+	if err != nil {
+		return nil, err
 	}
-
-	if held == nil {
-		return nil, shortcuts.ServiceError(http.StatusNotFound, DatabaseMissing)
-	}
-
-	address := held.Name + "." + config.Server.Domain
-
-	shown := &ShowContext{
-		Title:     held.Name,
-		Name:      held.Name,
-		Address:   address,
-		URL:       AddressScheme + address,
-		Protected: held.Protected,
-		Secret:    secret,
-		Scopes:    collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel),
-	}
-
-	if held, statisticsError := sqld.Statistics(requestContext, name); statisticsError == nil {
-		shown.Storage = readableSize(held.StorageBytesUsed)
-		shown.RowsRead = readableCount(held.RowsRead)
-		shown.RowsWritten = readableCount(held.RowsWritten)
-		shown.QueryCount = readableCount(held.QueryCount)
-	} else {
-		logger.Warnf(LogPrefix, StatisticsFailedLog, name, statisticsError)
-		shown.Storage = UnknownSize
-	}
-
-	if settings, settingsError := sqld.Configuration(requestContext, name); settingsError == nil {
-		shown.BlockReads = settings.BlockReads
-		shown.BlockWrites = settings.BlockWrites
-		shown.AllowAttach = settings.AllowAttach
-
-		if settings.BlockReason != nil {
-			shown.BlockReason = *settings.BlockReason
+	actor := access.FromContext(fresh)
+	address := record.Name + "." + config.Server.Domain
+	shown := &ShowContext{Title: record.Name, Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", RowsRead: "—", RowsWritten: "—", QueryCount: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
+	shown.CanCloneRemote = overviewhelper.CanCloneRemote(actor)
+	shown.RemoteTLSModes = overviewhelper.RemoteTLSModes()
+	if record.Kind() == models.EnginePostgres {
+		if record.Available() {
+			if statistics, err := control.Statistics(fresh, record); err == nil {
+				shown.Storage = readableSize(statistics.StorageBytes)
+				shown.Connections = readableCount(statistics.Connections)
+				shown.Transactions = readableCount(statistics.TransactionsCommitted)
+				shown.Online = true
+			}
+			if actor.CanDatabase(record, permissions.DatabaseSettings) {
+				if settings, err := control.GetSettings(fresh, record); err == nil {
+					shown.SettingsAvailable = true
+					shown.ConnectionLimit = settings.ConnectionLimit
+					shown.StatementTimeoutMilliseconds = settings.StatementTimeoutMilliseconds
+					shown.IdleTransactionTimeoutMilliseconds = settings.IdleTransactionTimeoutMilliseconds
+				}
+			}
 		}
-	} else {
-		logger.Warnf(LogPrefix, ConfigurationFailedLog, name, settingsError)
-	}
-
-	if tables, tablesError := explorer.Tables(requestContext, name); tablesError == nil {
-		shown.Tables = len(tables)
-	}
-
-	tokenViews, tokenError := tokenservice.ForDatabase(name)
-	if tokenError != nil {
-		return nil, tokenError
-	}
-
-	shown.Tokens = tokenViews
-
-	if rules, rulesError := ruleRepository.ForDatabase(name); rulesError == nil {
-		for _, rule := range rules {
-			shown.Rules = append(shown.Rules, RuleView{
-				Identifier: rule.ID,
-				Network:    rule.Network,
-				Note:       rule.Note,
-			})
+	} else if record.Available() {
+		if statistics, err := engines.Statistics(fresh, name); err == nil {
+			shown.Storage = readableSize(statistics.StorageBytesUsed)
+			shown.RowsRead = readableCount(statistics.RowsRead)
+			shown.RowsWritten = readableCount(statistics.RowsWritten)
+			shown.QueryCount = readableCount(statistics.QueryCount)
+			shown.Online = true
+		}
+		if settings, err := engines.Configuration(fresh, name); err == nil {
+			shown.SettingsAvailable = true
+			shown.BlockReads, shown.BlockWrites, shown.AllowAttach = settings.BlockReads, settings.BlockWrites, settings.AllowAttach
+			if settings.BlockReason != nil {
+				shown.BlockReason = *settings.BlockReason
+			}
+		}
+		if actor.CanDatabase(record, permissions.TokenManage) {
+			shown.Secret = secret
+			tokenViews, err := tokenservice.ForDatabase(name)
+			if err != nil {
+				return nil, err
+			}
+			shown.Tokens = tokenViews
 		}
 	}
-
+	if record.Available() && actor.CanDatabase(record, permissions.DataRead) {
+		shown.Tables = tableCount(fresh, record)
+	}
+	if actor.CanDatabase(record, permissions.NetworkManage) {
+		if rules, err := ruleRepository.ForDatabase(name); err == nil {
+			for _, rule := range rules {
+				shown.Rules = append(shown.Rules, RuleView{Identifier: rule.ID, Network: rule.Network, Note: rule.Note})
+			}
+		}
+	}
+	if record.Kind() == models.EnginePostgres {
+		if credentialError := postgresContext(fresh, record, shown); credentialError != nil {
+			return nil, credentialError
+		}
+	}
 	return shown, nil
 }

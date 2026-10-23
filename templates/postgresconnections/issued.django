@@ -1,0 +1,13 @@
+<div class="sheet-veil" data-sheet="issued-password">
+  <div class="dialog-veil" data-sheet-close></div>
+  <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="issued-password-title">
+    <div class="dialog-head"><div class="dialog-title" id="issued-password-title">Connection password</div><div class="dialog-note">Copy it now. It is not shown again. Rotate the connection if you lose it.</div></div>
+    <div class="stack">
+      <div class="field"><span class="label">{{ Issued.Label }}</span><div class="copy"><code class="code" id="issued-username">{{ Issued.Username }}</code><button class="button is-outline is-small" type="button" data-copy="issued-username" data-copy-label="The username">Copy username</button></div></div>
+      <div class="field"><label class="label" for="issued-postgres-password">Password</label><div class="password" data-password><input class="input" id="issued-postgres-password" type="password" readonly autocomplete="off" value="{{ Issued.Password }}"><button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-pressed="false"><svg class="icon-show" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12"/><circle cx="12" cy="12" r="3"/></svg><svg class="icon-hide" viewBox="0 0 24 24"><path d="m2 2 20 20M6 6C3 8 2 12 2 12s3 7 10 7c2 0 4-1 6-2M10 5h2c7 0 10 7 10 7l-2 3"/></svg></button></div><div class="actions is-left"><button class="button is-outline is-small" type="button" data-postgres-copy-password="issued-postgres-password">Copy password</button></div></div>
+      <div class="field"><span class="label">Connection URL (without password)</span><div class="copy"><code class="code" id="issued-postgres-url">{{ Issued.URL }}</code><button class="button is-outline is-small" type="button" data-copy="issued-postgres-url" data-copy-label="The connection URL">Copy URL</button></div></div>
+      <p class="field-note">For <code>psql</code>, pass this URL with <code>sslrootcert=/path/to/ca.pem</code> and enter the password when prompted. Never put the password in shell history.</p>
+      <div class="dialog-foot"><button class="button" type="button" data-sheet-close>Done</button></div>
+    </div>
+  </div>
+</div>

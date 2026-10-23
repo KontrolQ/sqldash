@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"sqldash/services/access"
 	service "sqldash/services/insights"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -13,11 +12,7 @@ import (
 )
 
 func Queries(context fiber.Ctx) error {
-	scope, scopeError := access.MonitoringScope(context.Context())
-	if scopeError != nil {
-		return scopeError
-	}
-	data, dataError := service.GetQueries(asked(context, ""), scope...)
+	data, dataError := service.GetScopedQueries(context.Context(), asked(context, ""), context.Query("engine"))
 	if dataError != nil {
 		return dataError
 	}
@@ -28,17 +23,15 @@ func Queries(context fiber.Ctx) error {
 		meta.Crumb{Label: QueriesLabel},
 	)
 
+	context.Set("Cache-Control", "no-store")
+	context.Set("Referrer-Policy", "no-referrer")
 	return shortcuts.Render(context, QueriesTemplate, data)
 }
 
 func QueriesForDatabase(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
-	scope, scopeError := access.MonitoringScope(context.Context())
-	if scopeError != nil {
-		return scopeError
-	}
-	data, dataError := service.GetQueries(asked(context, name), scope...)
+	data, dataError := service.GetScopedQueries(context.Context(), asked(context, name), "")
 	if dataError != nil {
 		return dataError
 	}
@@ -51,6 +44,8 @@ func QueriesForDatabase(context fiber.Ctx) error {
 	)
 	meta.SetSection(context, name, QueriesSection)
 
+	context.Set("Cache-Control", "no-store")
+	context.Set("Referrer-Policy", "no-referrer")
 	return shortcuts.Render(context, QueriesTemplate, data)
 }
 

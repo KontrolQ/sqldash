@@ -13,7 +13,7 @@ import (
 func ForDatabase(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
-	data, dataError := service.GetOverview(name, context.Query(WindowParameter))
+	data, dataError := service.GetScopedOverview(context.Context(), name, context.Query(WindowParameter), "")
 	if dataError != nil {
 		return dataError
 	}
@@ -26,5 +26,7 @@ func ForDatabase(context fiber.Ctx) error {
 	)
 	meta.SetSection(context, name, InsightsSection)
 
+	context.Set("Cache-Control", "no-store")
+	context.Set("Referrer-Policy", "no-referrer")
 	return shortcuts.Render(context, OverviewTemplate, data)
 }

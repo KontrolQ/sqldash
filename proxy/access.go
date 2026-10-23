@@ -45,7 +45,8 @@ func checkAccess(request *http.Request, database string, recordUse bool) (int, s
 	if issuerError != nil || !issuer.Can(permissions.TokenManage) || !issuer.Can(permissions.DataWrite) {
 		return http.StatusUnauthorized, TokenRefused
 	}
-	if _, visibilityError := access.Database(issuer, database); visibilityError != nil {
+	record, visibilityError := access.Database(issuer, database)
+	if visibilityError != nil || !record.Available() || record.Kind() != models.EngineLibSQL {
 		return http.StatusUnauthorized, TokenRefused
 	}
 

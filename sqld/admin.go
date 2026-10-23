@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -116,7 +115,7 @@ func send(requestContext context.Context, method string, path string, body any, 
 	}
 
 	if answer.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf(RefusedFormat, answer.Status, strings.TrimSpace(string(held)))
+		return &AdminError{Status: answer.StatusCode, Message: strings.TrimSpace(string(held))}
 	}
 
 	if into == nil || len(bytes.TrimSpace(held)) == 0 {

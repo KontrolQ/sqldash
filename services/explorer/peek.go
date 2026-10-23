@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 )
 
 func attachPeeks(requestContext context.Context, databaseName string, columns []ColumnView, rows []RowView) {

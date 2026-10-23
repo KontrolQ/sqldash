@@ -27,7 +27,7 @@ func GetOverview(databaseName string, windowLabel string, allowed ...[]string) (
 		return nil, shortcuts.ServiceError(http.StatusInternalServerError, MeasurementsUnavailable)
 	}
 
-	action := DatabasePath + databaseName + InsightsSuffix
+	action := overviewPathFor(databaseName)
 
 	if databaseName == "" {
 		action = OverviewPath

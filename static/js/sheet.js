@@ -5,9 +5,9 @@
     return;
   }
 
-  function close() {
-    sheets.forEach(function (sheet) {
-      sheet.hidden = true;
+  function close(target) {
+    (target ? [target] : sheets).forEach(function (sheet) {
+      if (sheet.dataset.cloneBusy !== 'true') sheet.hidden = true;
     });
   }
 
@@ -15,7 +15,7 @@
     button.addEventListener('click', function () {
       const sheet = document.querySelector('[data-sheet="' + button.dataset.sheetOpen + '"]');
 
-      if (!sheet) {
+      if (!sheet || sheets.some(function (one) { return !one.hidden && one.dataset.cloneBusy === 'true'; })) {
         return;
       }
 
@@ -32,7 +32,7 @@
 
   sheets.forEach(function (sheet) {
     sheet.querySelectorAll('[data-sheet-close]').forEach(function (button) {
-      button.addEventListener('click', close);
+      button.addEventListener('click', function () { close(sheet); });
     });
   });
 

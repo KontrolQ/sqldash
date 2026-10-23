@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="{% static "css/postgresconnections.css" %}">
+<div class="card postgres-credentials">
+  <div class="card-head has-border">
+    <div class="card-title">Connect</div>
+    <div class="card-note">Use a PostgreSQL client with this database's username and generated password.</div>
+  </div>
+  <div class="card-body stack">
+    <div class="row">
+      <div class="field"><label class="label" for="postgres-host">Hostname</label>{% include "postgresconnections/input.django" with credential_id="postgres-host" credential_value=Host credential_label="Hostname" %}</div>
+      <div class="field"><label class="label" for="postgres-database">Database</label>{% include "postgresconnections/input.django" with credential_id="postgres-database" credential_value=Name credential_label="Database" %}</div>
+      {% if Port != 5432 %}<div class="field"><label class="label" for="postgres-port">Port</label>{% include "postgresconnections/input.django" with credential_id="postgres-port" credential_value=Port credential_label="Port" %}</div>{% endif %}
+    </div>
+    <div class="row postgres-credential-fields">
+      <div class="field">
+        <label class="label" for="postgres-overview-username">Username</label>
+        {% include "postgresconnections/input.django" with credential_id="postgres-overview-username" credential_value=Username credential_label="Username" %}
+      </div>
+      {% if PostgresCredentials %}
+        <div class="field">
+          <label class="label" for="postgres-overview-password">Password</label>
+          <div class="postgres-credential-control">
+            {% include "postgresconnections/input.django" with credential_id="postgres-overview-password" credential_value=PostgresCredentials.Password credential_label="Password" credential_secret=1 %}
+            {% if Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}<button class="button is-outline is-small" type="submit" form="postgres-overview-rotate">Rotate password</button>{% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    {% if PostgresCredentials %}
+      <div class="field">
+        <label class="label" for="postgres-connection-uri">Connection URI</label>
+        {% include "postgresconnections/input.django" with credential_id="postgres-connection-uri" credential_value=PostgresCredentials.URL credential_label="Connection URI" credential_secret=1 %}
+        <span class="field-note">Includes the current password. Keep this URI private.</span>
+      </div>
+    {% else %}
+      <div class="field"><label class="label" for="postgres-address">Connection URI (without password)</label>{% include "postgresconnections/input.django" with credential_id="postgres-address" credential_value=URL credential_label="Connection URI" %}</div>
+      {% if PasswordProblem %}
+        <div class="alert" role="status"><div class="alert-title">Password unavailable</div><div class="alert-body">{{ PasswordProblem }}</div></div>
+      {% elif Ready %}
+        <p class="field-note">You do not have permission to view this database's password.</p>
+      {% endif %}
+    {% endif %}
+    {% if not PostgresCredentials and Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}
+      <div class="actions is-left"><button class="button is-outline is-small" type="submit" form="postgres-overview-rotate">Rotate password</button></div>
+    {% endif %}
+    <div data-postgres-ssl="{% if PostgresCredentials %}postgres-connection-uri{% else %}postgres-address{% endif %}" data-postgres-ssl-help="postgres-overview-tls-guidance">
+      {% include "partials/switch.django" with switch_field="postgres_ssl" switch_name="Use SSL" switch_note="Uncheck to connect without transport encryption. This changes only the URI shown here." switch_on=1 %}
+    </div>
+    <div class="stack" id="postgres-overview-tls-guidance">{% include "postgresconnections/tls.django" %}</div>
+    {% if Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}
+      <form id="postgres-overview-rotate" method="post" action="{% url "databases.connections.rotate.primary" name=Name %}" data-confirm="The old password stops working and current database connections are closed." data-confirm-title="Rotate the database password?" data-confirm-action="Rotate password" hidden></form>
+    {% endif %}
+  </div>
+</div>
+{% if Actions.CanEditDatabaseSettings and Ready %}
+  <div class="card">
+    <div class="card-head has-border"><div class="card-title">Configuration</div><div class="card-note">Connection limits apply to this database. Session defaults apply to new application connections.</div></div>
+    <div class="card-body">
+      {% if SettingsAvailable %}
+        <form class="stack" method="post" action="{% url "databases.settings.postgres" name=Name %}">
+          <div class="field"><label class="label" for="postgres-connection-limit">Connection limit</label><input class="input" id="postgres-connection-limit" name="connection_limit" type="number" value="{{ ConnectionLimit }}" min="-1" max="10000" required><span class="field-note">Use -1 for no database-specific limit. The instance connection limit still applies.</span></div>
+          <div class="row"><div class="field"><label class="label" for="postgres-statement-timeout">Statement timeout (milliseconds)</label><input class="input" id="postgres-statement-timeout" name="statement_timeout" type="number" value="{{ StatementTimeoutMilliseconds }}" min="100" max="300000" required></div><div class="field"><label class="label" for="postgres-idle-timeout">Idle transaction timeout (milliseconds)</label><input class="input" id="postgres-idle-timeout" name="idle_transaction_timeout" type="number" value="{{ IdleTransactionTimeoutMilliseconds }}" min="100" max="300000" required></div></div>
+          <span class="field-note">Choose 100–300000 milliseconds. Clients can change session defaults; these are not hard runtime quotas.</span>
+          {% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
+          <div class="actions"><button class="button" type="submit">Save configuration</button></div>
+        </form>
+      {% else %}
+        <p class="muted">The current settings are unavailable. Refresh when PostgreSQL is online.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

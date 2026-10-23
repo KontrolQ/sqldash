@@ -1,0 +1,12 @@
+.extension-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.extension-toolbar > .input {
+  flex: 1 1 240px;
+  min-width: 0;
+  width: auto;
+}

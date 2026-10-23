@@ -1,0 +1,12 @@
+<div class="sheet-veil" data-sheet="duplicate-database-{{ database.Name }}" hidden>
+  <div class="dialog-veil" data-sheet-close></div>
+  <div class="dialog is-wide clone-dialog" role="dialog" aria-modal="true" aria-labelledby="duplicate-database-title-{{ database.Name }}">
+    <div class="dialog-head"><div class="dialog-title" id="duplicate-database-title-{{ database.Name }}">Duplicate {{ database.Name }}</div><div class="dialog-note">Copy its current contents into a new {{ database.EngineLabel }} database.</div></div>
+    <form class="stack" method="post" action="{% url "databases.fork" name=database.Name %}" data-clone-native>
+      <div class="field"><span class="label">Engine</span><span class="badge is-outline">{{ database.EngineLabel }}</span></div>
+      <div class="field"><label class="label" for="duplicate-database-name-{{ database.Name }}">New database name</label><input class="input" id="duplicate-database-name-{{ database.Name }}" name="name" minlength="2" maxlength="48" placeholder="{{ database.Name }}-copy" required><span class="field-note">Lowercase letters, digits and hyphens. Existing databases are never overwritten.</span></div>
+      {% include "databases/clonebusy.django" %}
+      <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button><button class="button" type="submit">Duplicate database</button></div>
+    </form>
+  </div>
+</div>

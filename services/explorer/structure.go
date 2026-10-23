@@ -6,14 +6,21 @@ import (
 	"net/http"
 
 	"sqldash/config"
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func Structure(requestContext context.Context, databaseName string, table string) (*StructureContext, *fiber.Error) {
+func Structure(requestContext context.Context, databaseName string, table string, schemas ...string) (*StructureContext, *fiber.Error) {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.read")
+	if permissionError != nil {
+		return nil, permissionError
+	}
+	if record.Kind() == "postgres" {
+		return structurePostgres(requestContext, record, selectedSchema(schemas), table)
+	}
 	tables, tablesError := Tables(requestContext, databaseName)
 	if tablesError != nil {
 		return nil, tablesError

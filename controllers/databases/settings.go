@@ -1,6 +1,7 @@
 package databases
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -39,6 +40,21 @@ func SaveSettings(context fiber.Ctx) error {
 		audit.Note(context, name, audit.SettingsSaved, describeSettings(asked))
 	}
 
+	return backTo(context, name)
+}
+
+func SavePostgresSettings(context fiber.Ctx) error {
+	asked, parseError := meta.Body[PostgresSettingsRequest](context)
+	if parseError != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+	name := context.Params(NameParameter)
+	if err := service.SavePostgresSettings(context.Context(), name, asked.ConnectionLimit, asked.StatementTimeoutMilliseconds, asked.IdleTransactionTimeoutMilliseconds, asked.Protected == CheckedValue); err != nil {
+		sessions.Complain(context, err.Message)
+	} else {
+		sessions.Report(context, SettingsSaved)
+		audit.Note(context, name, audit.SettingsSaved, fmt.Sprintf("Connection limit: %d; statement timeout: %d ms; idle transaction timeout: %d ms; delete protection: %t", asked.ConnectionLimit, asked.StatementTimeoutMilliseconds, asked.IdleTransactionTimeoutMilliseconds, asked.Protected == CheckedValue))
+	}
 	return backTo(context, name)
 }
 

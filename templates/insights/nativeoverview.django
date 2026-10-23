@@ -1,0 +1,102 @@
+<div class="tiles">
+  {% for tile in Native.Tiles %}
+    {% include "partials/tile.django" %}
+  {% endfor %}
+</div>
+<div class="duo">
+  <div class="card is-panel">
+    <div class="card-head"><div class="card-title">Recorded calls over time</div>{% include "partials/hint.django" with hint_text="Top-level statement counter increases in complete sampled buckets, not all client requests." %}</div>
+    <div class="card-body">{% include "partials/chart.django" with chart_data=Native.CallsChart %}</div>
+  </div>
+  <div class="card is-panel">
+    <div class="card-head"><div class="card-title">Recorded execution time</div>{% include "partials/hint.django" with hint_text="Recorded execution milliseconds in complete sampled buckets, not request latency or percentiles." %}</div>
+    <div class="card-body">{% include "partials/chart.django" with chart_data=Native.ExecutionChart %}</div>
+  </div>
+</div>
+<div class="duo">
+  <div class="card is-panel">
+    <div class="card-head"><div class="card-title">Database storage over time</div>{% include "partials/hint.django" with hint_text="Latest actual database-size sample in each bucket. Missing database coverage is unavailable." %}</div>
+    <div class="card-body">{% include "partials/chart.django" with chart_data=Native.StorageChart %}</div>
+  </div>
+  <div class="card is-panel">
+    <div class="card-head"><div class="card-title">Connections over time</div>{% include "partials/hint.django" with hint_text="Latest actual connection count in each bucket, including internal monitoring sessions." %}</div>
+    <div class="card-body">{% include "partials/chart.django" with chart_data=Native.ConnectionsChart %}</div>
+  </div>
+</div>
+<p class="field-note">{{ Native.ChartCoverage }}</p>
+<div class="card is-panel">
+  <div class="card-head"><div class="card-title">PostgreSQL query statistics</div><div class="card-tools"><a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres">Top queries</a></div></div>
+  <div class="card-body insights-native-body">
+    {% if Native.HasIntervals %}
+      <div class="spread">
+        <div class="spread-part"><span class="spread-label">Calls</span><span class="spread-value">{{ Native.Calls }}</span></div>
+        <div class="spread-part"><span class="spread-label">Execution time</span><span class="spread-value">{{ Native.ExecutionTime }}</span></div>
+        <div class="spread-part"><span class="spread-label">Mean execution</span><span class="spread-value">{{ Native.MeanExecutionTime }}</span></div>
+        <div class="spread-part"><span class="spread-label">Rows processed</span><span class="spread-value">{{ Native.RowsProcessed }}</span></div>
+        <div class="spread-part"><span class="spread-label">Shared blocks hit</span><span class="spread-value">{{ Native.SharedHit }}</span></div>
+        <div class="spread-part"><span class="spread-label">Shared blocks read</span><span class="spread-value">{{ Native.SharedRead }}</span></div>
+      </div>
+      <p class="field-note">Sampled from {{ Native.FirstCollectedAt }} through {{ Native.CollectedAt }}. Only complete intervals and top-level statements inside this period are counted. {{ Native.Discontinuities }} baseline changes; restarts, resets and eviction gaps are excluded.</p>
+    {% else %}
+      <div class="empty"><span class="empty-title">{{ Native.EmptyTitle }}</span><span>{{ Native.EmptyNote }}</span></div>
+    {% endif %}
+    {% if Native.HasSamples and not Native.HasFreshSamples %}
+      <p class="field-note">No recent sample is available. Any measurements shown come from previously collected intervals, not live PostgreSQL activity.</p>
+    {% elif Native.HasIntervals and not Native.HasStatementSource %}
+      <p class="field-note">Query statistics are unavailable in the latest snapshots. Measurements shown come from earlier complete intervals in this period.</p>
+    {% endif %}
+    <p class="field-note">Rows processed are rows returned or affected by statements, not rows scanned. Native minimum and maximum are sampled extrema that may include executions before this period. PostgreSQL query statistics do not include failure counts, transferred bytes, rows read or latency percentiles.</p>
+  </div>
+</div>
+{% if Native.Databases %}
+  <div class="card is-panel is-table">
+    <div class="card-head"><div class="card-title">PostgreSQL database snapshots</div></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Database</th>
+            <th scope="col">Storage</th>
+            <th scope="col">Connections</th>
+            <th scope="col">Collected</th>
+            <th scope="col">Database reset</th>
+            <th scope="col">Statement reset</th>
+            <th scope="col">Server started</th>
+            <th scope="col">Statements</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for database in Native.Databases %}
+            <tr>
+              <td><a class="link" href="{{ database.Path }}">{{ database.Name }}</a></td>
+              <td class="table-numeric">{{ database.Storage }}</td>
+              <td class="table-numeric">{{ database.Connections }}</td>
+              <td>
+                {{ database.CollectedAt }}
+                {% if database.Stale %}
+                  <div class="field-note insights-native-snapshot-note">Stale sample</div>
+                {% endif %}
+              </td>
+              <td>{{ database.StatisticsReset }}</td>
+              <td>{{ database.StatementReset }}</td>
+              <td>{{ database.PostmasterStarted }}</td>
+              <td>{% if database.StatementsAvailable %}Available{% else %}Unavailable{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-body insights-native-body">
+      <div class="spread">
+        <div class="spread-part"><span class="spread-label">Committed transactions</span><span class="spread-value">{{ Native.Committed }}</span></div>
+        <div class="spread-part"><span class="spread-label">Rolled-back transactions</span><span class="spread-value">{{ Native.RolledBack }}</span></div>
+        <div class="spread-part"><span class="spread-label">Deadlocks</span><span class="spread-value">{{ Native.Deadlocks }}</span></div>
+      </div>
+      <p class="field-note">Transaction and deadlock counts are sampled database counter increases, not request failure counts. Database counters include monitoring sessions. A dash means a complete interval has not been established, not a measured zero.</p>
+    </div>
+  </div>
+{% endif %}
+<div class="card is-panel is-table">
+  <div class="card-head"><div class="card-title">Top PostgreSQL queries</div><div class="card-tools"><a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres">See them all</a></div></div>
+  {% include "insights/nativequerytable.django" %}
+</div>

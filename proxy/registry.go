@@ -42,7 +42,7 @@ func Forget() {
 func refresh() {
 	records := make([]models.Database, 0)
 
-	if findError := database.DB.Find(&records).Error; findError != nil {
+	if findError := database.DB.Where("engine = ? AND state = ?", models.EngineLibSQL, models.DatabaseReady).Find(&records).Error; findError != nil {
 		return
 	}
 

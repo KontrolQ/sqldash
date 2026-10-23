@@ -1,0 +1,15 @@
+<div class="sheet-veil" data-sheet="clone-database" hidden>
+  <div class="dialog-veil" data-sheet-close></div>
+  <div class="dialog is-wide clone-dialog" role="dialog" aria-modal="true" aria-labelledby="clone-database-title">
+    <div class="dialog-head"><div class="dialog-title" id="clone-database-title">Clone {{ clone_name }}</div><div class="dialog-note">Create a new database without changing the source.</div></div>
+    <form class="stack" method="post" action="{% url "databases.fork" name=clone_name %}" data-clone-native>
+      <div class="field"><span class="label">Source</span><span>{{ clone_name }} <span class="badge is-outline">{{ clone_label }}</span></span><span class="field-note">{% if clone_engine == "postgres" %}Copy the current PostgreSQL snapshot. Historical restore is not available.{% else %}Leave the moment blank to copy the database as it stands.{% endif %}</span></div>
+      <div class="field"><label class="label" for="clone-local-name">Name for the new database</label><input class="input" id="clone-local-name" name="name" minlength="2" maxlength="48" placeholder="{{ clone_name }}-copy" required><span class="field-note">The clone uses the same engine as its source. Existing databases are never overwritten.</span></div>
+      {% if clone_engine == "libsql" %}
+        <div class="field"><span class="label">As it stood at</span>{% include "partials/moment.django" with moment_field="moment" moment_placeholder="Latest" %}</div>
+      {% endif %}
+      {% include "databases/clonebusy.django" %}
+      <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-close>Cancel</button><button class="button" type="submit">Clone database</button></div>
+    </form>
+  </div>
+</div>

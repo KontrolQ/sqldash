@@ -1,13 +1,16 @@
 package access
 
-import "context"
+import (
+	"context"
+	"sqldash/permissions"
+)
 
 func MonitoringScope(parent context.Context) ([][]string, error) {
-	held := FromContext(parent)
-	if held != nil && held.All() {
-		return nil, nil
-	}
-	records, findError := Visible(held)
+	return MonitoringScopeFor(parent, permissions.InsightsView)
+}
+
+func MonitoringScopeFor(parent context.Context, permission string) ([][]string, error) {
+	records, findError := VisibleFor(FromContext(parent), permission)
 	if findError != nil {
 		return nil, findError
 	}

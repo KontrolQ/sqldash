@@ -5,7 +5,7 @@
         <th scope="col">Query</th>
         {% for column in query_columns %}
           <th scope="col" class="table-numeric">
-            <a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}&sort={{ column.Key }}&direction={% if Sort == column.Key and Direction == "desc" %}asc{% else %}desc{% endif %}">
+            <a class="column-sort" href="{{ QueriesPath }}?window={{ Window }}{% if Engine %}&engine={{ Engine }}{% endif %}&sort={{ column.Key }}&direction={% if Sort == column.Key and Direction == "desc" %}asc{% else %}desc{% endif %}">
 {{ column.Label }}
             {% if Sort == column.Key %}
               <svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true">

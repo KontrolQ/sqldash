@@ -13,59 +13,71 @@ import (
 	"time"
 
 	"sqldash/config"
-	"sqldash/hosting"
 	"sqldash/models"
-	repository "sqldash/repositories/database"
-	"sqldash/services/access"
+	"sqldash/permissions"
 	"sqldash/sqld"
-	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func CreateFromUpload(requestContext context.Context, asked string, fileName string, contents io.Reader) *fiber.Error {
-	name, guardError := AcceptableName(asked)
-	if guardError != nil {
-		return guardError
-	}
-
-	staged, stageError := stage(name, fileName, contents)
-	if stageError != nil {
-		logger.Errorf(LogPrefix, ImportFailedLog, name, stageError)
-		return shortcuts.ServiceError(http.StatusBadRequest, fmt.Sprintf(ImportRefusedFormat, stageError))
-	}
-
-	defer os.Remove(staged)
-
-	if createError := sqld.Create(requestContext, name); createError != nil {
-		logger.Errorf(LogPrefix, ImportFailedLog, name, createError)
-		return shortcuts.ServiceError(http.StatusBadGateway, ImportRefused)
-	}
-
-	if replayError := replay(requestContext, name, staged); replayError != nil {
-		logger.Errorf(LogPrefix, ImportFailedLog, name, replayError)
-		discard(requestContext, name)
-
-		return shortcuts.ServiceError(http.StatusBadRequest, fmt.Sprintf(ImportRefusedFormat, replayError))
-	}
-
-	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
-		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
-		discard(requestContext, name)
-
-		return shortcuts.ServiceError(http.StatusInternalServerError, ImportRefused)
-	}
-
-	go hosting.Publish(context.WithoutCancel(requestContext), name)
-
-	return nil
+func CreateFromUpload(ctx context.Context, asked, fileName string, contents io.Reader) *fiber.Error {
+	return CreateFromUploadEngine(ctx, asked, models.EngineLibSQL, fileName, contents)
 }
 
-func discard(requestContext context.Context, name string) {
-	if removeError := sqld.Delete(requestContext, name); removeError != nil {
-		logger.Errorf(LogPrefix, DeleteFailedLog, name, removeError)
+func CreateFromUploadEngine(ctx context.Context, asked, engine, fileName string, contents io.Reader) *fiber.Error {
+	engine = selectedEngine(engine)
+	fresh, actor, authorityError := creationActor(ctx, engine, permissions.DatabaseImport)
+	if authorityError != nil {
+		return authorityError
 	}
+	if !actor.Can(permissions.ForEngine(permissions.DatabaseCreate, engine)) {
+		return shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
+	}
+	name, nameError := acceptableEngineName(asked, engine)
+	if nameError != nil {
+		return nameError
+	}
+	var staged string
+	var stageError error
+	if engine == models.EnginePostgres {
+		staged, stageError = stageNative(contents)
+	} else {
+		staged, stageError = stage(name, fileName, contents)
+	}
+	if stageError != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, ImportRefused)
+	}
+	record, operation, reserveError := reserveDatabase(fresh, name, engine, actor.Account.ID, "import", 0, operationPayload{Path: staged})
+	if reserveError != nil {
+		os.Remove(staged)
+		return reserveError
+	}
+	return executeOperation(fresh, record, operation)
+}
+
+func stageNative(contents io.Reader) (string, error) {
+	directory := config.PostgresStagingPath()
+	if err := os.MkdirAll(directory, 0700); err != nil {
+		return "", err
+	}
+	handle, err := os.CreateTemp(directory, "upload-*")
+	if err != nil {
+		return "", err
+	}
+	path := handle.Name()
+	if err := handle.Chmod(0600); err != nil {
+		handle.Close()
+		os.Remove(path)
+		return "", err
+	}
+	copied, copyError := io.Copy(handle, io.LimitReader(contents, (1<<30)+1))
+	closeError := handle.Close()
+	if copyError != nil || closeError != nil || copied > 1<<30 {
+		os.Remove(path)
+		return "", errors.New(ImportRefused)
+	}
+	return path, nil
 }
 
 func stage(name string, fileName string, contents io.Reader) (string, error) {
@@ -224,32 +236,31 @@ func replayable(statement string) bool {
 	return !strings.Contains(upper, SequenceTable)
 }
 
-func Fork(requestContext context.Context, from string, asked string, at *time.Time) *fiber.Error {
-	name, guardError := AcceptableName(asked)
-	if guardError != nil {
-		return guardError
+func Fork(ctx context.Context, from, asked string, at *time.Time) *fiber.Error {
+	fresh, source, authorityError := Authorize(ctx, from, permissions.DatabaseFork, true)
+	if authorityError != nil {
+		return authorityError
 	}
-
-	source, findError := repository.FindByName(from)
-	if findError != nil || source == nil {
-		return shortcuts.ServiceError(http.StatusNotFound, DatabaseMissing)
+	fresh, actor, authorityError := creationActor(fresh, source.Kind(), permissions.DatabaseCreate)
+	if authorityError != nil {
+		return authorityError
 	}
-
+	if !actor.CanDatabase(source, permissions.DataRead) {
+		return shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
+	}
+	if source.Kind() == models.EnginePostgres && at != nil {
+		return shortcuts.ServiceError(http.StatusBadRequest, MomentUnusable)
+	}
 	if at != nil && at.After(time.Now()) {
 		return shortcuts.ServiceError(http.StatusBadRequest, MomentAhead)
 	}
-
-	if forkError := sqld.Fork(requestContext, from, name, at); forkError != nil {
-		logger.Errorf(LogPrefix, ForkFailedLog, from, forkError)
-		return shortcuts.ServiceError(http.StatusBadGateway, ForkRefused)
+	name, nameError := acceptableEngineName(asked, source.Kind())
+	if nameError != nil {
+		return nameError
 	}
-
-	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
-		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
-		return shortcuts.ServiceError(http.StatusInternalServerError, ForkRefused)
+	record, operation, reserveError := reserveDatabase(fresh, name, source.Kind(), actor.Account.ID, "clone", source.ID, operationPayload{Moment: at})
+	if reserveError != nil {
+		return reserveError
 	}
-
-	go hosting.Publish(context.WithoutCancel(requestContext), name)
-
-	return nil
+	return executeOperation(fresh, record, operation)
 }

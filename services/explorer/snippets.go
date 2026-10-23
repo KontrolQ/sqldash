@@ -66,6 +66,7 @@ func SaveSnippet(databaseName string, identifier uint, name string, statement st
 
 			return nil
 		}
+		return shortcuts.ServiceError(http.StatusNotFound, SnippetMissing)
 	}
 
 	record := &models.Snippet{Database: databaseName, Name: name, Statement: statement}

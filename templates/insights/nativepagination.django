@@ -1,0 +1,12 @@
+{% if Native.Rows %}
+  <div class="card-foot is-split">
+    <span class="tally">Showing {{ Native.FirstRow }}–{{ Native.LastRow }} of {{ Native.Total }}</span>
+    <div class="steps">
+      <a class="step {% if Native.Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres&sort={{ Native.Sort }}&direction={{ Native.Direction }}&page=1" aria-label="First page">«</a>
+      <a class="step {% if Native.Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres&sort={{ Native.Sort }}&direction={{ Native.Direction }}&page={{ Native.PreviousPage }}" aria-label="Previous page">‹</a>
+      <span class="step is-page">{{ Native.Page }}</span>
+      <a class="step {% if Native.Page >= Native.Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres&sort={{ Native.Sort }}&direction={{ Native.Direction }}&page={{ Native.NextPage }}" aria-label="Next page">›</a>
+      <a class="step {% if Native.Page >= Native.Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres&sort={{ Native.Sort }}&direction={{ Native.Direction }}&page={{ Native.Pages }}" aria-label="Last page">»</a>
+    </div>
+  </div>
+{% endif %}

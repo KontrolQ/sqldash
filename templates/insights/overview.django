@@ -7,16 +7,21 @@
     </div>
     <div class="page-actions">
       {% include "partials/period.django" with period_base=FormAction %}
-<a class="button is-outline" href="{{ QueriesPath }}?window={{ Window }}">Top queries</a>
+<a class="button is-outline" href="{{ QueriesPath }}?window={{ Window }}&engine={{ Engine }}">Top queries</a>
     </div>
   </div>
   {% include "partials/databasetabs.django" %}
-  <div class="tiles">
+  {% include "insights/engines.django" with engine_base=FormAction %}
+  {% if Native %}
+    {% include "insights/nativeoverview.django" %}
+  {% endif %}
+  {% if ShowLibSQL %}
+    <div class="tiles">
     {% for tile in Tiles %}
       {% include "partials/tile.django" %}
     {% endfor %}
   </div>
-  <div class="duo">
+    <div class="duo">
     <div class="card is-panel">
       <div class="card-head">
         <div class="card-title">Queries over time</div>
@@ -36,7 +41,7 @@
       </div>
     </div>
   </div>
-  <div class="card is-panel">
+    <div class="card is-panel">
     <div class="card-head">
       <div class="card-title">Latency spread</div>
       {% include "partials/hint.django" with hint_text="Across every query in the period." %}
@@ -52,12 +57,12 @@
       </div>
     </div>
   </div>
-  <div class="card is-panel is-table">
+    <div class="card is-panel is-table">
     <div class="card-head">
       <div class="card-title">Top queries</div>
       {% include "partials/hint.django" with hint_text="The heaviest by total time over the period." %}
       <div class="card-tools">
-        <a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}">See them all</a>
+        <a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}&engine=libsql">See them all</a>
       </div>
     </div>
     {% if Top %}
@@ -71,4 +76,8 @@
       </div>
     {% endif %}
   </div>
+  {% endif %}
+  {% if not ShowLibSQL and not Native %}
+    <div class="card"><div class="card-body"><div class="empty"><span class="empty-title">No accessible databases</span><span>Insights are limited to databases you can monitor.</span></div></div></div>
+  {% endif %}
 {% endblock %}

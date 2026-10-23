@@ -1,0 +1,9 @@
+{% if Global %}
+  <div class="tab-bar insights-engines">
+    <nav class="tabs" aria-label="Database engine">
+      {% for option in EngineOptions %}
+        <a class="tab {% if option.Value == Engine %}is-current{% endif %}" {% if option.Value == Engine %}aria-current="page"{% endif %} href="{{ engine_base }}?window={{ Window }}&engine={{ option.Value }}{% if FilterQuery %}&{{ FilterQuery }}{% endif %}">{{ option.Label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+{% endif %}

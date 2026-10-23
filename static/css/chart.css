@@ -13,6 +13,24 @@
   overflow: visible;
 }
 
+.chart-canvas[tabindex]:focus-visible, .chart-measurements > summary:focus-visible, .chart-measurements .table-wrap:focus-visible {
+  outline: 2px solid var(--muted-foreground);
+  outline-offset: 4px;
+}
+
+.chart-measurements > summary {
+  width: fit-content;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+.chart-measurements .table-wrap {
+  max-height: 320px;
+  margin-top: var(--sp-2);
+  overflow: auto;
+}
+
 .chart-band.is-0 {
   fill: var(--chart-read);
 }

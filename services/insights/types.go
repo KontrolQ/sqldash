@@ -3,6 +3,11 @@ package insights
 import "sqldash/utils/collections"
 
 type OverviewContext struct {
+	Engine        string
+	EngineOptions []collections.Option
+	Global        bool
+	ShowLibSQL    bool
+	Native        *NativeContext
 	Title         string
 	Heading       string
 	FormAction    string
@@ -52,6 +57,7 @@ type TileView struct {
 	Alarm  bool
 	Spark  string
 	Fill   string
+	Quiet  string
 }
 
 type QueryColumn struct {
@@ -61,24 +67,39 @@ type QueryColumn struct {
 }
 
 type QueriesContext struct {
-	Title         string
-	Heading       string
-	Scope         string
-	Database      string
-	FormAction    string
-	QueriesPath   string
-	Window        string
-	WindowOptions []collections.Option
-	Sort          string
-	Direction     string
-	Columns       []QueryColumn
-	Rows          []QueryView
-	Total         int64
-	Page          int
-	Pages         int
-	PageSize      int
-	PreviousPage  int
-	NextPage      int
-	FirstRow      int
-	LastRow       int
+	Engine            string
+	EngineOptions     []collections.Option
+	Global            bool
+	ShowLibSQL        bool
+	Native            *NativeContext
+	Title             string
+	Heading           string
+	Scope             string
+	Database          string
+	FormAction        string
+	QueriesPath       string
+	Window            string
+	WindowOptions     []collections.Option
+	Sort              string
+	Direction         string
+	Columns           []QueryColumn
+	Rows              []QueryView
+	Total             int64
+	Page              int
+	Pages             int
+	PageSize          int
+	PreviousPage      int
+	NextPage          int
+	FirstRow          int
+	LastRow           int
+	TableRows         []QueryTableRow
+	TableColumns      []QueryMetricColumn
+	HasDatabases      bool
+	FilterQuery       string
+	FirstPagePath     string
+	PreviousPagePath  string
+	NextPagePath      string
+	LastPagePath      string
+	DatabaseSortPath  string
+	StatementSortPath string
 }

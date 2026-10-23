@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -21,6 +22,21 @@ func SaveCells(context fiber.Ctx) error {
 		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
 	}
 
+	if len(asked.Columns) != len(asked.Keys) || len(asked.Columns) != len(asked.Values) || (len(asked.States) > 0 && len(asked.States) != len(asked.Columns)) {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+	if asked.ValueEncoding != "" && asked.ValueEncoding != "json" {
+		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+	}
+	if asked.ValueEncoding == "json" {
+		for index, encoded := range asked.Values {
+			var value *string
+			if json.Unmarshal([]byte(encoded), &value) != nil || value == nil {
+				return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+			}
+			asked.Values[index] = *value
+		}
+	}
 	name := context.Params(NameParameter)
 	edits := make([]service.CellEdit, 0, len(asked.Columns))
 
@@ -30,17 +46,27 @@ func SaveCells(context fiber.Ctx) error {
 		}
 
 		clear := index < len(asked.Clears) && asked.Clears[index] == CheckedValue
+		state := ""
+		if index < len(asked.States) {
+			state = asked.States[index]
+		}
+		if state == "keep" {
+			continue
+		}
 
 		edits = append(edits, service.CellEdit{
-			Column: column, Key: asked.Keys[index], Value: asked.Values[index], Clear: clear,
+			Column: column, Key: asked.Keys[index], Value: asked.Values[index], Clear: clear, State: state,
 		})
 	}
 
-	if saveError := service.UpdateCells(context.Context(), name, asked.Table, edits); saveError != nil {
+	if saveError := service.UpdateCells(context.Context(), name, asked.Table, edits, asked.Schema); saveError != nil {
+		if saveError.Code == http.StatusConflict || saveError.Code == http.StatusForbidden {
+			return saveError
+		}
 		sessions.Complain(context, saveError.Message)
 	} else {
 		sessions.Report(context, savedMessage(len(edits)))
-		audit.Note(context, name, audit.RowsChanged, countedAs(len(edits), OneChangedFormat, ChangedFormat, asked.Table))
+		audit.Note(context, name, audit.RowsChanged, countedAs(len(edits), OneChangedFormat, ChangedFormat, relationName(asked.Schema, asked.Table)))
 	}
 
 	return backTo(context, name, asked.Back)
@@ -54,11 +80,14 @@ func DeleteRows(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	if deleteError := service.DeleteRows(context.Context(), name, asked.Table, asked.Keys); deleteError != nil {
+	if deleteError := service.DeleteRows(context.Context(), name, asked.Table, asked.Keys, asked.Schema); deleteError != nil {
+		if deleteError.Code == http.StatusConflict || deleteError.Code == http.StatusForbidden {
+			return deleteError
+		}
 		sessions.Complain(context, deleteError.Message)
 	} else {
 		sessions.Report(context, deletedMessage(len(asked.Keys)))
-		audit.Note(context, name, audit.RowsDeleted, countedAs(len(asked.Keys), OneDeletedFormat, DeletedFormat, asked.Table))
+		audit.Note(context, name, audit.RowsDeleted, countedAs(len(asked.Keys), OneDeletedFormat, DeletedFormat, relationName(asked.Schema, asked.Table)))
 	}
 
 	return backTo(context, name, asked.Back)
@@ -72,12 +101,19 @@ func RunConsole(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
-	data, dataError := service.RunConsole(context.Context(), name, asked.Statement)
+	data, dataError := service.RunConsole(context.Context(), name, asked.Statement, asked.Schema, asked.RunID)
 	if dataError != nil {
 		return dataError
 	}
 
-	audit.Note(context, name, audit.StatementRun, shortened(asked.Statement))
+	detail := "SQL console submission"
+	if data.Engine == "postgres" {
+		detail = "PostgreSQL console submission"
+	}
+	if data.Failure != "" {
+		detail += "; execution failed"
+	}
+	audit.Note(context, name, audit.StatementRun, detail)
 
 	data.SnippetID = asked.Snippet
 
@@ -100,10 +136,15 @@ func SaveSnippet(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
+	if permissionError := service.ConsoleAccess(context.Context(), name); permissionError != nil {
+		return permissionError
+	}
+
 	if saveError := service.SaveSnippet(name, asked.Snippet, asked.Name, asked.Statement); saveError != nil {
 		sessions.Complain(context, saveError.Message)
 	} else {
 		sessions.Report(context, service.SnippetSaved)
+		audit.Note(context, name, audit.SnippetSaved, "")
 	}
 
 	return shortcuts.RedirectToPath(context, ExplorePath+url.PathEscape(name)+ConsoleSuffix)
@@ -117,10 +158,15 @@ func RemoveSnippet(context fiber.Ctx) error {
 
 	name := context.Params(NameParameter)
 
+	if permissionError := service.ConsoleAccess(context.Context(), name); permissionError != nil {
+		return permissionError
+	}
+
 	if removeError := service.RemoveSnippet(name, asked.Snippet); removeError != nil {
 		sessions.Complain(context, removeError.Message)
 	} else {
 		sessions.Report(context, service.SnippetRemoved)
+		audit.Note(context, name, audit.SnippetRemoved, "")
 	}
 
 	return shortcuts.RedirectToPath(context, ExplorePath+url.PathEscape(name)+ConsoleSuffix)
@@ -161,24 +207,37 @@ func InsertRow(context fiber.Ctx) error {
 		}
 	}
 
-	if insertError := service.InsertRow(context.Context(), name, asked.Table, values); insertError != nil {
+	fields := make(map[string]service.FieldValue)
+	for index, column := range asked.Names {
+		if index >= len(asked.States) || index >= len(asked.Values) {
+			return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+		}
+		if _, duplicate := fields[column]; duplicate {
+			return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
+		}
+		fields[column] = service.FieldValue{State: asked.States[index], Value: asked.Values[index]}
+	}
+	var insertError *fiber.Error
+	if len(asked.Names) > 0 || asked.Schema != "" {
+		insertError = service.InsertFields(context.Context(), name, asked.Schema, asked.Table, fields)
+	} else {
+		insertError = service.InsertRow(context.Context(), name, asked.Table, values)
+	}
+	if insertError != nil {
 		sessions.Complain(context, insertError.Message)
 	} else {
 		sessions.Report(context, service.RowAdded)
-		audit.Note(context, name, audit.RowInserted, fmt.Sprintf(InsertedFormat, asked.Table))
+		audit.Note(context, name, audit.RowInserted, fmt.Sprintf(InsertedFormat, relationName(asked.Schema, asked.Table)))
 	}
 
 	return backTo(context, name, asked.Back)
 }
 
-func shortened(statement string) string {
-	trimmed := strings.Join(strings.Fields(statement), " ")
-
-	if len(trimmed) > StatementLength {
-		return trimmed[:StatementLength] + Ellipsis
+func relationName(schema string, table string) string {
+	if schema == "" {
+		return table
 	}
-
-	return trimmed
+	return schema + "." + table
 }
 
 func countedAs(count int, one string, many string, table string) string {

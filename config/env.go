@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 type serverSettings struct {
 	Domain                  string `env:"DOMAIN" envDefault:"localhost"`
 	PublicURL               string `env:"PUBLIC_URL"`
@@ -20,6 +22,24 @@ type sqldSettings struct {
 	BinaryPath   string `env:"SQLD_BINARY" envDefault:"sqld"`
 	Address      string `env:"SQLD_ADDRESS" envDefault:"127.0.0.1:8080"`
 	AdminAddress string `env:"SQLD_ADMIN_ADDRESS" envDefault:"127.0.0.1:8081"`
+}
+
+type postgresSettings struct {
+	Enabled               bool          `env:"POSTGRES_ENABLED" envDefault:"true"`
+	Managed               bool          `env:"POSTGRES_MANAGED" envDefault:"true"`
+	BinaryDirectory       string        `env:"POSTGRES_BINARY_DIRECTORY" envDefault:"/usr/lib/postgresql/18/bin"`
+	Address               string        `env:"POSTGRES_ADDRESS" envDefault:"127.0.0.1:55432"`
+	GatewayAddress        string        `env:"POSTGRES_GATEWAY_ADDRESS" envDefault:":5432"`
+	GatewayEnabled        bool          `env:"POSTGRES_GATEWAY_ENABLED" envDefault:"true"`
+	PublicHost            string        `env:"POSTGRES_PUBLIC_HOST"`
+	PublicPort            int           `env:"POSTGRES_PUBLIC_PORT" envDefault:"5432"`
+	AdminUsername         string        `env:"POSTGRES_ADMIN_USERNAME" envDefault:"sqldash_admin"`
+	MaximumConnections    int           `env:"POSTGRES_MAXIMUM_CONNECTIONS" envDefault:"100"`
+	CertificatePath       string        `env:"POSTGRES_CERTIFICATE_PATH"`
+	PrivateKeyPath        string        `env:"POSTGRES_PRIVATE_KEY_PATH"`
+	InitializationTimeout time.Duration `env:"POSTGRES_INITIALIZATION_TIMEOUT" envDefault:"2m"`
+	StartupTimeout        time.Duration `env:"POSTGRES_STARTUP_TIMEOUT" envDefault:"60s"`
+	ShutdownTimeout       time.Duration `env:"POSTGRES_SHUTDOWN_TIMEOUT" envDefault:"45s"`
 }
 
 type certificateSettings struct {

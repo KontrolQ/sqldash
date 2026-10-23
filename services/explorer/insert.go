@@ -5,14 +5,25 @@ import (
 	"net/http"
 	"strings"
 
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func InsertRow(requestContext context.Context, databaseName string, table string, values map[string]string) *fiber.Error {
+func InsertRow(requestContext context.Context, databaseName string, table string, values map[string]string, schemas ...string) *fiber.Error {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.write")
+	if permissionError != nil {
+		return permissionError
+	}
+	if record.Kind() == "postgres" {
+		fields := make(map[string]FieldValue, len(values))
+		for name, value := range values {
+			fields[name] = FieldValue{State: "value", Value: value}
+		}
+		return insertPostgres(requestContext, record, selectedSchema(schemas), table, fields)
+	}
 	tables, tablesError := Tables(requestContext, databaseName)
 	if tablesError != nil {
 		return tablesError

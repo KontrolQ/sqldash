@@ -1,7 +1,8 @@
 package databases
 
 type CreateRequest struct {
-	Name string `form:"name"`
+	Name   string `form:"name"`
+	Engine string `form:"engine"`
 }
 
 type SettingsRequest struct {
@@ -13,7 +14,15 @@ type SettingsRequest struct {
 }
 
 type ImportRequest struct {
-	Name string `form:"name"`
+	Name   string `form:"name"`
+	Engine string `form:"engine"`
+}
+
+type PostgresSettingsRequest struct {
+	ConnectionLimit                    int    `form:"connection_limit"`
+	StatementTimeoutMilliseconds       int    `form:"statement_timeout"`
+	IdleTransactionTimeoutMilliseconds int    `form:"idle_transaction_timeout"`
+	Protected                          string `form:"protected"`
 }
 
 type ForkRequest struct {

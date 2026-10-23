@@ -11,7 +11,7 @@ import (
 func Structure(context fiber.Ctx) error {
 	name := context.Params(NameParameter)
 
-	data, dataError := service.Structure(context.Context(), name, context.Query(TableParameter))
+	data, dataError := service.Structure(context.Context(), name, context.Query(TableParameter), context.Query("schema"))
 	if dataError != nil {
 		return dataError
 	}

@@ -19,6 +19,6 @@
 <path class="tile-spark-line" d="{{ tile.Spark }}"/>
 </svg>
   {% else %}
-    <span class="tile-quiet">No data</span>
+    <span class="tile-quiet">{% if tile.Quiet %}{{ tile.Quiet }}{% else %}No data{% endif %}</span>
   {% endif %}
 </div>

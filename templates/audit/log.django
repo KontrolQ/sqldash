@@ -3,31 +3,34 @@
   <div class="page-head is-slim">
     <div class="page-title">
       <h1>{{ Heading }}</h1>
-      <p class="page-subtitle">Everything done through this panel, newest first.</p>
+      <p class="page-subtitle">Recorded dashboard actions, newest first. Direct PostgreSQL client traffic is not included.</p>
     </div>
     <div class="page-actions">
       <form class="inline-form" method="get" action="{% url "audit" %}">
+        {% include "partials/select.django" with select_name="engine" select_label="Engine" select_chosen=Engine select_options=EngineChoices select_small=0 %}
         {% include "partials/select.django" with select_name="action" select_label="Action" select_chosen=Action select_options=Choices select_small=0 %}
-        {% if Database %}
+        {% if DatabaseID %}
+          <input type="hidden" name="database_id" value="{{ DatabaseID }}">
+        {% elif Database %}
           <input type="hidden" name="database" value="{{ Database }}">
         {% endif %}
         <button class="button is-outline" type="submit">Filter</button>
       </form>
-      {% if Database or Action %}
+      {% if Database or DatabaseID or Action or Engine %}
         <a class="button is-ghost" href="{% url "audit" %}">Clear</a>
       {% endif %}
     </div>
   </div>
-  {% if Database %}
+  {% if Database or DatabaseID %}
     <div class="alert" role="status">
       <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-      <div class="alert-title">Showing {{ Database }} only. <a class="link" href="{% url "audit" %}">Show every database</a>.</div>
+      <div class="alert-title">Showing {% if Database %}{{ Database }}{% else %}database{% endif %}{% if DatabaseID %} (ID {{ DatabaseID }}){% endif %} only. <a class="link" href="{% url "audit" %}">Show every database</a>.</div>
     </div>
   {% endif %}
   <div class="card is-panel is-table">
     <div class="card-head">
       <div class="card-title">Activity</div>
-      {% include "partials/hint.django" with hint_text="Every action taken in this panel, with the account that took it." %}
+      {% include "partials/hint.django" with hint_text="Dashboard actions visible to your account. Direct database-client traffic is not included." %}
       <div class="card-tools">
         <span class="tally">
         {% if Total %}
@@ -46,6 +49,7 @@
               <th scope="col">When</th>
               <th scope="col">Action</th>
               <th scope="col">Database</th>
+              <th scope="col">Engine</th>
               <th scope="col">Detail</th>
               <th scope="col">By</th>
             </tr>
@@ -58,7 +62,8 @@
 <span class="event-stamp">{{ entry.When }}</span>
                 </td>
                 <td><span class="badge is-{{ entry.Tone }}">{{ entry.Label }}</span></td>
-                <td>{% if entry.Database %}<a class="table-name" href="{% url "audit" %}?database={{ entry.Database }}">{{ entry.Database }}</a>{% else %}<span class="null">&mdash;</span>{% endif %}</td>
+                <td>{% if entry.Database %}<a class="table-name" href="{% url "audit" %}?{{ entry.DatabaseLink }}">{{ entry.Database }}{% if entry.DatabaseID %} <span class="tally">#{{ entry.DatabaseID }}</span>{% endif %}</a>{% else %}<span class="null">&mdash;</span>{% endif %}</td>
+                <td>{{ entry.Engine }}</td>
                 <td class="event-detail">{% if entry.Detail %}{{ entry.Detail }}{% else %}<span class="null">&mdash;</span>{% endif %}</td>
                 <td>{{ entry.Actor }}</td>
               </tr>
@@ -82,7 +87,7 @@
       <div class="card-body">
         <div class="empty">
           <span class="empty-title">Nothing recorded yet</span>
-<span>Actions show here as soon as you create a database, mint a token or change a row.</span>
+<span>Recorded dashboard actions appear here when they match your filters and permissions.</span>
         </div>
       </div>
     {% endif %}

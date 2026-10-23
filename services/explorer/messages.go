@@ -5,11 +5,14 @@ const (
 )
 
 const (
-	TablesUnavailable = "The tables could not be read."
-	RowsUnavailable   = "The rows could not be read."
-	TableMissing      = "No such table."
-	NotEditable       = "This table has no primary key and no rowid, so its rows cannot be aimed at."
-	StatementEmpty    = "Write a statement to run."
+	TablesUnavailable  = "The tables could not be read."
+	RowsUnavailable    = "The rows could not be read."
+	TableMissing       = "No such table."
+	NotEditable        = "This table has no primary key and no rowid, so its rows cannot be aimed at."
+	StatementEmpty     = "Write a statement to run."
+	ReadOnlySchema     = "System and internal schemas are read-only."
+	CatalogRestricted  = "This catalog relation is restricted or unavailable with the current database permissions."
+	CatalogUnavailable = "This catalog structure is unavailable with the current database permissions."
 )
 
 const (

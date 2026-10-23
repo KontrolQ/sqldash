@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func Tables(requestContext context.Context, databaseName string) ([]TableView, *fiber.Error) {
+func Tables(requestContext context.Context, databaseName string, schemas ...string) ([]TableView, *fiber.Error) {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.read")
+	if permissionError != nil {
+		return nil, permissionError
+	}
+	if record.Kind() == "postgres" {
+		return postgresTables(requestContext, record, selectedSchema(schemas))
+	}
 	held, queryError := sqld.Query(requestContext, databaseName, TableListSQL)
 	if queryError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, databaseName, queryError)
@@ -31,7 +38,14 @@ func Tables(requestContext context.Context, databaseName string) ([]TableView, *
 	return views, nil
 }
 
-func Columns(requestContext context.Context, databaseName string, table string) ([]ColumnView, *fiber.Error) {
+func Columns(requestContext context.Context, databaseName string, table string, schemas ...string) ([]ColumnView, *fiber.Error) {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.read")
+	if permissionError != nil {
+		return nil, permissionError
+	}
+	if record.Kind() == "postgres" {
+		return postgresColumns(requestContext, record, selectedSchema(schemas), table)
+	}
 	held, queryError := sqld.Query(requestContext, databaseName, fmt.Sprintf(ColumnListSQL, quoteIdentifier(table)))
 	if queryError != nil {
 		logger.Errorf(LogPrefix, ReadFailedLog, databaseName, queryError)

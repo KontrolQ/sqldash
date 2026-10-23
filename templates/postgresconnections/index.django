@@ -1,0 +1,35 @@
+{% extends "layouts/base.django" %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/postgresconnections.css" %}">
+{% endblock %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Name }} <span class="badge is-outline">PostgreSQL</span></h1>
+      <p class="page-subtitle">Database credentials.</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <div class="card postgres-credentials">
+    <div class="card-head has-border"><div class="card-title">Connection string</div><div class="card-note">The username is your database name. Its password is generated automatically.</div></div>
+    <div class="card-body stack">
+      <div class="row">
+        <div class="field"><label class="label" for="postgres-host">Hostname</label>{% include "postgresconnections/input.django" with credential_id="postgres-host" credential_value=Host credential_label="Hostname" %}</div>
+        <div class="field"><label class="label" for="postgres-database">Database</label>{% include "postgresconnections/input.django" with credential_id="postgres-database" credential_value=Database credential_label="Database" %}</div>
+        <div class="field"><label class="label" for="postgres-overview-username">Username</label>{% include "postgresconnections/input.django" with credential_id="postgres-overview-username" credential_value=Database credential_label="Username" %}</div>
+        {% if Port != 5432 %}<div class="field"><label class="label" for="postgres-port">Port</label>{% include "postgresconnections/input.django" with credential_id="postgres-port" credential_value=Port credential_label="Port" %}</div>{% endif %}
+      </div>
+      {% if PasswordAvailable %}
+        <div class="field"><label class="label" for="postgres-connection-uri">Connection URI</label>{% include "postgresconnections/input.django" with credential_id="postgres-connection-uri" credential_value=CredentialURL credential_label="Connection URI" credential_secret=1 %}<span class="field-note">Contains the current password. Keep this URI private.</span></div>
+      {% else %}
+        <div class="alert" role="status"><div class="alert-title">Password unavailable</div><div class="alert-body">{{ PasswordProblem }}</div></div>
+      {% endif %}
+      {% include "postgresconnections/tls.django" %}
+      <form method="post" action="{% url "databases.connections.rotate.primary" name=Name %}" data-confirm="The old password stops working and current database connections are closed." data-confirm-title="Rotate the database password?" data-confirm-action="Rotate password"><button class="button is-outline" type="submit">Rotate password</button></form>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/postgresconnections.js" %}" defer></script>
+{% endblock %}

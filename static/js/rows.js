@@ -7,6 +7,7 @@
 
   const body = veil.querySelector('[data-statement-body]');
   const copy = veil.querySelector('[data-statement-copy]');
+  const note = veil.querySelector('[data-statement-note]');
 
   let opener = null;
 
@@ -27,7 +28,10 @@
     }
 
     opener = button;
-    body.textContent = held.content.textContent.trim();
+    body.textContent = held.hasAttribute('data-statement-preserve') ? held.content.textContent : held.content.textContent.trim();
+    if (note) {
+      note.textContent = button.dataset.statementLabel || 'Representative stored statement.';
+    }
     veil.hidden = false;
 
     const first = veil.querySelector('button');

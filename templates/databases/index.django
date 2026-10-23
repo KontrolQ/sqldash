@@ -15,6 +15,14 @@ Create database
     {% endif %}
   </div>
   {% include "partials/alert.django" %}
+  {% if RemoteCloneForm and not CanCloneRemote %}
+    <div class="alert is-bad" role="alert"><div class="alert-title">Clone failed</div><div class="alert-body">{{ RemoteCloneForm.Error|capfirst }}</div></div>
+  {% endif %}
+  <nav class="tabs database-engine-tabs" aria-label="Database engine">
+    <a class="tab{% if not Engine %} is-current{% endif %}" href="{% url "databases" %}"{% if not Engine %} aria-current="page"{% endif %}>All</a>
+    <a class="tab{% if Engine == "libsql" %} is-current{% endif %}" href="{% url "databases" %}?engine=libsql"{% if Engine == "libsql" %} aria-current="page"{% endif %}>libSQL</a>
+    <a class="tab{% if Engine == "postgres" %} is-current{% endif %}" href="{% url "databases" %}?engine=postgres"{% if Engine == "postgres" %} aria-current="page"{% endif %}>PostgreSQL</a>
+  </nav>
   {% if Databases %}
     <div class="card is-table">
       <div class="table-wrap">
@@ -22,6 +30,7 @@ Create database
           <thead>
             <tr>
               <th scope="col">Name</th>
+              <th scope="col">Engine</th>
               <th scope="col">Address</th>
               <th scope="col" class="table-numeric">Tables</th>
               <th scope="col" class="table-numeric">Storage</th>
@@ -34,14 +43,15 @@ Create database
           <tbody>
             {% for database in Databases %}
               <tr>
-                <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
+                <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked or not database.Online %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
+                <td><span class="badge is-outline">{{ database.EngineLabel }}</span></td>
                 <td class="mono muted">{{ database.Address }}</td>
                 <td class="table-numeric">{{ database.Tables }}</td>
                 <td class="table-numeric">{{ database.Storage }}</td>
                 <td class="table-numeric">{{ database.RowsRead }}</td>
                 <td class="table-numeric">{{ database.Queries }}</td>
                 <td>
-                  {% if database.Blocked %}
+                  {% if not database.Ready %}<span class="badge is-outline">{{ database.State }}</span>{% elif not database.Online %}<span class="badge is-outline">Offline</span>{% elif database.Blocked %}
                     <span class="badge is-outline">Blocked</span>
                   {% elif database.Protected %}
                     <span class="badge is-secondary">Protected</span>
@@ -56,13 +66,14 @@ Create database
 </button>
                     <div class="menu-content" data-menu-content hidden>
                       <a class="menu-plain" href="{% url "databases.show" name=database.Name %}">Manage</a>
-                      {% if CanReadData %}
+                      {% if database.Actions.CanReadData and database.Ready %}
                         <a class="menu-plain" href="{% url "databases.explore" name=database.Name %}">Browse data</a>
                       {% endif %}
-                      {% if CanRunSQL %}
+                      {% if database.Actions.CanRunSQL and database.Ready %}
                         <a class="menu-plain" href="{% url "databases.console" name=database.Name %}">Open the console</a>
                       {% endif %}
-                      {% if CanExportDatabases %}
+                      {% if database.Ready and database.Actions.CanForkDatabases and database.Actions.CanCreateDatabases and database.Actions.CanReadData %}<button class="menu-plain" type="button" data-sheet-open="duplicate-database-{{ database.Name }}">Duplicate</button>{% endif %}
+                      {% if database.Actions.CanExportDatabases and database.Ready %}
                         <div class="menu-separator"></div>
                         <a class="menu-plain" href="{% url "databases.export" name=database.Name %}">Download a dump</a>
                       {% endif %}
@@ -87,49 +98,18 @@ Create database
       </span>
     </div>
   {% endif %}
+  {% for database in Databases %}
+    {% if database.Ready and database.Actions.CanForkDatabases and database.Actions.CanCreateDatabases and database.Actions.CanReadData %}
+      {% include "databases/duplicate.django" %}
+    {% endif %}
+  {% endfor %}
   {% if CanCreateDatabases %}
-    <div class="sheet-veil" data-sheet="new-database" hidden>
-      <div class="dialog-veil" data-sheet-close></div>
-      <div class="dialog is-wide" role="dialog" aria-modal="true" aria-labelledby="new-database-title">
-        <div class="dialog-head">
-          <div class="dialog-title" id="new-database-title">Create a database</div>
-          <div class="dialog-note">Start empty, or build one from a file you already have.</div>
-        </div>
-        <div class="tabs" data-swap>
-          <button class="tab is-current" type="button" data-swap-to="make-empty">Empty</button>
-          {% if CanImportDatabases %}
-            <button class="tab" type="button" data-swap-to="make-dump">From a file</button>
-          {% endif %}
-        </div>
-        <form class="stack" method="post" action="{% url "databases.create" %}" data-swap-panel="make-empty">
-          <div class="field">
-            <label class="label" for="create-name">Name</label>
-<input class="input" id="create-name" name="name" required>
-<span class="field-note">Lowercase letters, digits and hyphens.</span>
-          </div>
-          <div class="dialog-foot">
-            <button class="button is-outline" type="button" data-sheet-close>Cancel</button>
-<button class="button" type="submit">Create database</button>
-          </div>
-        </form>
-        {% if CanImportDatabases %}
-          <form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data" data-swap-panel="make-dump" hidden>
-            <div class="field">
-              <label class="label" for="import-name">Name</label>
-<input class="input" id="import-name" name="name" required>
-            </div>
-            <div class="field">
-              <label class="label" for="import-dump">File</label>
-<input class="file" id="import-dump" type="file" name="dump" accept=".sql,.db,.sqlite,.sqlite3" required>
-<span class="field-note">A SQLite file, or a .sql file of statements.</span>
-            </div>
-            <div class="dialog-foot">
-              <button class="button is-outline" type="button" data-sheet-close>Cancel</button>
-<button class="button" type="submit">Load database</button>
-            </div>
-          </form>
-        {% endif %}
-      </div>
-    </div>
+    {% include "databases/chooser.django" %}
   {% endif %}
+{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/databases.css" %}">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/databases.js" %}" defer></script>
 {% endblock %}

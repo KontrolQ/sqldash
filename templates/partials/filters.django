@@ -22,7 +22,7 @@ Add filter
 </button>
 <span class="tab-bar-spacer"></span>
       {% if Filters %}
-        <a class="button is-ghost is-small" href="{{ BrowsePath }}?table={{ Table }}{% if Search %}&search={{ Search }}{% endif %}">Clear all</a>
+        <a class="button is-ghost is-small" href="{{ BrowsePath }}?{% if Engine == "postgres" %}schema={{ Schema|urlencode }}&{% endif %}table={{ Table|urlencode }}{% if Search %}&search={{ Search|urlencode }}{% endif %}{% if Sort %}&sort={{ Sort|urlencode }}&direction={{ Direction }}{% endif %}">Clear all</a>
       {% endif %}
       <button class="button is-small" type="submit" form="filter-form">Apply</button>
     </div>

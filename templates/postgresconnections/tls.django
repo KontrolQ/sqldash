@@ -1,0 +1,2 @@
+<p class="field-note">Use <code>sslmode=verify-full</code> and your trusted CA file with <code>sslrootcert</code>. <a class="link" href="/postgres/ca" download>Download the public CA certificate</a>. If the instance uses a public certificate authority, use your system trust store.</p>
+<p class="field-note">Set <code>channel_binding=disable</code>. Required SCRAM channel binding is not supported by this connection gateway.</p>

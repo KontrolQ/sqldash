@@ -16,6 +16,8 @@ func init() {
 	urls.Path(urls.Post, "/databases/:name/explore/cell", controller.SaveCells, "databases.explore.cell")
 	urls.Path(urls.Post, "/databases/:name/explore/row", controller.DeleteRows, "databases.explore.row")
 	urls.Path(urls.Post, "/databases/:name/console", controller.RunConsole, "databases.console.run")
+	urls.Path(urls.Post, "/databases/:name/console/cancel", controller.CancelConsole, "databases.console.cancel")
+	urls.Path(urls.Post, "/databases/:name/structure/object", controller.ManageObject, "databases.structure.object")
 	urls.Path(urls.Post, "/databases/:name/console/snippets", controller.SaveSnippet, "databases.console.snippet.save")
 	urls.Path(urls.Post, "/databases/:name/console/snippets/remove", controller.RemoveSnippet, "databases.console.snippet.remove")
 }

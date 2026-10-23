@@ -1,0 +1,43 @@
+<div class="page-head is-slim">
+  <div class="page-title">
+    <h1>Top queries</h1>
+    <p class="page-subtitle">Across {{ Scope }} over the last {{ Window }}.</p>
+  </div>
+  <div class="page-actions">{% include "partials/period.django" with period_base=QueriesPath %}</div>
+</div>
+{% include "partials/databasetabs.django" %}
+{% include "insights/engines.django" with engine_base=QueriesPath %}
+{% if Native %}
+  <div class="card is-panel is-table">
+    <div class="card-head"><div class="card-title">PostgreSQL query statistics</div><div class="card-tools">{% if ShowLibSQL %}<a class="button is-ghost is-small" href="{{ QueriesPath }}?window={{ Window }}&engine=postgres">See them all</a>{% endif %}</div></div>
+    <div class="card-body">
+      <p class="field-note">Recorded top-level query activity. Rows processed means rows returned or affected, not rows read. Native minimum and maximum are extrema observed in samples; their reset range may include executions before this period. Latency percentiles and query failure counts are unavailable.</p>
+    </div>
+    {% include "insights/nativequerytable.django" with native_sortable=1 %}
+    {% if not ShowLibSQL %}
+      {% include "insights/nativepagination.django" %}
+    {% endif %}
+  </div>
+{% endif %}
+{% if ShowLibSQL %}
+  <div class="card is-table">
+    {% if Rows %}
+      {% include "partials/querytable.django" with query_rows=Rows query_columns=Columns %}
+      <div class="card-foot is-split">
+        <span class="tally">Showing {{ FirstRow }}-{{ LastRow }} of {{ Total }}</span>
+        <div class="steps">
+          <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&engine={{ Engine }}&page=1" aria-label="First page"><svg viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg></a>
+          <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&engine={{ Engine }}&page={{ PreviousPage }}" aria-label="Previous page"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
+          <span class="step is-page">{{ Page }}</span>
+          <a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&engine={{ Engine }}&page={{ NextPage }}" aria-label="Next page"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></a>
+          <a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&engine={{ Engine }}&page={{ Pages }}" aria-label="Last page"><svg viewBox="0 0 24 24"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg></a>
+        </div>
+      </div>
+    {% else %}
+      <div class="card-body"><div class="empty"><span class="empty-title">Nothing measured yet</span><span>Queries appear here once clients start using a database.</span></div></div>
+    {% endif %}
+  </div>
+{% endif %}
+{% if not ShowLibSQL and not Native %}
+  <div class="card"><div class="card-body"><div class="empty"><span class="empty-title">No accessible databases</span><span>Insights are limited to databases you can monitor.</span></div></div></div>
+{% endif %}

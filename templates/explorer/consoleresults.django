@@ -1,0 +1,43 @@
+{% if Failure %}
+  <div class="console-problem" role="alert"><code>{{ Failure }}</code></div>
+{% endif %}
+{% if Results %}
+  <div data-console-results>
+    <div class="workbar is-second explorer-result-tabs"><div class="tabs is-compact" role="tablist" aria-label="Statement results">{% for result in Results %}<button class="tab{% if forloop.First %} is-current{% endif %}" type="button" role="tab" data-console-result="{{ result.Number }}" aria-controls="console-result-{{ result.Number }}" aria-selected="{% if forloop.First %}true{% else %}false{% endif %}">Result {{ result.Number }}</button>{% endfor %}</div></div>
+    {% for result in Results %}
+      <section class="explorer-result-panel" id="console-result-{{ result.Number }}" data-console-panel="{{ result.Number }}" role="tabpanel" aria-label="Result {{ result.Number }}"{% if not forloop.First %} hidden{% endif %}>
+        <div class="workbar is-second"><span class="timing">{{ result.Duration }}</span><span class="tally">{{ result.Rows|length }} returned &middot; {{ result.Affected }} affected &middot; {% if result.RowsReadAvailable %}{{ result.RowsRead }} read{% else %}rows read unavailable{% endif %}</span><div class="workbar-right"><button class="button is-ghost is-small" type="button" data-console-export="json">Copy JSON</button><button class="button is-outline is-small" type="button" data-console-export="csv">Download CSV</button></div></div>
+        <div class="sheet">
+          {% if result.Columns %}
+            <table class="table is-grid" data-console-table>
+              <thead>
+                <tr>
+                  {% for column in result.Columns %}
+                    <th scope="col"><span class="column-name">{{ column }}</span></th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in result.Records %}
+                  <tr>
+                    {% for cell in row %}
+                      <td class="cell" data-null="{% if cell.IsNull %}true{% else %}false{% endif %}">{{ cell.Text }}</td>
+                    {% endfor %}
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="{{ result.Columns|length }}" class="cell-empty">No rows returned.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="sheet-empty"><strong>Done</strong><span>{{ result.Affected }} rows affected.</span></div>
+          {% endif %}
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+{% elif not Failure %}
+  <div class="sheet-empty"><strong>Nothing run yet</strong><span>Write a PostgreSQL statement above and run it.</span></div>
+{% endif %}

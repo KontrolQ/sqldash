@@ -1,0 +1,16 @@
+<aside class="rail">
+  <form class="rail-head explorer-schema" method="get" action="{{ rail_base }}">
+    <div class="field">
+      <span class="label">Schema</span>
+      {% include "partials/select.django" with select_name="schema" select_label="Schema" select_options=Schemas select_chosen=Schema select_wide=true select_submits=true %}
+    </div>
+  </form>
+  <div class="rail-head"><input class="input" type="search" placeholder="Search relations" aria-label="Search relations" data-rail-search></div>
+  <div class="rail-list">
+    {% for one in Tables %}
+      <a class="rail-item {% if one.Name == Table %}is-current{% endif %}" href="{{ rail_base }}?{{ one.Query }}" data-rail-row="{{ one.Name }}">
+        <span class="rail-name">{{ one.Name }}</span><span class="badge is-outline">{{ one.Kind }}</span>
+      </a>
+    {% empty %}<div class="rail-empty">No relations in this schema.</div>{% endfor %}
+  </div>
+</aside>

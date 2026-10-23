@@ -4,6 +4,7 @@ import "time"
 
 type Observation struct {
 	DatabaseName string
+	DatabaseID   uint
 	SQL          string
 	DurationMs   float64
 	RowsRead     int64

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"sqldash/sqld"
+	sqld "sqldash/engines"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -17,9 +17,17 @@ type CellEdit struct {
 	Key    string
 	Value  string
 	Clear  bool
+	State  string
 }
 
-func UpdateCells(requestContext context.Context, databaseName string, table string, edits []CellEdit) *fiber.Error {
+func UpdateCells(requestContext context.Context, databaseName string, table string, edits []CellEdit, schemas ...string) *fiber.Error {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.write")
+	if permissionError != nil {
+		return permissionError
+	}
+	if record.Kind() == "postgres" {
+		return updatePostgres(requestContext, record, selectedSchema(schemas), table, edits)
+	}
 	if len(edits) == 0 {
 		return shortcuts.ServiceError(http.StatusBadRequest, NothingChanged)
 	}
@@ -77,7 +85,14 @@ func UpdateCells(requestContext context.Context, databaseName string, table stri
 	return nil
 }
 
-func DeleteRows(requestContext context.Context, databaseName string, table string, keys []string) *fiber.Error {
+func DeleteRows(requestContext context.Context, databaseName string, table string, keys []string, schemas ...string) *fiber.Error {
+	record, permissionError := authorizedDatabase(requestContext, databaseName, "libsql.data.write")
+	if permissionError != nil {
+		return permissionError
+	}
+	if record.Kind() == "postgres" {
+		return deletePostgres(requestContext, record, selectedSchema(schemas), table, keys)
+	}
 	if len(keys) == 0 {
 		return shortcuts.ServiceError(http.StatusBadRequest, NothingChosen)
 	}

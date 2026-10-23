@@ -18,15 +18,22 @@
       }
 
       const what = button.dataset.copyLabel || 'That';
+      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+      const value = isInput ? target.value : target.textContent.trim();
 
       try {
-        await navigator.clipboard.writeText(target.textContent.trim());
+        await navigator.clipboard.writeText(value);
         announce(what + ' was copied.');
       } catch (copyError) {
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
+        if (isInput) {
+          target.focus();
+          target.select();
+        } else {
+          const range = document.createRange();
+          range.selectNodeContents(target);
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+        }
         announce('It is selected — press Ctrl+C to copy.', 'bad');
       }
     });

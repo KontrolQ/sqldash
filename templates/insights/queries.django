@@ -1,43 +1,51 @@
 {% extends "layouts/base.django" %}
 {% block content %}
-  <div class="page-head is-slim">
-    <div class="page-title">
-      <h1>Top queries</h1>
-      <p class="page-subtitle">Across {{ Scope }} over the last {{ Window }}.</p>
-    </div>
-    <div class="page-actions">
-      {% include "partials/period.django" with period_base=QueriesPath %}
-    </div>
-  </div>
-  {% include "partials/databasetabs.django" %}
-  <div class="card is-table">
-    {% if Rows %}
-      {% include "partials/querytable.django" with query_rows=Rows query_columns=Columns %}
-      <div class="card-foot is-split">
-        <span class="tally">Showing {{ FirstRow }}-{{ LastRow }} of {{ Total }}</span>
-        <div class="steps">
-          <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page=1" aria-label="First page">
-<svg viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
-</a>
-<a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ PreviousPage }}" aria-label="Previous page">
-<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-</a>
-<span class="step is-page">{{ Page }}</span>
-<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ NextPage }}" aria-label="Next page">
-<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-</a>
-<a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ QueriesPath }}?window={{ Window }}&sort={{ Sort }}&direction={{ Direction }}&page={{ Pages }}" aria-label="Last page">
-<svg viewBox="0 0 24 24"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
-</a>
-        </div>
+  {% if TableColumns %}
+    <div class="page-head is-slim">
+      <div class="page-title">
+        <h1>Top queries</h1>
+        <p class="page-subtitle">Across {{ Scope }} over the last {{ Window }}.</p>
       </div>
-    {% else %}
+      <div class="page-actions">{% include "partials/period.django" with period_base=QueriesPath %}</div>
+    </div>
+    {% include "partials/databasetabs.django" %}
+    {% include "insights/engines.django" with engine_base=QueriesPath %}
+    <div class="card is-panel is-table">
+      <div class="card-head"><div class="card-title">Recorded queries</div><div class="card-tools"><span class="tally">{{ Total }} query groups</span></div></div>
       <div class="card-body">
-        <div class="empty">
-          <span class="empty-title">Nothing measured yet</span>
-<span>Queries appear here once clients start using a database.</span>
-        </div>
+        <p class="field-note">Database and statement identities remain separate. Time shares are within each row's engine and selected scope, not one cross-engine percentage. Total and mean time measure client duration for libSQL and native execution time for PostgreSQL. Unavailable means unsupported or not measured, never a recorded zero.</p>
+        {% if ShowLibSQL %}
+          <p class="field-note">libSQL P50 and P99 are approximate histogram percentiles. Rows read are scanned rows; a rows-read/returned ratio is unavailable when returned rows are zero.</p>
+        {% endif %}
+        {% if Native %}
+          <p class="field-note">PostgreSQL rows processed are returned or affected rows, not rows scanned. Native minimum and maximum are sampled extrema whose statistics epoch may precede this period. Query-level percentiles, failures, transferred bytes and separate rows-read/written counts are unavailable. Only compatible top-level statement intervals are included; internal activity already recorded in history is not retrospectively removed.</p>
+          {% if Native.HasIntervals %}
+            <p class="field-note">PostgreSQL samples span {{ Native.FirstCollectedAt }} through {{ Native.CollectedAt }}; {{ Native.Discontinuities }} baseline changes. Restarts, resets and incompatible intervals are excluded.</p>
+          {% else %}
+            <p class="field-note">{{ Native.EmptyTitle }}. {{ Native.EmptyNote }}</p>
+          {% endif %}
+          {% if Native.HasSamples and not Native.HasFreshSamples %}
+            <p class="field-note">No recent PostgreSQL sample is available; any native rows come from older recorded intervals.</p>
+          {% endif %}
+        {% endif %}
       </div>
-    {% endif %}
-  </div>
+      {% if TableRows %}
+        {% include "partials/querypagetable.django" %}
+      {% else %}
+        <div class="card-body"><div class="empty"><span class="empty-title">{% if HasDatabases %}Nothing measured yet{% else %}No accessible databases{% endif %}</span><span>Queries are limited to databases you can monitor in this scope and period.</span></div></div>
+      {% endif %}
+      <div class="card-foot is-split">
+      <span class="tally">Showing {{ FirstRow }}-{{ LastRow }} of {{ Total }} query groups</span>
+      <div class="steps">
+        <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ FirstPagePath }}" aria-label="First page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg></a>
+        <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ PreviousPagePath }}" aria-label="Previous page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
+        <span class="step is-page">{{ Page }}</span>
+        <a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ NextPagePath }}" aria-label="Next page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+        <a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ LastPagePath }}" aria-label="Last page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg></a>
+      </div>
+    </div>
+    </div>
+  {% else %}
+    {% include "insights/querieslegacy.django" %}
+  {% endif %}
 {% endblock %}

@@ -4,8 +4,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"sqldash/permissions"
-	"sqldash/services/access"
 	service "sqldash/services/explorer"
 	"sqldash/utils/meta"
 	"sqldash/utils/shortcuts"
@@ -19,6 +17,7 @@ func Browse(context fiber.Ctx) error {
 
 	data, dataError := service.Browse(context.Context(), service.Ask{
 		Database:  name,
+		Schema:    context.Query("schema"),
 		Table:     context.Query(TableParameter),
 		Page:      page,
 		Sort:      context.Query(SortParameter),
@@ -31,7 +30,7 @@ func Browse(context fiber.Ctx) error {
 		return dataError
 	}
 
-	data.Editable = data.Editable && access.FromContext(context.Context()).Can(permissions.DataWrite)
+	data.Editable = data.Editable && service.CanWrite(context.Context(), name)
 	meta.SetPageTitle(context, data.Title)
 	describe(context, name, DataLabel, DataSection)
 
@@ -47,7 +46,7 @@ func Console(context fiber.Ctx) error {
 		statement = service.SnippetStatement(name, uint(chosen))
 	}
 
-	data, dataError := service.RunConsole(context.Context(), name, "")
+	data, dataError := service.RunConsole(context.Context(), name, "", context.Query("schema"))
 	if dataError != nil {
 		return dataError
 	}

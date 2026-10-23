@@ -13,6 +13,7 @@ const (
 type Rollup struct {
 	ID            uint       `gorm:"primarykey"`
 	DatabaseName  string     `gorm:"index:idx_rollup_slot,unique;not null"`
+	DatabaseID    uint       `gorm:"index;not null;default:0"`
 	Digest        string     `gorm:"index:idx_rollup_slot,unique;not null"`
 	Resolution    Resolution `gorm:"index:idx_rollup_slot,unique;not null"`
 	BucketStart   time.Time  `gorm:"index:idx_rollup_slot,unique;index;not null"`

@@ -31,8 +31,9 @@ type Result struct {
 }
 
 type Statement struct {
-	SQL       string
-	Arguments []any
+	SQL              string
+	Arguments        []any
+	ExpectedAffected *int64
 }
 
 type StatementError struct {

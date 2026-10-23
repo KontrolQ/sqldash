@@ -38,5 +38,4 @@ func init() {
 
 	logger.Successf(LogPrefix, ConnectedLog, config.StatePath())
 
-	migrate()
 }

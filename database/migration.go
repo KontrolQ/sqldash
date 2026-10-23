@@ -1,32 +1,25 @@
 package database
 
-import (
-	"sqldash/models"
-	"sqldash/utils/logger"
-)
+import "sqldash/models"
 
-func migrate() {
-	migrationError := DB.AutoMigrate(
+func migrate() error {
+	if migrationError := migrateOIDColumns(); migrationError != nil {
+		return migrationError
+	}
+	if migrationError := DB.AutoMigrate(
 		&models.Account{},
 		&models.AccountPicture{},
 		&models.Site{}, &models.Role{}, &models.RolePermission{}, &models.AccountRole{},
 		&models.DatabaseShare{}, &models.AccountLink{}, &models.OwnershipTransfer{}, &models.SMTPSettings{},
-		&models.Session{},
-		&models.Database{},
-		&models.AccessRule{},
-		&models.Token{},
-		&models.Fingerprint{},
-		&models.Statement{},
-		&models.Rollup{},
-		&models.Marker{},
-		&models.Snippet{},
-		&models.Event{},
-	)
-
-	if migrationError != nil {
-		logger.Fatalf(LogPrefix, MigrationFailedLog, migrationError)
+		&models.Session{}, &models.Database{}, &models.AccessRule{}, &models.Token{},
+		&models.Fingerprint{}, &models.Statement{}, &models.Rollup{}, &models.Marker{},
+		&models.Snippet{}, &models.Event{}, &models.PostgresConnection{}, &models.DatabaseOperation{},
+		&models.SchemaMigration{}, &models.PostgresStatistics{}, &models.PostgresStatementStatistics{},
+	); migrationError != nil {
+		return migrationError
 	}
 	if ownershipError := migrateOwnership(); ownershipError != nil {
-		logger.Fatalf(LogPrefix, MigrationFailedLog, ownershipError)
+		return ownershipError
 	}
+	return migrateEngines()
 }

@@ -13,13 +13,17 @@ import (
 
 func Log(context fiber.Ctx) error {
 	page, _ := strconv.Atoi(context.Query(PageParameter))
-
-	scope, scopeError := access.MonitoringScope(context.Context())
-	if scopeError != nil {
-		return scopeError
+	filter := service.Filter{Engine: context.Query(EngineParameter)}
+	if databaseID := context.Query(DatabaseIDParameter); databaseID != "" {
+		parsedID, parseError := strconv.ParseUint(databaseID, 10, strconv.IntSize)
+		if parseError != nil || parsedID == 0 {
+			return fiber.NewError(fiber.StatusBadRequest, service.InvalidFilter)
+		}
+		filter.DatabaseID = uint(parsedID)
 	}
-	data, dataError := service.Page(
-		context.Query(DatabaseParameter), context.Query(ActionParameter), page, scope...,
+
+	data, dataError := service.PageFor(
+		access.FromContext(context.Context()), context.Query(DatabaseParameter), context.Query(ActionParameter), page, filter,
 	)
 
 	if dataError != nil {

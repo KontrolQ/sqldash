@@ -2,6 +2,7 @@ package insights
 
 import (
 	"net/http"
+	"net/url"
 	"sort"
 
 	"sqldash/analytics"
@@ -59,7 +60,9 @@ func GetQueries(asked QueriesAsk, allowed ...[]string) (*QueriesContext, *fiber.
 		shown.Page = 1
 	}
 
-	if shown.Pages > 0 && shown.Page > shown.Pages {
+	if shown.Pages == 0 {
+		shown.Page = 1
+	} else if shown.Page > shown.Pages {
 		shown.Page = shown.Pages
 	}
 
@@ -191,5 +194,5 @@ func queriesPathFor(databaseName string) string {
 		return QueriesPath
 	}
 
-	return DatabasePath + databaseName + QueriesSuffix
+	return DatabasePath + url.PathEscape(databaseName) + QueriesSuffix
 }

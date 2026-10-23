@@ -5,7 +5,7 @@ Last {{ Window }}
 </button>
   <div class="menu-content" data-menu-content hidden>
     {% for option in WindowOptions %}
-      <a class="menu-check" role="menuitemradio" aria-checked="{% if option.Value == Window %}true{% else %}false{% endif %}" href="{{ period_base }}?window={{ option.Value }}">
+      <a class="menu-check" role="menuitemradio" aria-checked="{% if option.Value == Window %}true{% else %}false{% endif %}" href="{{ period_base }}?window={{ option.Value }}{% if Engine %}&engine={{ Engine }}{% endif %}{% if FilterQuery %}&{{ FilterQuery }}{% endif %}">
 <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
 {{ option.Label }}
 </a>

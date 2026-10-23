@@ -8,6 +8,11 @@ const (
 	TopQueryLimit = 20
 	QueryPageSize = 10
 
+	AllEngines      = "all"
+	AllEnginesLabel = "All engines"
+	LibSQLLabel     = "libSQL"
+	PostgresLabel   = "PostgreSQL"
+
 	ShareSort   = "share"
 	CountSort   = "count"
 	TotalSort   = "total"
@@ -34,6 +39,7 @@ const (
 	ShareFormat          = "%.1f%%"
 	RatioFormat          = "%.1f"
 	NoRatio              = "—"
+	UnavailableValue     = "—"
 	MillisecondsInSecond = 1000.0
 
 	Thousand = 1_000.0
@@ -58,7 +64,7 @@ const (
 )
 
 const (
-	EveryDatabase = "every database"
+	EveryDatabase = "accessible databases"
 	LastPrefix    = "Last "
 )
 

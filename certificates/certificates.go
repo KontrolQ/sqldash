@@ -1,6 +1,7 @@
 package certificates
 
 import (
+	"context"
 	"crypto/tls"
 
 	"sqldash/config"
@@ -27,8 +28,16 @@ func authority() string {
 }
 
 func Settings() (*tls.Config, error) {
+	return managedSettings(shutdownAware(), config.CertificatesPath(), Names())
+}
+
+func NativeSettings(parent context.Context, host string, storage string) (*tls.Config, error) {
+	return managedSettings(parent, storage, []string{host})
+}
+
+func managedSettings(parent context.Context, storage string, names []string) (*tls.Config, error) {
 	holder := certmagic.NewDefault()
-	holder.Storage = &certmagic.FileStorage{Path: config.CertificatesPath()}
+	holder.Storage = &certmagic.FileStorage{Path: storage}
 	holder.Logger = quiet()
 
 	issuer := certmagic.NewACMEIssuer(holder, certmagic.ACMEIssuer{
@@ -47,7 +56,7 @@ func Settings() (*tls.Config, error) {
 
 	logger.Infof(LogPrefix, ObtainingLog, config.Server.Domain)
 
-	if manageError := holder.ManageSync(shutdownAware(), Names()); manageError != nil {
+	if manageError := holder.ManageSync(parent, names); manageError != nil {
 		return nil, manageError
 	}
 

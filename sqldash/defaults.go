@@ -3,8 +3,9 @@ package main
 const (
 	LogPrefix = "Sqldash"
 
-	ModeProxy = "proxy"
-	ModeWeb   = "web"
+	ModeProxy           = "proxy"
+	ModeWeb             = "web"
+	ModePostgresGateway = "postgres-proxy"
 
 	SqldProcessName  = "libsql server"
 	ProxyProcessName = "proxy"

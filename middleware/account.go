@@ -6,6 +6,7 @@ import (
 
 	store "sqldash/database"
 	"sqldash/models"
+	"sqldash/permissions"
 
 	repository "sqldash/repositories/account"
 	"sqldash/services/access"
@@ -45,9 +46,12 @@ func account(context fiber.Ctx) error {
 			context.Locals("CanManageRoles", granted.Can("roles.manage"))
 			context.Locals("CanManageSMTP", granted.Can("settings.smtp"))
 			context.Locals("IsSiteOwner", granted.Owner)
-			for key, permission := range map[string]string{"CanViewDatabases": "databases.view", "CanCreateDatabases": "databases.create", "CanViewInsights": "insights.view", "CanViewAudit": "audit.view", "CanReadData": "data.read", "CanWriteData": "data.write", "CanRunSQL": "sql.execute", "CanManageTokens": "tokens.manage", "CanManageNetwork": "network.manage", "CanEditDatabaseSettings": "databases.settings", "CanDeleteDatabases": "databases.delete", "CanImportDatabases": "databases.import", "CanExportDatabases": "databases.export", "CanForkDatabases": "databases.fork"} {
-				context.Locals(key, granted.Can(permission))
+			for key, permission := range access.DatabaseActions {
+				context.Locals(key, granted.CanAny(permission))
 			}
+			context.Locals("CanCreateLibSQL", granted.Can(permissions.DatabaseCreate))
+			context.Locals("CanCreatePostgres", granted.Can(permissions.PostgresDatabaseCreate))
+			context.Locals("CanViewAudit", granted.CanAny(permissions.AuditView) || granted.Can(permissions.PlatformAuditView))
 			var requests []models.OwnershipTransfer
 			if transferError := store.DB.Where("status = ? AND expires_at > ? AND (recipient_account_id = ? OR owner_account_id = ?)", "pending", time.Now(), held.ID, held.ID).Find(&requests).Error; transferError != nil {
 				return transferError

@@ -11,11 +11,14 @@
   </div>
   {% include "partials/databasetabs.django" %}
   {% include "partials/alert.django" %}
-  <div class="workspace">
-    {% include "partials/rail.django" with rail_base=StructurePath %}
-    <div class="bench">
-      {% if Table %}
-        <div class="workbar">
+  {% if Engine == "postgres" %}
+    {% include "explorer/postgresstructure.django" %}
+  {% else %}
+    <div class="workspace">
+      {% include "partials/rail.django" with rail_base=StructurePath %}
+      <div class="bench">
+        {% if Table %}
+          <div class="workbar">
           <button class="step" type="button" data-rail-toggle aria-label="Hide the table list" aria-expanded="true" title="Hide the table list">
 <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
 </button>
@@ -40,9 +43,9 @@ Copy schema
 </button>
           </div>
         </div>
-        <div class="sheet is-padded">
-          <div class="plan">
-            <div class="plan-head">
+          <div class="sheet is-padded">
+            <div class="plan">
+              <div class="plan-head">
               <span class="plan-kind">
               {% if IsView %}
                 View
@@ -52,7 +55,7 @@ Copy schema
               </span>
 <span class="plan-name">{{ Table }}</span>
             </div>
-            <div class="plan-group">
+              <div class="plan-group">
               <div class="plan-label">Columns</div>
               <div class="plan-rows">
                 {% for column in Columns %}
@@ -75,8 +78,8 @@ Copy schema
                 {% endfor %}
               </div>
             </div>
-            {% if Indexes %}
-              <div class="plan-group">
+              {% if Indexes %}
+                <div class="plan-group">
                 <div class="plan-label">Indexes</div>
                 <div class="plan-rows">
                   {% for index in Indexes %}
@@ -91,9 +94,9 @@ Copy schema
                   {% endfor %}
                 </div>
               </div>
-            {% endif %}
-            {% if Relations %}
-              <div class="plan-group">
+              {% endif %}
+              {% if Relations %}
+                <div class="plan-group">
                 <div class="plan-label">Points at</div>
                 <div class="plan-rows">
                   {% for relation in Relations %}
@@ -107,9 +110,9 @@ Copy schema
                   {% endfor %}
                 </div>
               </div>
-            {% endif %}
-            {% if UsedBy %}
-              <div class="plan-group">
+              {% endif %}
+              {% if UsedBy %}
+                <div class="plan-group">
                 <div class="plan-label">Pointed at by</div>
                 <div class="plan-rows">
                   {% for relation in UsedBy %}
@@ -121,36 +124,43 @@ Copy schema
                   {% endfor %}
                 </div>
               </div>
-            {% endif %}
-            {% if Triggers %}
-              <div class="plan-group">
-                <div class="plan-label">Triggers</div>
-                <div class="plan-rows">
-                  {% for trigger in Triggers %}
-                    <div class="plan-row is-stacked">
-                      <span class="plan-column">{{ trigger.Name }}</span>
-                      {% if trigger.Definition %}
-                        <pre class="code is-block">{{ trigger.Definition }}</pre>
-                      {% endif %}
-                    </div>
-                  {% endfor %}
+              {% endif %}
+              {% if Triggers %}
+                <div class="plan-group">
+                  <div class="plan-label">Triggers</div>
+                  <div class="plan-rows">
+                    {% for trigger in Triggers %}
+                      <div class="plan-row is-stacked">
+                        <span class="plan-column">{{ trigger.Name }}</span>
+                        {% if trigger.Definition %}
+                          <pre class="code is-block">{{ trigger.Definition }}</pre>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
-              </div>
-            {% endif %}
-            {% if Definition %}
-              <div class="plan-group">
-                <div class="plan-label">Definition</div>
-                <pre class="code is-block" id="table-definition">{{ Definition }}</pre>
-              </div>
-            {% endif %}
+              {% endif %}
+              {% if Definition %}
+                <div class="plan-group">
+                  <div class="plan-label">Definition</div>
+                  <pre class="code is-block" id="table-definition">{{ Definition }}</pre>
+                </div>
+              {% endif %}
+            </div>
           </div>
-        </div>
-      {% else %}
-        <div class="sheet-empty">
+        {% else %}
+          <div class="sheet-empty">
           <strong>Nothing selected</strong>
 <span>Choose a table on the left to see how it is built.</span>
         </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
-  </div>
+  {% endif %}
+{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/postgres-explorer.css" %}">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/explorer.js" %}" defer></script>
 {% endblock %}

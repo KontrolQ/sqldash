@@ -5,6 +5,8 @@
 
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
+        const sheet = group.closest('[data-sheet]');
+        if (sheet && sheet.dataset.cloneBusy === 'true') return;
         tabs.forEach(function (one) {
           one.classList.toggle('is-current', one === tab);
         });

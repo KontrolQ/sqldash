@@ -2,36 +2,30 @@ package databases
 
 import (
 	"context"
-	"net/http"
 
-	"sqldash/hosting"
 	"sqldash/models"
-	repository "sqldash/repositories/database"
-	"sqldash/services/access"
-	"sqldash/sqld"
-	"sqldash/utils/logger"
-	"sqldash/utils/shortcuts"
+	"sqldash/permissions"
 
 	"github.com/gofiber/fiber/v3"
 )
 
-func Create(requestContext context.Context, asked string) *fiber.Error {
-	name, guardError := AcceptableName(asked)
-	if guardError != nil {
-		return guardError
+func Create(ctx context.Context, asked string) *fiber.Error {
+	return CreateEngine(ctx, asked, models.EngineLibSQL)
+}
+
+func CreateEngine(ctx context.Context, asked string, engine string) *fiber.Error {
+	engine = selectedEngine(engine)
+	fresh, actor, authorityError := creationActor(ctx, engine, permissions.DatabaseCreate)
+	if authorityError != nil {
+		return authorityError
 	}
-
-	if createError := sqld.Create(requestContext, name); createError != nil {
-		logger.Errorf(LogPrefix, CreateFailedLog, name, createError)
-		return shortcuts.ServiceError(http.StatusBadGateway, CreateRefused)
+	name, nameError := acceptableEngineName(asked, engine)
+	if nameError != nil {
+		return nameError
 	}
-
-	if registerError := repository.Create(&models.Database{Name: name, OwnerAccountID: access.AccountID(requestContext)}); registerError != nil {
-		logger.Errorf(LogPrefix, RegisterLog, name, registerError)
-		return shortcuts.ServiceError(http.StatusInternalServerError, CreateRefused)
+	record, operation, reserveError := reserveDatabase(fresh, name, engine, actor.Account.ID, "create", 0, operationPayload{})
+	if reserveError != nil {
+		return reserveError
 	}
-
-	go hosting.Publish(context.WithoutCancel(requestContext), name)
-
-	return nil
+	return executeOperation(fresh, record, operation)
 }

@@ -56,10 +56,10 @@ func removeLegacyRoles(transaction *gorm.DB) error {
 		generated := role.Kind == permissions.SuperAdminKind
 		var expected []string
 		if role.Name == permissions.EditorName && role.Position == 20 && role.Color == "#3b82f6" {
-			expected = permissions.Editor
+			expected = permissions.LegacyEditor
 		}
 		if role.Name == permissions.ViewerName && role.Position == 10 && role.Color == "#22c55e" {
-			expected = permissions.Viewer
+			expected = permissions.LegacyViewer
 		}
 		if expected != nil {
 			var grants []models.RolePermission
