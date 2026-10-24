@@ -12,13 +12,14 @@ import (
 )
 
 type Roles struct {
-	Custodian   string
-	Owner       string
-	Reader      string
-	Writer      string
-	ReadAccess  string
-	WriteAccess string
-	Observer    string
+	Custodian    string
+	Owner        string
+	Reader       string
+	Writer       string
+	ReadAccess   string
+	WriteAccess  string
+	ObjectAccess string
+	Observer     string
 }
 
 func DatabaseRoles(record *models.Database) (Roles, error) {
@@ -30,13 +31,14 @@ func DatabaseRoles(record *models.Database) (Roles, error) {
 	}
 	prefix := RolePrefix + strconv.FormatUint(uint64(record.ID), 16) + "_"
 	return Roles{
-		Custodian:   prefix + "custodian",
-		Owner:       prefix + "owner",
-		Reader:      prefix + "reader",
-		Writer:      prefix + "writer",
-		ReadAccess:  prefix + "read",
-		WriteAccess: prefix + "write",
-		Observer:    prefix + "observer",
+		Custodian:    prefix + "custodian",
+		Owner:        prefix + "owner",
+		Reader:       prefix + "reader",
+		Writer:       prefix + "writer",
+		ReadAccess:   prefix + "read",
+		WriteAccess:  prefix + "write",
+		ObjectAccess: prefix + "objects",
+		Observer:     prefix + "observer",
 	}, nil
 }
 
@@ -49,7 +51,7 @@ func InternalRoleName(username string) bool {
 		return false
 	}
 	switch suffix {
-	case "custodian", "owner", "reader", "writer", "read", "write", "observer":
+	case "custodian", "owner", "reader", "writer", "read", "write", "objects", "observer":
 		return true
 	}
 	return strings.HasPrefix(suffix, "app_") || strings.HasPrefix(suffix, "transfer_")
@@ -82,5 +84,5 @@ func databaseMarker(record *models.Database) string {
 }
 
 func roleList(roles Roles) []string {
-	return []string{roles.Custodian, roles.Owner, roles.Reader, roles.Writer, roles.ReadAccess, roles.WriteAccess, roles.Observer}
+	return []string{roles.Custodian, roles.Owner, roles.Reader, roles.Writer, roles.ReadAccess, roles.WriteAccess, roles.ObjectAccess, roles.Observer}
 }

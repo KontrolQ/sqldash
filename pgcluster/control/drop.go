@@ -42,7 +42,7 @@ func Drop(ctx context.Context, record *models.Database) error {
 		return queryError
 	}
 	names := append(applications, transfers...)
-	names = append(names, []string{roles.Observer, roles.Reader, roles.Writer, roles.Owner, roles.ReadAccess, roles.WriteAccess, roles.Custodian}...)
+	names = append(names, []string{roles.Observer, roles.Reader, roles.Writer, roles.Owner, roles.ReadAccess, roles.WriteAccess, roles.ObjectAccess, roles.Custodian}...)
 	existing := []string{}
 	for _, name := range names {
 		var marker string

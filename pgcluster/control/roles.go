@@ -143,7 +143,7 @@ func provisionRoles(ctx context.Context, connection *pgx.Conn, record *models.Da
 			return ensureError
 		}
 	}
-	for member, group := range map[string]string{roles.Reader: roles.ReadAccess, roles.Writer: roles.WriteAccess} {
+	for member, group := range map[string]string{roles.Reader: roles.ReadAccess, roles.Writer: roles.WriteAccess, roles.Owner: roles.ObjectAccess} {
 		if grantError := dataMembership(ctx, transaction, member, group); grantError != nil {
 			return grantError
 		}

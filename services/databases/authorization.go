@@ -57,7 +57,7 @@ func creationActor(ctx context.Context, engine string, permission string) (conte
 	if !actor.Can(permissions.ForEngine(permission, engine)) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
-	if engine == models.EnginePostgres && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite)) {
+	if engine == models.EnginePostgres && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) || !actor.Can(permissions.PostgresObjectsManage)) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
 	return fresh, actor, nil

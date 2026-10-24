@@ -63,6 +63,11 @@ func Rotate(ctx context.Context, name string, identifier uint) (*IssuedPassword,
 	if findError != nil {
 		return nil, findError
 	}
+	if connection.PrimaryConnection {
+		if _, authorityError := primarycredentials.Authorize(fresh, database.DB.WithContext(fresh), record, access.AccountID(fresh)); authorityError != nil {
+			return nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
+		}
+	}
 	fresh, _, err = authorize(fresh, name, connection.Scope)
 	if err != nil {
 		return nil, err

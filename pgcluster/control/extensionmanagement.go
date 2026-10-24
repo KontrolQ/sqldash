@@ -150,7 +150,7 @@ func extensionNamespace(ctx context.Context, transaction pgx.Tx, roles Roles, sc
 		return SafeError(queryError)
 	}
 	if owner != "" {
-		if owner != config.Postgres.AdminUsername && owner != roles.Owner {
+		if owner != config.Postgres.AdminUsername && owner != roles.Owner && owner != roles.ObjectAccess {
 			return IdentityMismatch
 		}
 		return nil

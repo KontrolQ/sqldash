@@ -62,7 +62,7 @@ func applyPolicy(ctx context.Context, transaction pgx.Tx, record *models.Databas
 	if _, revokeError := transaction.Exec(ctx, "REVOKE ALL ON DATABASE "+pgIdentifier(record.Name)+" FROM PUBLIC"); revokeError != nil {
 		return SafeError(revokeError)
 	}
-	for _, name := range []string{roles.Owner, roles.Reader, roles.Writer, roles.ReadAccess, roles.WriteAccess} {
+	for _, name := range []string{roles.Owner, roles.Reader, roles.Writer, roles.ReadAccess, roles.WriteAccess, roles.ObjectAccess} {
 		if _, revokeError := transaction.Exec(ctx, "REVOKE ALL ON DATABASE "+pgIdentifier(record.Name)+" FROM "+pgIdentifier(name)); revokeError != nil {
 			return SafeError(revokeError)
 		}
@@ -75,16 +75,41 @@ func applyPolicy(ctx context.Context, transaction pgx.Tx, record *models.Databas
 		return SafeError(queryError)
 	}
 	if publicExists {
-		if _, ownerError := transaction.Exec(ctx, "ALTER SCHEMA public OWNER TO "+pgIdentifier(roles.Owner)); ownerError != nil {
+		if _, ownerError := transaction.Exec(ctx, "ALTER SCHEMA public OWNER TO "+pgIdentifier(roles.ObjectAccess)); ownerError != nil {
 			return SafeError(ownerError)
 		}
 	}
-	if _, grantError := transaction.Exec(ctx, "GRANT CREATE ON DATABASE "+pgIdentifier(record.Name)+" TO "+pgIdentifier(roles.Owner)); grantError != nil {
+	if _, grantError := transaction.Exec(ctx, "GRANT CREATE ON DATABASE "+pgIdentifier(record.Name)+" TO "+pgIdentifier(roles.ObjectAccess)); grantError != nil {
 		return SafeError(grantError)
 	}
 	recipients, recipientError := policyRecipients(ctx, transaction, roles)
 	if recipientError != nil {
 		return recipientError
+	}
+	privateRecipients := recipients + ", " + pgIdentifier(roles.Owner) + ", " + pgIdentifier(roles.ObjectAccess) + ", " + pgIdentifier(roles.Custodian)
+	if schemaError := ensureExtensionsSchema(ctx, transaction); schemaError != nil {
+		return schemaError
+	}
+	if guardError := guardExtensions(ctx, transaction, privateRecipients); guardError != nil {
+		return guardError
+	}
+	if dropGuardError := guardExtensionDrops(ctx, transaction, privateRecipients); dropGuardError != nil {
+		return dropGuardError
+	}
+	if ownershipError := guardObjectOwnership(ctx, transaction, record, roles, privateRecipients); ownershipError != nil {
+		return ownershipError
+	}
+	creators, creatorError := policyCreators(ctx, transaction, record, roles)
+	if creatorError != nil {
+		return creatorError
+	}
+	creatorRecipients := make(map[string]string, len(creators))
+	for _, creator := range creators {
+		defaultsRecipients, defaultsError := policyRecipients(ctx, transaction, roles, creator)
+		if defaultsError != nil {
+			return defaultsError
+		}
+		creatorRecipients[creator] = defaultsRecipients
 	}
 	rows, queryError := transaction.Query(ctx, `SELECT nspname FROM pg_catalog.pg_namespace
 		WHERE nspname <> 'information_schema' AND nspname !~ '^pg_' AND nspname NOT IN ($1, $2) ORDER BY nspname`, ControlSchema, ExtensionsSchema)
@@ -124,13 +149,13 @@ func applyPolicy(ctx context.Context, transaction pgx.Tx, record *models.Databas
 				return SafeError(policyError)
 			}
 		}
-		for _, creator := range []string{roles.Owner, config.Postgres.AdminUsername} {
+		for _, creator := range creators {
 			prefix := "ALTER DEFAULT PRIVILEGES FOR ROLE " + pgIdentifier(creator) + " IN SCHEMA " + identifier
 			defaults := []string{
-				prefix + " REVOKE ALL ON TABLES FROM " + recipients,
-				prefix + " REVOKE ALL ON SEQUENCES FROM " + recipients,
-				prefix + " REVOKE ALL ON FUNCTIONS FROM " + recipients,
-				prefix + " REVOKE ALL ON TYPES FROM " + recipients,
+				prefix + " REVOKE ALL ON TABLES FROM " + creatorRecipients[creator],
+				prefix + " REVOKE ALL ON SEQUENCES FROM " + creatorRecipients[creator],
+				prefix + " REVOKE ALL ON FUNCTIONS FROM " + creatorRecipients[creator],
+				prefix + " REVOKE ALL ON TYPES FROM " + creatorRecipients[creator],
 				prefix + " GRANT USAGE ON TYPES TO " + pgIdentifier(roles.ReadAccess) + ", " + pgIdentifier(roles.WriteAccess),
 				prefix + " GRANT SELECT ON TABLES TO " + pgIdentifier(roles.ReadAccess),
 				prefix + " GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO " + pgIdentifier(roles.WriteAccess),
@@ -145,14 +170,14 @@ func applyPolicy(ctx context.Context, transaction pgx.Tx, record *models.Databas
 			}
 		}
 	}
-	for _, creator := range []string{roles.Owner, config.Postgres.AdminUsername} {
+	for _, creator := range creators {
 		prefix := "ALTER DEFAULT PRIVILEGES FOR ROLE " + pgIdentifier(creator)
 		defaults := []string{
-			prefix + " REVOKE ALL ON TABLES FROM " + recipients,
-			prefix + " REVOKE ALL ON SEQUENCES FROM " + recipients,
-			prefix + " REVOKE ALL ON FUNCTIONS FROM " + recipients,
-			prefix + " REVOKE ALL ON TYPES FROM " + recipients,
-			prefix + " REVOKE ALL ON SCHEMAS FROM " + recipients,
+			prefix + " REVOKE ALL ON TABLES FROM " + creatorRecipients[creator],
+			prefix + " REVOKE ALL ON SEQUENCES FROM " + creatorRecipients[creator],
+			prefix + " REVOKE ALL ON FUNCTIONS FROM " + creatorRecipients[creator],
+			prefix + " REVOKE ALL ON TYPES FROM " + creatorRecipients[creator],
+			prefix + " REVOKE ALL ON SCHEMAS FROM " + creatorRecipients[creator],
 			prefix + " GRANT SELECT ON TABLES TO " + pgIdentifier(roles.ReadAccess),
 			prefix + " GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO " + pgIdentifier(roles.WriteAccess),
 			prefix + " GRANT SELECT ON SEQUENCES TO " + pgIdentifier(roles.ReadAccess),
@@ -167,32 +192,23 @@ func applyPolicy(ctx context.Context, transaction pgx.Tx, record *models.Databas
 			}
 		}
 	}
-	privateRecipients := recipients + ", " + pgIdentifier(roles.Owner) + ", " + pgIdentifier(roles.Custodian)
-	if schemaError := ensureExtensionsSchema(ctx, transaction); schemaError != nil {
-		return schemaError
-	}
-	if guardError := guardExtensions(ctx, transaction, privateRecipients); guardError != nil {
-		return guardError
-	}
-	if dropGuardError := guardExtensionDrops(ctx, transaction, privateRecipients); dropGuardError != nil {
-		return dropGuardError
-	}
 	if protectError := protectStatistics(ctx, transaction, privateRecipients); protectError != nil {
 		return protectError
 	}
-	if extensionError := protectExtensions(ctx, transaction, roles, recipients); extensionError != nil {
+	extensionRecipients := recipients + ", " + pgIdentifier(roles.ObjectAccess)
+	if extensionError := protectExtensions(ctx, transaction, roles, extensionRecipients); extensionError != nil {
 		return extensionError
 	}
-	if routineError := protectExtensionRoutines(ctx, transaction, roles, recipients); routineError != nil {
+	if routineError := protectExtensionRoutines(ctx, transaction, roles, extensionRecipients); routineError != nil {
 		return routineError
 	}
-	if relationError := protectExtensionRelations(ctx, transaction, roles, recipients); relationError != nil {
+	if relationError := protectExtensionRelations(ctx, transaction, roles, extensionRecipients); relationError != nil {
 		return relationError
 	}
-	if typeError := protectExtensionTypes(ctx, transaction, roles, recipients); typeError != nil {
+	if typeError := protectExtensionTypes(ctx, transaction, roles, extensionRecipients); typeError != nil {
 		return typeError
 	}
-	if largeObjectError := protectLargeObjects(ctx, transaction, roles, recipients); largeObjectError != nil {
+	if largeObjectError := protectLargeObjects(ctx, transaction, roles, extensionRecipients); largeObjectError != nil {
 		return largeObjectError
 	}
 	return applyMetadataPolicy(ctx, transaction, record, roles)
@@ -252,8 +268,9 @@ func protectStatistics(ctx context.Context, transaction pgx.Tx, recipients strin
 	return nil
 }
 
-func policyRecipients(ctx context.Context, transaction pgx.Tx, roles Roles) (string, error) {
-	rows, queryError := transaction.Query(ctx, "SELECT rolname FROM pg_catalog.pg_roles WHERE rolname <> ALL($1::text[]) ORDER BY rolname", []string{roles.Owner, roles.Custodian, config.Postgres.AdminUsername})
+func policyRecipients(ctx context.Context, transaction pgx.Tx, roles Roles, excluded ...string) (string, error) {
+	excluded = append(excluded, roles.Owner, roles.ObjectAccess, roles.Custodian, config.Postgres.AdminUsername)
+	rows, queryError := transaction.Query(ctx, "SELECT rolname FROM pg_catalog.pg_roles WHERE rolname <> ALL($1::text[]) ORDER BY rolname", excluded)
 	if queryError != nil {
 		return "", SafeError(queryError)
 	}
@@ -267,6 +284,28 @@ func policyRecipients(ctx context.Context, transaction pgx.Tx, roles Roles) (str
 		recipients = append(recipients, pgIdentifier(name))
 	}
 	return strings.Join(recipients, ", "), SafeError(rows.Err())
+}
+
+func policyCreators(ctx context.Context, transaction pgx.Tx, record *models.Database, roles Roles) ([]string, error) {
+	creators := []string{roles.ObjectAccess, roles.Owner, config.Postgres.AdminUsername}
+	var primary bool
+	queryError := transaction.QueryRow(ctx, `SELECT EXISTS (
+		SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = $1 AND rolcanlogin
+		AND pg_catalog.shobj_description(oid, 'pg_authid') = $2
+		AND NOT rolsuper AND NOT rolcreatedb AND NOT rolcreaterole AND NOT rolreplication AND NOT rolbypassrls
+	)`, record.Name, roleMarker(record, record.Name)).Scan(&primary)
+	if queryError != nil {
+		return nil, SafeError(queryError)
+	}
+	if primary {
+		credential := &models.PostgresConnection{DatabaseID: record.ID, Username: record.Name, Scope: models.ScopeReadWrite, PrimaryConnection: true}
+		if membershipError := verifyLoginMembership(ctx, transaction, credential, roles); membershipError == nil {
+			creators = append(creators, record.Name)
+		} else if membershipError != RoleMismatch {
+			return nil, membershipError
+		}
+	}
+	return creators, nil
 }
 
 func applicationRoleNames(ctx context.Context, transaction pgx.Tx, record *models.Database) ([]string, error) {

@@ -37,7 +37,7 @@ func ValidReference(record *models.Database, connection *models.PostgresConnecti
 
 func Authorize(ctx context.Context, store *gorm.DB, record *models.Database, accountID uint) (*access.AccountAccess, error) {
 	actor, err := access.LoadWith(store, accountID)
-	if err != nil || actor == nil || !actor.Account.Active || !actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) {
+	if err != nil || actor == nil || !actor.Account.Active || !actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) || !actor.Can(permissions.PostgresObjectsManage) {
 		return nil, Refused
 	}
 	var current models.Database
@@ -164,6 +164,47 @@ func ensure(ctx context.Context, record *models.Database, accountID uint) error 
 		}
 		return nil
 	})
+}
+
+func Reconcile(ctx context.Context, record *models.Database) error {
+	connection, findError := Connection(ctx, record)
+	if errors.Is(findError, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	if findError != nil {
+		return findError
+	}
+	return Mutate(ctx, record, connection.AccountID, func(fenced context.Context) error {
+		current, currentError := Connection(fenced, record)
+		if currentError != nil {
+			return currentError
+		}
+		if current.RevokedAt != nil || current.ExpiresAt != nil && !time.Now().Before(*current.ExpiresAt) {
+			return control.RevokeLogin(fenced, record, current)
+		}
+		if current.State != models.DatabaseReady {
+			return nil
+		}
+		authorized, authorityError := reconcileAuthority(fenced, record, current)
+		if !authorized || authorityError != nil {
+			return authorityError
+		}
+		if reconcileError := control.ReconcileLogin(fenced, record, current, ""); reconcileError != nil {
+			return reconcileError
+		}
+		_, authorityError = reconcileAuthority(fenced, record, current)
+		return authorityError
+	})
+}
+
+func reconcileAuthority(ctx context.Context, record *models.Database, connection *models.PostgresConnection) (bool, error) {
+	if _, authorityError := Authorize(ctx, database.DB.WithContext(ctx), record, connection.AccountID); authorityError != nil {
+		if !errors.Is(authorityError, Refused) {
+			return false, authorityError
+		}
+		return false, control.SuspendLogin(ctx, record, connection)
+	}
+	return true, nil
 }
 
 func DeleteReference(reference string) error {

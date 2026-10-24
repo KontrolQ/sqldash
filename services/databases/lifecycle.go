@@ -156,7 +156,7 @@ func operationAuthorityWith(ctx context.Context, store *gorm.DB, record *models.
 	if !actor.CanDatabase(&target, permission) {
 		return fresh, nil, errors.New(AuthorityRefused)
 	}
-	if target.Kind() == models.EnginePostgres && operation.Kind != "delete" && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite)) {
+	if target.Kind() == models.EnginePostgres && operation.Kind != "delete" && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) || !actor.Can(permissions.PostgresObjectsManage)) {
 		return fresh, nil, errors.New(AuthorityRefused)
 	}
 	if operation.Kind == "import" || operation.Kind == "clone" || operation.Kind == "remote-clone" {

@@ -29,7 +29,7 @@ func credentialAuthorityWith(ctx context.Context, store *gorm.DB, record *models
 		return ctx, nil, errors.New(AuthorityRefused)
 	}
 	if operation.Kind != "credential-revoke" {
-		if connection.AccountID != operation.AccountID || connection.RevokedAt != nil || connection.ExpiresAt != nil && !connection.ExpiresAt.After(time.Now()) || connection.Scope == models.ScopeReadWrite && !actor.Can(permissions.PostgresDataWrite) {
+		if connection.AccountID != operation.AccountID || connection.RevokedAt != nil || connection.ExpiresAt != nil && !connection.ExpiresAt.After(time.Now()) || connection.Scope == models.ScopeReadWrite && !actor.Can(permissions.PostgresDataWrite) || connection.PrimaryConnection && !actor.Can(permissions.PostgresObjectsManage) {
 			return ctx, nil, errors.New(AuthorityRefused)
 		}
 	}

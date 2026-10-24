@@ -13,6 +13,7 @@ import (
 	"sqldash/pgcluster/control"
 	"sqldash/pggateway"
 	"sqldash/services/pgaccess"
+	primarycredentials "sqldash/services/postgresconnections/primary"
 	"sqldash/utils/logger"
 	"syscall"
 	"time"
@@ -37,6 +38,9 @@ func runPostgresGateway() {
 	for index := range records {
 		if reconcileError := control.Provision(parent, &records[index]); reconcileError != nil {
 			logger.Fatalf(LogPrefix, "Could not reconcile PostgreSQL database privileges")
+		}
+		if reconcileError := primarycredentials.Reconcile(parent, &records[index]); reconcileError != nil {
+			logger.Fatalf(LogPrefix, "Could not reconcile PostgreSQL application privileges")
 		}
 	}
 	tlsOptions := pggateway.TLSOptions{ConfigurationDirectory: config.PostgresTLSPath(), Host: config.PostgresHost(), CertificatePath: config.Postgres.CertificatePath, KeyPath: config.Postgres.PrivateKeyPath}

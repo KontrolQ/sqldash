@@ -62,7 +62,7 @@ func TransferLogin(ctx context.Context, record *models.Database, mode SessionMod
 	}
 	group, readOnly := roles.ReadAccess, "on"
 	if mode == Objects {
-		group, readOnly = roles.Owner, "off"
+		group, readOnly = roles.ObjectAccess, "off"
 	}
 	if grantError := dataMembership(ctx, transaction, username, group); grantError != nil {
 		return nil, grantError
@@ -139,7 +139,7 @@ func FinishTransfer(ctx context.Context, record *models.Database, username strin
 		if extensionError := validateExtensions(ctx, connection); extensionError != nil {
 			return extensionError
 		}
-		if _, ownershipError := transaction.Exec(ctx, "REASSIGN OWNED BY "+pgIdentifier(username)+" TO "+pgIdentifier(roles.Owner)); ownershipError != nil {
+		if _, ownershipError := transaction.Exec(ctx, "REASSIGN OWNED BY "+pgIdentifier(username)+" TO "+pgIdentifier(roles.ObjectAccess)); ownershipError != nil {
 			return SafeError(ownershipError)
 		}
 	}

@@ -34,6 +34,9 @@ func VerifyLoginPassword(ctx context.Context, record *models.Database, credentia
 	if roleError != nil {
 		return roleError
 	}
+	if membershipError := verifyLoginMembership(ctx, administrator, credential, roles); membershipError != nil {
+		return membershipError
+	}
 	configuration, configurationError := connectionConfiguration(record.Name, username, password)
 	if configurationError != nil {
 		return configurationError

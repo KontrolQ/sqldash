@@ -62,7 +62,7 @@ func validate(parent context.Context, connection *models.PostgresConnection, nam
 	if connection.Scope != models.ScopeReadOnly && connection.Scope != models.ScopeReadWrite {
 		return nil, Refused
 	}
-	if connection.Scope == models.ScopeReadWrite && !issuer.Can(permissions.PostgresDataWrite) {
+	if connection.Scope == models.ScopeReadWrite && !issuer.Can(permissions.PostgresDataWrite) || connection.PrimaryConnection && (connection.Scope != models.ScopeReadWrite || !issuer.Can(permissions.PostgresObjectsManage)) {
 		return nil, Refused
 	}
 	var visible int64

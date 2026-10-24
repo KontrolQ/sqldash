@@ -20,7 +20,7 @@ func (self *job) validatePublicNamespace(record *models.Database, credential *co
 	}
 	var owner string
 	if queryError := connection.QueryRow(self.context, `SELECT owner.rolname FROM pg_catalog.pg_namespace AS namespace
-		JOIN pg_catalog.pg_roles AS owner ON owner.oid=namespace.nspowner WHERE namespace.nspname='public'`).Scan(&owner); queryError != nil || owner != roles.Owner {
+		JOIN pg_catalog.pg_roles AS owner ON owner.oid=namespace.nspowner WHERE namespace.nspname='public'`).Scan(&owner); queryError != nil || owner != roles.ObjectAccess {
 		return InvalidTarget
 	}
 	var existing bool
