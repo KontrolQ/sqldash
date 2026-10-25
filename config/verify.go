@@ -12,6 +12,10 @@ func verifyConfig() error {
 		return postgresError
 	}
 
+	if redisError := VerifyRedis(); redisError != nil {
+		return redisError
+	}
+
 	if Server.MaximumImageUploadBytes <= 0 || Server.MaximumImageUploadBytes > math.MaxInt-MultipartUploadOverhead {
 		return errors.New(ImageUploadLimitInvalid)
 	}

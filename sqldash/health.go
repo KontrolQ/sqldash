@@ -10,6 +10,7 @@ import (
 	"sqldash/config"
 	"sqldash/database"
 	"sqldash/pgcluster/control"
+	"sqldash/redishost"
 	"sqldash/sqld"
 	"sqldash/utils/collections"
 	"time"
@@ -32,11 +33,20 @@ func readyHealth(context fiber.Ctx) error {
 			}
 		}
 	}
+	redisReady := !config.Redis.Enabled || redishost.Ready(parent) == nil
+	redisGatewayReady := !config.Redis.Enabled || !config.Redis.GatewayEnabled
+	if config.Redis.Enabled && config.Redis.GatewayEnabled {
+		connection, err := (&net.Dialer{}).DialContext(parent, "tcp", loopbackAddress(config.Redis.GatewayAddress))
+		redisGatewayReady = err == nil
+		if connection != nil {
+			connection.Close()
+		}
+	}
 	status := fiber.StatusOK
-	if !stateReady || !libSQLReady || !postgresReady || !gatewayReady {
+	if !stateReady || !libSQLReady || !postgresReady || !gatewayReady || !redisReady || !redisGatewayReady {
 		status = fiber.StatusServiceUnavailable
 	}
-	return context.Status(status).JSON(collections.Record[string, any]{"ready": status == fiber.StatusOK, "state": stateReady, "libsql": libSQLReady, "postgres": postgresReady, "native": gatewayReady})
+	return context.Status(status).JSON(collections.Record[string, any]{"ready": status == fiber.StatusOK, "state": stateReady, "libsql": libSQLReady, "postgres": postgresReady, "native": gatewayReady, "redis": redisReady, "redis_native": redisGatewayReady})
 }
 
 func readyContext(parent standardContext.Context) (standardContext.Context, standardContext.CancelFunc) {

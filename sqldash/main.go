@@ -5,6 +5,7 @@ import (
 	"os"
 	"sqldash/database"
 	_ "sqldash/engines/postgres"
+	_ "sqldash/engines/redis"
 	"time"
 
 	"sqldash/utils/logger"
@@ -41,6 +42,10 @@ func main() {
 		runWeb()
 	case ModePostgresGateway:
 		runPostgresGateway()
+	case ModeRedisHost:
+		runRedisHost()
+	case ModeRedisGateway:
+		runRedisGateway()
 	default:
 		logger.Fatalf(LogPrefix, UnknownModeLog, mode, ModeProxy, ModeWeb)
 	}

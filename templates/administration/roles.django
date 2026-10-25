@@ -115,3 +115,9 @@
     </div>
   {% endif %}
 {% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/rolepermissions.css" %}">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/rolepermissions.js" %}" defer></script>
+{% endblock %}

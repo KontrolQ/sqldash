@@ -15,7 +15,11 @@ func publicPostgresCertificate(context fiber.Ctx) error {
 	if !config.Postgres.Enabled || config.Postgres.CertificatePath != "" || config.Certificates.Automatic {
 		return fiber.ErrNotFound
 	}
-	path := filepath.Join(config.PostgresTLSPath(), "ca.crt")
+	return publicNativeCertificate(context, config.PostgresTLSPath(), "sqldash-postgres-ca.crt")
+}
+
+func publicNativeCertificate(context fiber.Ctx, directory, filename string) error {
+	path := filepath.Join(directory, "ca.crt")
 	information, readError := os.Lstat(path)
 	if readError != nil || !information.Mode().IsRegular() || information.Size() > 65536 {
 		return fiber.ErrNotFound
@@ -34,7 +38,7 @@ func publicPostgresCertificate(context fiber.Ctx) error {
 	}
 	fingerprint := sha256.Sum256(certificate.Raw)
 	context.Set("Content-Type", "application/x-pem-file")
-	context.Set("Content-Disposition", "attachment; filename=\"sqldash-postgres-ca.crt\"")
+	context.Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 	context.Set("Cache-Control", "no-store")
 	context.Set("X-Certificate-SHA256", hex.EncodeToString(fingerprint[:]))
 	return context.Send(contents)

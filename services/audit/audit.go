@@ -53,7 +53,7 @@ func PageFor(actor *access.AccountAccess, databaseName string, action string, pa
 	if len(filters) > 0 {
 		filter = filters[0]
 	}
-	if filter.Engine != "" && filter.Engine != models.EngineLibSQL && filter.Engine != models.EnginePostgres && filter.Engine != PlatformEngine {
+	if filter.Engine != "" && !models.IsKnownEngine(filter.Engine) && filter.Engine != PlatformEngine {
 		return nil, shortcuts.ServiceError(http.StatusBadRequest, InvalidFilter)
 	}
 	if filter.DatabaseID == 0 && databaseName != "" {
@@ -71,6 +71,9 @@ func PageFor(actor *access.AccountAccess, databaseName string, action string, pa
 	}
 	if actor.Can(permissions.PostgresAuditView) {
 		scope.Engines = append(scope.Engines, models.EnginePostgres)
+	}
+	if actor.Can(permissions.RedisAuditView) {
+		scope.Engines = append(scope.Engines, models.EngineRedis)
 	}
 	if !scope.AllDatabases && len(scope.Engines) > 0 {
 		records, findError := access.VisibleFor(actor, permissions.AuditView)
@@ -181,6 +184,8 @@ func engineLabel(engine string) string {
 		return "libSQL"
 	case models.EnginePostgres:
 		return "PostgreSQL"
+	case models.EngineRedis:
+		return "Redis"
 	case "", PlatformEngine:
 		return "Administration"
 	default:

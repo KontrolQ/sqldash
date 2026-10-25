@@ -1,0 +1,12 @@
+{% extends "redis/layout.django" %}
+{% block rediscontent %}
+  <section class="card is-panel">
+    <div class="card-head"><div class="card-title">Connected clients</div><div class="card-tools"><button class="button is-outline is-small" type="button" data-redis-clients-refresh>Refresh</button></div></div>
+    <div class="card-body">
+      <div class="redis-table-wrap" data-redis-clients>
+        <p class="field-note">Loading clients…</p>
+      </div>
+      <p class="field-note">Public clients connected to this database. Internal management connections are excluded.</p>
+    </div>
+  </section>
+{% endblock %}

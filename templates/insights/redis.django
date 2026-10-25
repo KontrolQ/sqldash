@@ -1,0 +1,79 @@
+<div class="card is-panel is-table">
+  <div class="card-head"><div class="card-title">Redis {% if Redis.WithCommands %}commands{% else %}live measurements{% endif %}</div></div>
+  <div class="card-body">
+    <p class="field-note">Redis measurements are separate from SQL query statistics. {% if Redis.WithCommands %}Command counters cover each server's current statistics epoch, not the selected SQL period; restarts and resets begin a new epoch. No keys, arguments or values are retained here.{% else %}These are current server measurements, not totals over the selected SQL period. Open a database's Insights for its sampled history and persistence status.{% endif %}</p>
+    {% if Redis.Truncated %}
+      <p class="field-note">This bounded view is truncated. Open an individual database for more detail.</p>
+    {% endif %}
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Database</th>
+          {% if not Redis.WithCommands %}
+            <th class="is-number">Memory (bytes)</th>
+            <th class="is-number">Connected clients</th>
+            <th class="is-number">Operations / second</th>
+            <th>Keyspace</th>
+          {% endif %}
+          <th>Collected</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in Redis.Databases %}
+          <tr>
+            <td><a href="{{ record.Path }}">{{ record.Name }}</a></td>
+            {% if not Redis.WithCommands %}
+              <td class="is-number">{{ record.Memory }}</td>
+              <td class="is-number">{{ record.Clients }}</td>
+              <td class="is-number">{{ record.Operations }}</td>
+              <td>{{ record.Keys }}</td>
+            {% endif %}
+            <td>{{ record.CollectedAt }}</td>
+            <td>{% if record.Problem %}{{ record.Problem }}{% else %}<a href="{{ record.CommandsPath }}">Top commands</a>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No accessible Redis databases.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if Redis.WithCommands %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Database</th>
+            <th>Command</th>
+            <th class="is-number">Calls</th>
+            <th class="is-number">Total (µs)</th>
+            <th class="is-number">Mean (µs)</th>
+            <th class="is-number">Rejected</th>
+            <th class="is-number">Failed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for command in Redis.Commands %}
+            <tr>
+              <td><a href="{{ command.Path }}">{{ command.Database }}</a></td>
+              <td>{{ command.Name }}</td>
+              <td class="is-number">{{ command.Calls }}</td>
+              <td class="is-number">{{ command.Microseconds }}</td>
+              <td class="is-number">{{ command.MeanMicroseconds }}</td>
+              <td class="is-number">{{ command.Rejected }}</td>
+              <td class="is-number">{{ command.Failed }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7">No command measurements are available.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,95 @@
+.redis-data-root {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.redis-key-tree button.rail-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.redis-key-tree button.rail-item:hover {
+  background: var(--accent);
+}
+
+.redis-key-tree button.rail-item.is-current {
+  background: var(--secondary);
+}
+
+.redis-key-tree details > .rail-item,.redis-key-tree details > details {
+  margin-left: 8px;
+  width: calc(100% - 8px);
+}
+
+.redis-key-tree summary.rail-group {
+  cursor: pointer;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.redis-data-root .sheet > [data-redis-editor] {
+  min-width: 0;
+}
+
+.redis-data-root textarea.redis-code {
+  width: 100%;
+  min-height: 260px;
+  padding: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--card);
+  color: var(--foreground);
+  font: var(--text-xs)/1.7 var(--mono);
+  resize: vertical;
+}
+
+.redis-data-root [data-redis-stream-groups] {
+  padding: 0 12px;
+}
+
+.redis-data-root [data-redis-stream-groups]:empty {
+  display: none;
+}
+
+.redis-data-root .redis-byte-note {
+  padding: 8px 12px;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.redis-data-root .cell-text {
+  max-width: 480px;
+}
+
+.redis-data-root .redis-cell-actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.redis-data-dialog {
+  margin: 0;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.redis-data-dialog:not([open]) {
+  display: none;
+}
+
+.redis-data-dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+.redis-data-dialog > form {
+  display: grid;
+  gap: 16px;
+}
+
+.redis-data-dialog .actions.is-left {
+  flex-wrap: wrap;
+}

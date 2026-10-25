@@ -1,0 +1,90 @@
+.redis-console-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.redis-console-workspace .bench {
+  min-width: 0;
+}
+
+.redis-console-workspace .workbar {
+  min-height: 42px;
+  height: auto;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  padding-block: 8px;
+}
+
+.redis-console-surface {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  background: var(--background);
+  color: var(--foreground);
+  font: 13px/1.7 var(--mono);
+  cursor: text;
+  scrollbar-gutter: stable;
+}
+
+.redis-console-line {
+  display: flex;
+  align-items: baseline;
+  min-height: 23px;
+  gap: 8px;
+}
+
+.redis-console-prompt {
+  flex: 0 0 auto;
+  color: var(--brand);
+  font-weight: var(--fw-medium);
+  user-select: none;
+}
+
+.redis-console-command {
+  display: block;
+  flex: 1;
+  min-width: 1ch;
+  min-height: 23px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  outline: none;
+  caret-color: var(--foreground);
+}
+
+.redis-console-command:focus-visible {
+  outline: none;
+}
+
+.redis-console-command[contenteditable='false'] {
+  opacity: 0.5;
+}
+
+.redis-console-entry {
+  margin: 0 0 10px;
+}
+
+.redis-console-reply {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  color: var(--foreground);
+}
+
+.redis-console-reply.is-error {
+  color: var(--destructive);
+}
+
+.redis-console-reply.is-muted {
+  color: var(--muted-foreground);
+}
+
+@media (forced-colors: active) {
+  .redis-console-prompt {
+    color: LinkText;
+  }
+
+  .redis-console-reply.is-error {
+    text-decoration: underline;
+  }
+}

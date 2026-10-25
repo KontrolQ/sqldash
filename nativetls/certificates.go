@@ -1,4 +1,4 @@
-package pggateway
+package nativetls
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func loadOrCreateAuthority(directory string) (*x509.Certificate, crypto.Signer, []byte, error) {
+func loadOrCreateAuthority(directory, commonName string) (*x509.Certificate, crypto.Signer, []byte, error) {
 	certificatePath, keyPath := filepath.Join(directory, "ca.crt"), filepath.Join(directory, "ca.key")
 	exists, existenceError := certificatePairExists(certificatePath, keyPath)
 	if existenceError != nil {
@@ -43,7 +43,7 @@ func loadOrCreateAuthority(directory string) (*x509.Certificate, crypto.Signer, 
 	}
 	now := time.Now()
 	template := &x509.Certificate{
-		SerialNumber: serial, Subject: pkix.Name{CommonName: certificateAuthorityName},
+		SerialNumber: serial, Subject: pkix.Name{CommonName: commonName},
 		NotBefore: now.Add(-5 * time.Minute), NotAfter: now.Add(CertificateAuthorityValidity),
 		IsCA: true, BasicConstraintsValid: true, MaxPathLen: 0, MaxPathLenZero: true,
 		KeyUsage: x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
@@ -92,7 +92,7 @@ func readAuthority(directory string) (*x509.Certificate, crypto.Signer, []byte, 
 	return authority, privateKey, publicCertificate, nil
 }
 
-func loadOrCreateLeaf(options TLSOptions, host string, authority *x509.Certificate, authorityKey crypto.Signer) (*tls.Certificate, error) {
+func loadOrCreateLeaf(options Options, host string, authority *x509.Certificate, authorityKey crypto.Signer) (*tls.Certificate, error) {
 	certificatePath := filepath.Join(options.ConfigurationDirectory, "server.crt")
 	keyPath := filepath.Join(options.ConfigurationDirectory, "server.key")
 	if recoveryError := recoverLeafCertificate(certificatePath, keyPath, authority); recoveryError != nil {
@@ -148,7 +148,7 @@ func loadOrCreateLeaf(options TLSOptions, host string, authority *x509.Certifica
 		return nil, fmt.Errorf("%w: %s", ErrInvalidTLS, invalidAuthorityMessage)
 	}
 	template := &x509.Certificate{
-		SerialNumber: serial, Subject: pkix.Name{CommonName: certificateLeafName},
+		SerialNumber: serial, Subject: pkix.Name{CommonName: options.LeafName},
 		NotBefore: now.Add(-5 * time.Minute), NotAfter: expires,
 		KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,

@@ -6,6 +6,8 @@ const (
 	ModeProxy           = "proxy"
 	ModeWeb             = "web"
 	ModePostgresGateway = "postgres-proxy"
+	ModeRedisHost       = "redis-host"
+	ModeRedisGateway    = "redis-proxy"
 
 	SqldProcessName  = "libsql server"
 	ProxyProcessName = "proxy"

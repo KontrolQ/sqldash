@@ -156,7 +156,7 @@ func operationAuthorityWith(ctx context.Context, store *gorm.DB, record *models.
 	if !actor.CanDatabase(&target, permission) {
 		return fresh, nil, errors.New(AuthorityRefused)
 	}
-	if target.Kind() == models.EnginePostgres && operation.Kind != "delete" && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) || !actor.Can(permissions.PostgresObjectsManage)) {
+	if operation.Kind != "delete" && !canProvision(actor, target.Kind()) {
 		return fresh, nil, errors.New(AuthorityRefused)
 	}
 	if operation.Kind == "import" || operation.Kind == "clone" || operation.Kind == "remote-clone" {
@@ -252,6 +252,9 @@ func applyOperation(ctx context.Context, record *models.Database, operation *mod
 	backend, err := engines.For(record)
 	if err != nil {
 		return err
+	}
+	if record.Kind() == models.EngineRedis {
+		return applyRedisOperation(ctx, record, operation, backend, payload)
 	}
 	if operation.Kind == "delete" {
 		return finishDelete(fresh, record, operation, backend)
@@ -361,26 +364,7 @@ func applyOperation(ctx context.Context, record *models.Database, operation *mod
 	if err := clearRemoteSecret(operation); err != nil {
 		return err
 	}
-	err = database.DB.WithContext(ctx).Transaction(func(transaction *gorm.DB) error {
-		if _, _, err := operationAuthorityWith(ctx, transaction, record, operation); err != nil {
-			return err
-		}
-		completion := transaction.Model(operation).Where("state = ? AND lease_until = ?", models.DatabaseApplying, operation.LeaseUntil).Updates(map[string]any{"state": models.DatabaseReady, "lease_until": nil, "failure": ""})
-		if completion.Error != nil {
-			return completion.Error
-		}
-		if completion.RowsAffected != 1 {
-			return errors.New(DatabaseNotReady)
-		}
-		result := transaction.Model(record).Where("state <> ?", models.DatabaseDeleting).Updates(map[string]any{"state": models.DatabaseReady, "backend_oid": record.BackendOID, "cluster_id": record.ClusterID, "policy_version": gorm.Expr("policy_version + 1")})
-		if result.Error != nil {
-			return result.Error
-		}
-		if result.RowsAffected != 1 {
-			return errors.New(DatabaseNotReady)
-		}
-		return nil
-	})
+	err = completeOperation(ctx, record, operation)
 	if err != nil {
 		return err
 	}

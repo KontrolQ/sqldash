@@ -1,0 +1,14 @@
+{% extends "redis/layout.django" %}
+{% block rediscontent %}
+  <section class="card">
+    <div class="card-head"><div class="card-title">Command monitor</div><div class="card-note">Live commands for this database. Monitoring can expose application values and has a performance cost. Nothing is saved.</div></div>
+    <div class="card-body stack">
+      <div class="redis-toolbar"><span class="badge is-outline" data-redis-stream-state role="status">Stopped</span><div class="redis-actions"><button class="button is-ghost is-small" type="button" data-redis-stream-clear>Clear buffer</button><button class="button" type="button" data-redis-monitor-start>Start monitor</button><button class="button is-outline" type="button" data-redis-stream-stop disabled>Stop</button></div></div>
+      <div class="redis-terminal redis-live" data-redis-stream-output role="log" aria-live="off" aria-label="Live Redis commands">
+        <p class="field-note">Start the monitor to receive commands.</p>
+      </div>
+      <p class="field-note" data-redis-stream-count>Buffer empty · maximum 200 messages or 2 MiB</p>
+      <p class="field-note">The stream stops on navigation, connection loss, permission changes or after 30 minutes. Authentication and administrative secrets are filtered.</p>
+    </div>
+  </section>
+{% endblock %}

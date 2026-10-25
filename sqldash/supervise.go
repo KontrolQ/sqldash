@@ -50,6 +50,12 @@ func supervise() {
 	if config.Postgres.Enabled && config.Postgres.GatewayEnabled {
 		processes = append(processes, supervisor.Process{Name: ModePostgresGateway, Path: executable, Arguments: []string{ModePostgresGateway}, Environment: verified, ShutdownGroup: 0})
 	}
+	if config.Redis.Enabled {
+		processes = append(processes, supervisor.Process{Name: ModeRedisHost, Path: executable, Arguments: []string{ModeRedisHost}, Environment: verified, ShutdownGroup: 100, StopGrace: config.Redis.ShutdownTimeout + 10*time.Second})
+	}
+	if config.Redis.Enabled && config.Redis.GatewayEnabled {
+		processes = append(processes, supervisor.Process{Name: ModeRedisGateway, Path: executable, Arguments: []string{ModeRedisGateway}, Environment: verified, ShutdownGroup: 0})
+	}
 	manager := supervisor.New(processes...)
 	if cluster != nil {
 		go watchPostgresEnforcement(parent, manager, cluster)

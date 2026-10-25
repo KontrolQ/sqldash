@@ -7,9 +7,9 @@
     </div>
     {% if Actions.CanExportDatabases and Ready %}
       <div class="page-actions">
-        <a class="button is-outline" href="{% if Engine == "postgres" %}{% url "databases.export.postgres.archive" name=Name %}{% else %}{% url "databases.export.file" name=Name %}{% endif %}">
+        <a class="button is-outline" href="{% if Engine == "postgres" %}{% url "databases.export.postgres.archive" name=Name %}{% elif Engine == "redis" %}{% url "databases.export" name=Name %}{% else %}{% url "databases.export.file" name=Name %}{% endif %}">
 <svg class="button-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-{% if Engine == "postgres" %}Download PostgreSQL archive{% else %}Download SQLite file{% endif %}
+{% if Engine == "postgres" %}Download PostgreSQL archive{% elif Engine == "redis" %}Download Redis snapshot{% else %}Download SQLite file{% endif %}
 </a>
       </div>
     {% endif %}
@@ -40,9 +40,10 @@
       <div class="tile-line"><span class="tile-value">{{ Storage }}</span></div>
     </div>
     <div class="tile">
-      <span class="tile-label">{% if Engine == "postgres" %}Tables and views{% else %}Tables{% endif %}</span>
+      <span class="tile-label">{% if Engine == "postgres" %}Tables and views{% elif Engine == "redis" %}Keys{% else %}Tables{% endif %}</span>
       <div class="tile-line"><span class="tile-value">{{ Tables }}</span></div>
     </div>
+    {% if Engine == "redis" %}<div class="tile"><span class="tile-label">Connections</span><div class="tile-line"><span class="tile-value">{{ Connections }}</span></div></div><div class="tile"><span class="tile-label">Memory</span><div class="tile-line"><span class="tile-value">{{ MemoryUsed }}</span></div></div>{% endif %}
     {% if Engine == "postgres" %}<div class="tile"><span class="tile-label">Connections</span><div class="tile-line"><span class="tile-value">{{ Connections }}</span></div></div><div class="tile"><span class="tile-label">Committed transactions</span><div class="tile-line"><span class="tile-value">{{ Transactions }}</span></div></div>{% endif %}
   </div>
   {% if Engine == "postgres" %}
@@ -50,6 +51,8 @@
   {% endif %}
   {% if Engine == "postgres" %}
     {% include "databases/postgres.django" %}
+  {% elif Engine == "redis" %}
+    {% include "databases/redis.django" %}
   {% else %}
     <div class="card">
     <div class="card-head has-border">
@@ -228,7 +231,7 @@
       </div>
       <div class="card-body">
         <div class="actions is-left">
-          {% if Engine == "postgres" %}<a class="button is-outline" href="{% url "databases.export.postgres.archive" name=Name %}">Download PostgreSQL archive</a><a class="button is-outline" href="{% url "databases.export.postgres.sql" name=Name %}">Download SQL dump</a>{% else %}<a class="button is-outline" href="{% url "databases.export.file" name=Name %}">Download SQLite file</a>
+          {% if Engine == "postgres" %}<a class="button is-outline" href="{% url "databases.export.postgres.archive" name=Name %}">Download PostgreSQL archive</a><a class="button is-outline" href="{% url "databases.export.postgres.sql" name=Name %}">Download SQL dump</a>{% elif Engine == "redis" %}<a class="button is-outline" href="{% url "databases.export" name=Name %}">Download Redis snapshot</a>{% else %}<a class="button is-outline" href="{% url "databases.export.file" name=Name %}">Download SQLite file</a>
 <a class="button is-outline" href="{% url "databases.export" name=Name %}">Download SQL dump</a>{% endif %}
         </div>
       </div>
@@ -241,7 +244,7 @@
         <div class="card-note">This removes the database and everything in it.</div>
       </div>
       <div class="card-body">
-        <form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and every row in it are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
+        <form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and all its data are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
           <button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
         </form>
       </div>
@@ -256,7 +259,10 @@
 {% endblock %}
 {% block scripts %}
   <script src="{% static "js/databases.js" %}" defer></script>
-  {% if Engine == "postgres" %}
+  {% if Engine == "postgres" or Engine == "redis" %}
     <script src="{% static "js/postgresconnections.js" %}" defer></script>
+  {% endif %}
+  {% if Engine == "redis" %}
+    <script src="{% static "js/redisoverview.js" %}" defer></script>
   {% endif %}
 {% endblock %}

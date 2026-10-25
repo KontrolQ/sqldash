@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="{% static "css/postgresconnections.css" %}">
+<link rel="stylesheet" href="{% static "css/redisoverview.css" %}">
+<div class="card postgres-credentials">
+  <div class="card-head has-border"><div class="card-title">Connect</div><div class="card-note">Use a Redis client with this database's username and password. The username selects this database; the logical database is 0.</div></div>
+  <div class="card-body stack">
+    <div class="row">
+      <div class="field"><label class="label" for="redis-host">Hostname</label>{% include "postgresconnections/input.django" with credential_id="redis-host" credential_value=Host credential_label="Hostname" %}</div>
+      <div class="field"><label class="label" for="redis-logical-database">Logical database</label>{% include "postgresconnections/input.django" with credential_id="redis-logical-database" credential_value="0" credential_label="Logical database" %}</div>
+      {% if Port != 6379 %}<div class="field"><label class="label" for="redis-port">Port</label>{% include "postgresconnections/input.django" with credential_id="redis-port" credential_value=Port credential_label="Port" %}</div>{% endif %}
+    </div>
+    <div class="row postgres-credential-fields">
+      <div class="field"><label class="label" for="redis-overview-username">Username</label>{% include "postgresconnections/input.django" with credential_id="redis-overview-username" credential_value=Username credential_label="Username" %}</div>
+      {% if RedisCredentials %}<div class="field"><label class="label" for="redis-overview-password">Password</label><div class="postgres-credential-control">{% include "postgresconnections/input.django" with credential_id="redis-overview-password" credential_value=RedisCredentials.Password credential_label="Password" credential_secret=1 %}{% if Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}<button class="button is-outline is-small" type="submit" form="redis-overview-rotate">Rotate password</button>{% endif %}</div></div>{% endif %}
+    </div>
+    {% if RedisCredentials %}
+      <div class="field"><label class="label" for="redis-connection-uri">Connection URI</label>{% include "postgresconnections/input.django" with credential_id="redis-connection-uri" credential_value=RedisCredentials.URL credential_label="Connection URI" credential_secret=1 %}<span class="field-note">Includes the current password. Keep this URI private.</span></div>
+    {% else %}
+      <div class="field"><label class="label" for="redis-address">Connection URI (without password)</label>{% include "postgresconnections/input.django" with credential_id="redis-address" credential_value=URL credential_label="Connection URI" %}</div>
+      {% if PasswordProblem %}
+        <div class="alert" role="status"><div class="alert-title">Password unavailable</div><div class="alert-body">{{ PasswordProblem }}</div></div>
+      {% elif Ready %}
+        <p class="field-note">You do not have permission to view this database's password.</p>
+      {% endif %}
+      {% if Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}
+        <div class="actions is-left"><button class="button is-outline is-small" type="submit" form="redis-overview-rotate">Rotate password</button></div>
+      {% endif %}
+    {% endif %}
+    <div data-redis-ssl="{% if RedisCredentials %}redis-connection-uri{% else %}redis-address{% endif %}" data-redis-ssl-help="redis-overview-tls-guidance">
+      {% if PlaintextAllowed %}{% include "partials/switch.django" with switch_field="redis_ssl" switch_name="Use SSL" switch_note="Uncheck to connect without transport encryption. This changes only the URI shown here; password authentication is still required." switch_on=1 %}{% else %}{% include "partials/switch.django" with switch_field="redis_ssl" switch_name="Use SSL" switch_note="This installation requires encrypted Redis connections." switch_on=1 switch_disabled=1 %}{% endif %}
+    </div>
+    <div class="stack" id="redis-overview-tls-guidance">
+      {% if ManagedRedisCA %}
+        <p class="field-note">Use the managed CA certificate to verify this hostname.</p>
+        {% if Actions.CanReadData %}
+          <div class="actions is-left"><a class="button is-outline is-small" href="{% url "redis.certificate" %}">Download CA certificate</a></div>
+        {% endif %}
+      {% else %}
+        <p class="field-note">Verify the server hostname using the configured certificate's trust chain.</p>
+      {% endif %}
+    </div>
+    {% if Actions.CanManageConnections and Actions.CanReadData and Actions.CanWriteData and Ready %}
+      <form id="redis-overview-rotate" method="post" action="{% url "databases.redis.overview.rotate.primary" name=Name %}" data-confirm="The old password stops working and current database connections are closed." data-confirm-title="Rotate the database password?" data-confirm-action="Rotate password" hidden></form>
+    {% endif %}
+  </div>
+</div>
+{% if Actions.CanEditDatabaseSettings and Ready %}
+  <div class="card">
+    <div class="card-head has-border"><div class="card-title">Configuration</div><div class="card-note">Memory and persistence settings apply to this Redis database.</div></div>
+    <div class="card-body">
+      {% if SettingsAvailable %}
+        <form class="stack" method="post" action="{% url "databases.redis.settings" name=Name %}">
+          <div class="row"><div class="field"><label class="label" for="redis-memory-limit">Memory limit</label><div class="row redis-memory-controls"><input class="input" id="redis-memory-limit" name="memoryLimit" type="number" inputmode="decimal" min="0" step="any" value="{{ MemoryAmount }}" aria-label="Memory limit amount" required>{% include "partials/select.django" with select_name="memoryUnit" select_label="Memory unit" select_chosen=MemoryUnit select_options=MemoryUnits select_wide=1 %}</div><span class="field-note">Maximum Redis data size. Memory and persistence overhead need additional room.</span></div><div class="field"><label class="label">Eviction policy</label>{% include "partials/select.django" with select_name="evictionPolicy" select_label="Eviction policy" select_chosen=EvictionPolicy select_options=EvictionPolicies select_wide=1 %}</div></div>
+          <div class="row"><div class="field"><label class="label">Persistence</label>{% include "partials/select.django" with select_name="persistence" select_label="Persistence" select_chosen=Persistence select_options=PersistenceOptions select_wide=1 %}</div><div class="field"><label class="label">AOF fsync</label>{% include "partials/select.django" with select_name="fsync" select_label="AOF fsync" select_chosen=Fsync select_options=FsyncOptions select_wide=1 %}</div></div>
+          {% include "partials/switch.django" with switch_field="protected" switch_name="Delete protection" switch_note="Refuse to delete this database." switch_on=Protected %}
+          <div class="actions"><button class="button" type="submit">Save configuration</button></div>
+        </form>
+      {% else %}
+        <p class="muted">The current settings are unavailable. Refresh when Redis is online.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

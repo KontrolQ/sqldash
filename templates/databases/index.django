@@ -22,6 +22,7 @@ Create database
     <a class="tab{% if not Engine %} is-current{% endif %}" href="{% url "databases" %}"{% if not Engine %} aria-current="page"{% endif %}>All</a>
     <a class="tab{% if Engine == "libsql" %} is-current{% endif %}" href="{% url "databases" %}?engine=libsql"{% if Engine == "libsql" %} aria-current="page"{% endif %}>libSQL</a>
     <a class="tab{% if Engine == "postgres" %} is-current{% endif %}" href="{% url "databases" %}?engine=postgres"{% if Engine == "postgres" %} aria-current="page"{% endif %}>PostgreSQL</a>
+    <a class="tab{% if Engine == "redis" %} is-current{% endif %}" href="{% url "databases" %}?engine=redis"{% if Engine == "redis" %} aria-current="page"{% endif %}>Redis</a>
   </nav>
   {% if Databases %}
     <div class="card is-table">
@@ -32,7 +33,7 @@ Create database
               <th scope="col">Name</th>
               <th scope="col">Engine</th>
               <th scope="col">Address</th>
-              <th scope="col" class="table-numeric">Tables</th>
+              <th scope="col" class="table-numeric">{% if ObjectHeading %}{{ ObjectHeading }}{% else %}Tables{% endif %}</th>
               <th scope="col" class="table-numeric">Storage</th>
               <th scope="col" class="table-numeric">Rows read</th>
               <th scope="col" class="table-numeric">Queries</th>
@@ -46,7 +47,7 @@ Create database
                 <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked or not database.Online %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
                 <td><span class="badge is-outline">{{ database.EngineLabel }}</span></td>
                 <td class="mono muted">{{ database.Address }}</td>
-                <td class="table-numeric">{{ database.Tables }}</td>
+                <td class="table-numeric">{% if database.Objects %}{{ database.Objects }}{% else %}{{ database.Tables }}{% endif %}</td>
                 <td class="table-numeric">{{ database.Storage }}</td>
                 <td class="table-numeric">{{ database.RowsRead }}</td>
                 <td class="table-numeric">{{ database.Queries }}</td>

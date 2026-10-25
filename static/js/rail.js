@@ -36,12 +36,13 @@
   }
 
   const remembered = 'sqldash-rail';
+  const listLabel = toggle.dataset.railLabel || 'table list';
 
   function apply(shut) {
     workspace.classList.toggle('is-shut', shut);
     toggle.setAttribute('aria-expanded', shut ? 'false' : 'true');
-    toggle.setAttribute('aria-label', shut ? 'Show the table list' : 'Hide the table list');
-    toggle.title = shut ? 'Show the table list' : 'Hide the table list';
+    toggle.setAttribute('aria-label', (shut ? 'Show the ' : 'Hide the ') + listLabel);
+    toggle.title = (shut ? 'Show the ' : 'Hide the ') + listLabel;
   }
 
   let shut = false;

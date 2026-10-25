@@ -12,7 +12,13 @@
       {% endif %}
       {% if CanViewInsights %}
         <a class="tab {% if Section == "insights" %}is-current{% endif %}" href="{% url "databases.insights" name=Database %}">Insights</a>
-    <a class="tab {% if Section == "queries" %}is-current{% endif %}" href="{% url "databases.queries" name=Database %}">Top queries</a>
+    <a class="tab {% if Section == "queries" %}is-current{% endif %}" href="{% url "databases.queries" name=Database %}">{% if IsRedis or Engine == "redis" %}Top commands{% else %}Top queries{% endif %}</a>
+      {% endif %}
+      {% if IsRedis or Engine == "redis" %}
+        {% if CanViewSlowLog %}<a class="tab {% if Section == "slowlog" %}is-current{% endif %}" href="{% url "databases.redis.slowlog" name=Database %}">Slow log</a>{% endif %}
+        {% if CanMonitorRedis %}<a class="tab {% if Section == "monitor" %}is-current{% endif %}" href="{% url "databases.redis.monitor" name=Database %}">Monitor</a>{% endif %}
+        {% if CanSubscribeRedis or CanPublishRedis %}<a class="tab {% if Section == "pubsub" %}is-current{% endif %}" href="{% url "databases.redis.pubsub" name=Database %}">Pub/Sub</a>{% endif %}
+        {% if CanManageConnections or CanViewActivity %}<a class="tab {% if Section == "connections" %}is-current{% endif %}" href="{% url "databases.connections" name=Database %}">Connections</a>{% endif %}
       {% endif %}
       {% if IsPostgres and CanViewActivity %}
         <a class="tab {% if Section == "connections" or Section == "activity" %}is-current{% endif %}" href="{% url "databases.connections" name=Database %}">Connections</a>

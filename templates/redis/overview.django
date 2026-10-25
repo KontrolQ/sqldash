@@ -1,0 +1,1 @@
+{% extends "databases/show.django" %}

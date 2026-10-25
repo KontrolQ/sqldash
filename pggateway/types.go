@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
+	"sqldash/nativetls"
 	"sync"
 	"time"
 )
@@ -50,19 +51,6 @@ type Registry struct {
 	sessions map[*session]struct{}
 }
 
-type TLSOptions struct {
-	ConfigurationDirectory string
-	Host                   string
-	CertificatePath        string
-	KeyPath                string
-	Config                 *tls.Config
-	AutomaticIssuer        func(context.Context, string, string) (*tls.Config, error)
-	LeafValidity           time.Duration
-	RenewBefore            time.Duration
-}
+type TLSOptions = nativetls.Options
 
-type TLSMaterial struct {
-	Config        *tls.Config
-	CACertificate []byte
-	CAFingerprint string
-}
+type TLSMaterial = nativetls.Material

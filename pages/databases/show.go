@@ -17,12 +17,16 @@ func Show(context fiber.Ctx) error {
 		return dataError
 	}
 
-	if data.PostgresCredentials != nil {
+	if data.PostgresCredentials != nil || data.RedisCredentials != nil {
 		context.Set("Cache-Control", "no-store")
 		context.Set("Referrer-Policy", "same-origin")
 		context.Set("X-Content-Type-Options", "nosniff")
 	}
 
+	if data.Engine == "redis" {
+		context.Set("Cache-Control", "no-store")
+		context.Set("Referrer-Policy", "no-referrer")
+	}
 	for action, permitted := range data.Actions {
 		context.Locals(action, permitted)
 	}
@@ -39,6 +43,9 @@ func Show(context fiber.Ctx) error {
 	}
 	if data.PostgresCredentials != nil {
 		audit.Note(context, name, audit.CredentialViewed, "")
+	}
+	if data.RedisCredentials != nil {
+		audit.Note(context, name, audit.RedisCredentialViewed, "")
 	}
 	return nil
 }

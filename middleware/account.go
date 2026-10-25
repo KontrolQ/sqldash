@@ -40,7 +40,7 @@ func account(context fiber.Ctx) error {
 				return accessError
 			}
 			context.Locals(access.ContextKey, granted)
-			context.SetContext(access.WithContext(context.Context(), granted))
+			context.SetContext(access.WithContext(sessions.WithReference(context.Context(), sessions.Capture(context)), granted))
 			context.Locals(meta.AccountKey, service.ToAccountView(held))
 			context.Locals("CanManageUsers", granted.Can("users.manage"))
 			context.Locals("CanManageRoles", granted.Can("roles.manage"))

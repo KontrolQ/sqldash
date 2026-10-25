@@ -1,7 +1,7 @@
 <div class="sheet-veil" data-sheet="new-database-{{ create_engine }}"{% if create_engine != "postgres" or not RemoteCloneForm or not CanCloneRemote %} hidden{% endif %}>
   <div class="dialog-veil" data-sheet-close></div>
   <div class="dialog is-wide clone-dialog" role="dialog" aria-modal="true" aria-labelledby="create-database-title-{{ create_engine }}">
-    <div class="dialog-head"><div class="dialog-title" id="create-database-title-{{ create_engine }}">Create a {{ create_label }} database</div><div class="dialog-note">{% if create_engine == "postgres" %}Connect with a PostgreSQL username and password.{% else %}Create an empty database or import a SQLite file or SQL dump.{% endif %}</div></div>
+    <div class="dialog-head"><div class="dialog-title" id="create-database-title-{{ create_engine }}">Create a {{ create_label }} database</div><div class="dialog-note">{% if create_engine == "postgres" %}Connect with a PostgreSQL username and password.{% elif create_engine == "redis" %}Create an isolated Redis database or import an RDB snapshot.{% else %}Create an empty database or import a SQLite file or SQL dump.{% endif %}</div></div>
     <div class="tabs" data-swap>
       <button class="tab{% if create_engine != "postgres" or not RemoteCloneForm or not CanCloneRemote %} is-current{% endif %}" type="button" data-swap-to="make-{{ create_engine }}-empty">Empty</button>
       {% if can_import %}<button class="tab" type="button" data-swap-to="make-{{ create_engine }}-dump">From a file</button>{% endif %}
@@ -16,7 +16,7 @@
       <form class="stack" method="post" action="{% url "databases.import" %}" enctype="multipart/form-data" data-swap-panel="make-{{ create_engine }}-dump" hidden>
         <input type="hidden" name="engine" value="{{ create_engine }}">
         <div class="field"><label class="label" for="import-{{ create_engine }}-name">Name</label><input class="input" id="import-{{ create_engine }}-name" name="name" minlength="2" maxlength="48" required></div>
-        <div class="field"><label class="label" for="import-{{ create_engine }}-dump">File</label><input class="file" id="import-{{ create_engine }}-dump" type="file" name="dump" accept="{% if create_engine == "postgres" %}.sql,.dump,.backup{% else %}.sql,.db,.sqlite,.sqlite3{% endif %}" required><span class="field-note">{% if create_engine == "postgres" %}A PostgreSQL archive (recommended) or native PostgreSQL SQL dump.{% else %}A SQLite database file or SQLite SQL dump.{% endif %}</span></div>
+        <div class="field"><label class="label" for="import-{{ create_engine }}-dump">File</label><input class="file" id="import-{{ create_engine }}-dump" type="file" name="dump" accept="{% if create_engine == "postgres" %}.sql,.dump,.backup{% elif create_engine == "redis" %}.rdb{% else %}.sql,.db,.sqlite,.sqlite3{% endif %}" required><span class="field-note">{% if create_engine == "postgres" %}A PostgreSQL archive (recommended) or native PostgreSQL SQL dump.{% elif create_engine == "redis" %}A native Redis RDB snapshot, restored into a new database.{% else %}A SQLite database file or SQLite SQL dump.{% endif %}</span></div>
         <div class="dialog-foot"><button class="button is-outline" type="button" data-sheet-open="new-database">Back</button><button class="button" type="submit">Load database</button></div>
       </form>
     {% endif %}

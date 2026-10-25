@@ -42,6 +42,30 @@ type postgresSettings struct {
 	ShutdownTimeout       time.Duration `env:"POSTGRES_SHUTDOWN_TIMEOUT" envDefault:"45s"`
 }
 
+type redisSettings struct {
+	Enabled              bool          `env:"REDIS_ENABLED" envDefault:"true"`
+	BinaryPath           string        `env:"REDIS_BINARY" envDefault:"/usr/local/bin/sqldash-redis-server"`
+	ModulesDirectory     string        `env:"REDIS_MODULES_DIRECTORY" envDefault:"/opt/redis-runtime/modules"`
+	GatewayEnabled       bool          `env:"REDIS_GATEWAY_ENABLED" envDefault:"true"`
+	GatewayAddress       string        `env:"REDIS_GATEWAY_ADDRESS" envDefault:":6379"`
+	PublicHost           string        `env:"REDIS_PUBLIC_HOST"`
+	PublicPort           int           `env:"REDIS_PUBLIC_PORT" envDefault:"6379"`
+	AllowPlaintext       bool          `env:"REDIS_ALLOW_PLAINTEXT" envDefault:"true"`
+	CertificatePath      string        `env:"REDIS_CERTIFICATE_PATH"`
+	PrivateKeyPath       string        `env:"REDIS_PRIVATE_KEY_PATH"`
+	MemoryLimit          int64         `env:"REDIS_MEMORY_LIMIT" envDefault:"268435456"`
+	MemoryBudget         int64         `env:"REDIS_MEMORY_BUDGET" envDefault:"1073741824"`
+	MaximumInstances     int           `env:"REDIS_MAXIMUM_INSTANCES" envDefault:"16"`
+	MaximumConnections   int           `env:"REDIS_MAXIMUM_CONNECTIONS" envDefault:"100"`
+	MaximumValueBytes    int64         `env:"REDIS_MAXIMUM_VALUE_BYTES" envDefault:"8388608"`
+	MaximumScanBatch     int64         `env:"REDIS_MAXIMUM_SCAN_BATCH" envDefault:"1000"`
+	MaximumStreamBuffer  int           `env:"REDIS_MAXIMUM_STREAM_BUFFER" envDefault:"1000"`
+	StartupTimeout       time.Duration `env:"REDIS_STARTUP_TIMEOUT" envDefault:"60s"`
+	ShutdownTimeout      time.Duration `env:"REDIS_SHUTDOWN_TIMEOUT" envDefault:"45s"`
+	CommandTimeout       time.Duration `env:"REDIS_COMMAND_TIMEOUT" envDefault:"30s"`
+	RevalidationInterval time.Duration `env:"REDIS_REVALIDATION_INTERVAL" envDefault:"2s"`
+}
+
 type certificateSettings struct {
 	Automatic          bool   `env:"AUTOMATIC_CERTIFICATES" envDefault:"false"`
 	Staging            bool   `env:"CERTIFICATE_STAGING" envDefault:"false"`

@@ -81,6 +81,9 @@ func WriteDump(requestContext context.Context, databaseName string, writer io.Wr
 	if record.Kind() == models.EnginePostgres {
 		return WritePostgres(fresh, databaseName, writer, "sql")
 	}
+	if record.Kind() == models.EngineRedis {
+		return WriteRedis(fresh, databaseName, writer)
+	}
 	return writeLibSQLDump(fresh, databaseName, writer)
 }
 
@@ -137,34 +140,9 @@ func (self *stagedExport) Close() error {
 }
 
 func PostgresExport(ctx context.Context, name, format string) (io.ReadCloser, error) {
-	fresh, record, authorityError := authorizeExport(ctx, name)
-	if authorityError != nil {
-		return nil, authorityError
-	}
-	if record.Kind() != models.EnginePostgres {
-		return nil, errors.New(EngineRefused)
-	}
-	if err := os.MkdirAll(config.PostgresStagingPath(), 0700); err != nil {
-		return nil, err
-	}
-	handle, err := os.CreateTemp(config.PostgresStagingPath(), "download-*")
-	if err != nil {
-		return nil, err
-	}
-	held := &stagedExport{File: handle, path: handle.Name(), ctx: fresh, name: record.Name, databaseID: record.ID}
-	if err := handle.Chmod(0600); err != nil {
-		held.Close()
-		return nil, err
-	}
-	if err := WritePostgres(fresh, name, handle, format); err != nil {
-		held.Close()
-		return nil, err
-	}
-	if _, err := handle.Seek(0, io.SeekStart); err != nil {
-		held.Close()
-		return nil, err
-	}
-	return held, nil
+	return stagedNativeExport(ctx, name, models.EnginePostgres, config.PostgresStagingPath(), func(parent context.Context, databaseName string, writer io.Writer) error {
+		return WritePostgres(parent, databaseName, writer, format)
+	})
 }
 
 func writeLibSQLDump(requestContext context.Context, databaseName string, writer io.Writer) error {

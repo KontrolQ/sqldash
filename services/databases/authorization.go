@@ -15,11 +15,11 @@ import (
 )
 
 func FreshActor(ctx context.Context) (context.Context, *access.AccountAccess, *fiber.Error) {
-	actor, err := access.Load(access.AccountID(ctx))
-	if err != nil || actor == nil || !actor.Account.Active {
+	fresh, actor, err := access.Refresh(ctx)
+	if err != nil {
 		return ctx, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
-	return access.WithContext(ctx, actor), actor, nil
+	return fresh, actor, nil
 }
 
 func Authorize(ctx context.Context, name string, permission string, ready bool) (context.Context, *models.Database, *fiber.Error) {
@@ -34,7 +34,7 @@ func Authorize(ctx context.Context, name string, permission string, ready bool) 
 	if !actor.CanDatabase(record, permission) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
-	if record.Kind() != models.EngineLibSQL && record.Kind() != models.EnginePostgres {
+	if !models.IsKnownEngine(record.Kind()) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusBadRequest, EngineRefused)
 	}
 	if ready && !record.Available() {
@@ -48,19 +48,34 @@ func creationActor(ctx context.Context, engine string, permission string) (conte
 	if err != nil {
 		return fresh, nil, err
 	}
-	if engine != models.EngineLibSQL && engine != models.EnginePostgres {
+	if !models.IsKnownEngine(engine) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusBadRequest, EngineRefused)
 	}
 	if engine == models.EnginePostgres && !config.Postgres.Enabled {
 		return fresh, nil, shortcuts.ServiceError(http.StatusServiceUnavailable, PostgresUnavailable)
 	}
+	if engine == models.EngineRedis && !config.Redis.Enabled {
+		return fresh, nil, shortcuts.ServiceError(http.StatusServiceUnavailable, RedisUnavailable)
+	}
 	if !actor.Can(permissions.ForEngine(permission, engine)) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
-	if engine == models.EnginePostgres && (!actor.Can(permissions.PostgresCredentialsManage) || !actor.Can(permissions.PostgresDataRead) || !actor.Can(permissions.PostgresDataWrite) || !actor.Can(permissions.PostgresObjectsManage)) {
+	if !canProvision(actor, engine) {
 		return fresh, nil, shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
 	return fresh, actor, nil
+}
+
+func canProvision(actor *access.AccountAccess, engine string) bool {
+	switch engine {
+	case models.EnginePostgres:
+		return actor.Can(permissions.PostgresCredentialsManage) && actor.Can(permissions.PostgresDataRead) && actor.Can(permissions.PostgresDataWrite) && actor.Can(permissions.PostgresObjectsManage)
+	case models.EngineRedis:
+		return actor.Can(permissions.RedisCredentialsManage) && actor.Can(permissions.RedisDataRead) && actor.Can(permissions.RedisDataWrite)
+	case models.EngineLibSQL:
+		return true
+	}
+	return false
 }
 
 func selectedEngine(engine string) string {

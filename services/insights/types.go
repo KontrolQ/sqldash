@@ -8,6 +8,7 @@ type OverviewContext struct {
 	Global        bool
 	ShowLibSQL    bool
 	Native        *NativeContext
+	Redis         *RedisContext
 	Title         string
 	Heading       string
 	FormAction    string
@@ -72,6 +73,7 @@ type QueriesContext struct {
 	Global            bool
 	ShowLibSQL        bool
 	Native            *NativeContext
+	Redis             *RedisContext
 	Title             string
 	Heading           string
 	Scope             string

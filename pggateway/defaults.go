@@ -1,6 +1,9 @@
 package pggateway
 
-import "time"
+import (
+	"sqldash/nativetls"
+	"time"
+)
 
 const (
 	LogPrefix = "PostgreSQL gateway"
@@ -21,9 +24,9 @@ const (
 	DefaultValidationTimeout          = 2 * time.Second
 	DefaultTerminationTimeout         = 5 * time.Second
 	MaximumPolicyDelay                = 5 * time.Second
-	DefaultLeafValidity               = 365 * 24 * time.Hour
-	DefaultRenewBefore                = 30 * 24 * time.Hour
-	CertificateAuthorityValidity      = 10 * 365 * 24 * time.Hour
+	DefaultLeafValidity               = nativetls.DefaultLeafValidity
+	DefaultRenewBefore                = nativetls.DefaultRenewBefore
+	CertificateAuthorityValidity      = nativetls.CertificateAuthorityValidity
 
 	protocol30                    uint32 = 196608
 	protocol32                    uint32 = 196610

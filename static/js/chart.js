@@ -1,9 +1,7 @@
 (function () {
   const holders = document.querySelectorAll('[data-chart]');
 
-  if (holders.length === 0) {
-    return;
-  }
+  const cleanups = new WeakMap();
 
   const SVG = 'http://www.w3.org/2000/svg';
   const PLOT_HEIGHT = 190;
@@ -226,17 +224,19 @@
     return details;
   }
 
-  holders.forEach(function (holder) {
+  function initialize(holder, supplied) {
+    cleanups.get(holder)?.();
+    holder.querySelector('.chart-measurements')?.remove();
     const source = holder.querySelector('script[type="application/json"]');
 
-    if (!source) {
+    if (!source && !supplied) {
       return;
     }
 
     let chart;
 
     try {
-      chart = JSON.parse(source.textContent);
+      chart = supplied || JSON.parse(source.textContent);
     } catch (parseError) {
       return;
     }
@@ -720,9 +720,13 @@
 
     let waiting = null;
 
-    window.addEventListener('resize', function () {
+    function resize() {
       clearTimeout(waiting);
       waiting = setTimeout(draw, 120);
-    });
-  });
+    }
+    window.addEventListener('resize', resize);
+    cleanups.set(holder, function () { clearTimeout(waiting); window.removeEventListener('resize', resize); });
+  }
+  window.SqlDashCharts = {render: initialize, format: label};
+  holders.forEach(function (holder) { initialize(holder); });
 })();

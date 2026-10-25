@@ -111,6 +111,9 @@ func Export(context fiber.Ctx) error {
 	if record.Kind() == models.EnginePostgres {
 		return ExportPostgresSQL(context)
 	}
+	if record.Kind() == models.EngineRedis {
+		return ExportRedis(context)
+	}
 
 	context.Set(DispositionHeader, `attachment; filename="`+name+`.sql"`)
 	context.Set(ContentTypeHeader, DumpContentType)

@@ -13,11 +13,12 @@ import (
 )
 
 var Handler fiber.Handler
+var sessionStore *session.Store
 
 func init() {
 	Sweep()
 
-	Handler = session.New(session.Config{
+	Handler, sessionStore = session.NewWithStore(session.Config{
 		Storage:        store{},
 		Extractor:      extractors.FromCookie(config.Session.CookieName),
 		CookieHTTPOnly: true,

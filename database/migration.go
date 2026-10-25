@@ -15,6 +15,7 @@ func migrate() error {
 		&models.Fingerprint{}, &models.Statement{}, &models.Rollup{}, &models.Marker{},
 		&models.Snippet{}, &models.Event{}, &models.PostgresConnection{}, &models.DatabaseOperation{},
 		&models.SchemaMigration{}, &models.PostgresStatistics{}, &models.PostgresStatementStatistics{},
+		&models.RedisInstance{}, &models.RedisConnection{}, &models.RedisStatistics{},
 	); migrationError != nil {
 		return migrationError
 	}

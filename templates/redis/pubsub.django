@@ -1,0 +1,30 @@
+{% extends "redis/layout.django" %}
+{% block rediscontent %}
+  <section class="workspace redis-message-workspace" aria-label="Redis Pub/Sub">
+    <div class="bench">
+      <div class="workbar">
+        {% if CanSubscribeRedis %}
+          <form class="redis-subscribe-form" data-redis-subscribe-form>
+            <input class="input is-small mono" name="channel" value="*" aria-label="Channel or pattern" placeholder="Channel or pattern" autocomplete="off" required>
+            <select class="input is-small" name="encoding" aria-label="Channel encoding"><option value="text">Text</option><option value="hex">Hex</option><option value="base64">Base64</option></select>
+            <div class="redis-check">{% include "partials/checkbox.django" with checkbox_id="redis-pattern" checkbox_name="pattern" checkbox_value="true" checkbox_label="Pattern subscription" checkbox_on=1 %}<label for="redis-pattern">Pattern</label></div>
+            <button class="button is-small" type="submit">Subscribe</button>
+          </form>
+          <button class="button is-outline is-small" type="button" data-redis-stream-stop disabled>Unsubscribe</button>
+        {% endif %}
+        <div class="workbar-right"><span class="badge is-outline" data-redis-stream-state role="status">Not subscribed</span><select class="input is-small" data-redis-message-format aria-label="Message display"><option value="text">Text / JSON</option><option value="hex">Hex</option><option value="base64">Base64</option></select><button class="button is-ghost is-small" type="button" data-redis-stream-clear>Clear</button></div>
+      </div>
+      <div class="sheet" data-redis-stream-output role="log" aria-live="off" aria-label="Channel messages"><div class="sheet-empty"><strong>No messages yet</strong><span>Subscribe to receive live messages.</span></div></div>
+      <div class="workbar is-second"><span class="tally" data-redis-stream-count>Received 0 messages · bounded live buffer</span><span class="tally redis-publish-result" data-redis-publish-result role="status"></span></div>
+      {% if CanPublishRedis %}
+        <form class="workbar redis-publish-bar" data-redis-publish-form>
+          <input class="input is-small mono" name="channel" placeholder="Channel" aria-label="Publish channel" required>
+          <input type="hidden" name="channelEncoding" value="text">
+          <input class="input is-small" name="payload" placeholder="Message" aria-label="Message">
+          <select class="input is-small" name="encoding" aria-label="Payload format"><option value="text">Text</option><option value="json">JSON</option><option value="hex">Hex</option><option value="base64">Base64</option></select>
+          <button class="button is-small" type="submit">Publish</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

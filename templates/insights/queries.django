@@ -10,31 +10,35 @@
     </div>
     {% include "partials/databasetabs.django" %}
     {% include "insights/engines.django" with engine_base=QueriesPath %}
-    <div class="card is-panel is-table">
-      <div class="card-head"><div class="card-title">Recorded queries</div><div class="card-tools"><span class="tally">{{ Total }} query groups</span></div></div>
-      <div class="card-body">
-        <p class="field-note">Database and statement identities remain separate. Time shares are within each row's engine and selected scope, not one cross-engine percentage. Total and mean time measure client duration for libSQL and native execution time for PostgreSQL. Unavailable means unsupported or not measured, never a recorded zero.</p>
-        {% if ShowLibSQL %}
-          <p class="field-note">libSQL P50 and P99 are approximate histogram percentiles. Rows read are scanned rows; a rows-read/returned ratio is unavailable when returned rows are zero.</p>
-        {% endif %}
-        {% if Native %}
-          <p class="field-note">PostgreSQL rows processed are returned or affected rows, not rows scanned. Native minimum and maximum are sampled extrema whose statistics epoch may precede this period. Query-level percentiles, failures, transferred bytes and separate rows-read/written counts are unavailable. Only compatible top-level statement intervals are included; internal activity already recorded in history is not retrospectively removed.</p>
-          {% if Native.HasIntervals %}
-            <p class="field-note">PostgreSQL samples span {{ Native.FirstCollectedAt }} through {{ Native.CollectedAt }}; {{ Native.Discontinuities }} baseline changes. Restarts, resets and incompatible intervals are excluded.</p>
-          {% else %}
-            <p class="field-note">{{ Native.EmptyTitle }}. {{ Native.EmptyNote }}</p>
+    {% if Redis %}
+      {% include "insights/redis.django" %}
+    {% endif %}
+    {% if ShowLibSQL or Native %}
+      <div class="card is-panel is-table">
+        <div class="card-head"><div class="card-title">Recorded queries</div><div class="card-tools"><span class="tally">{{ Total }} query groups</span></div></div>
+        <div class="card-body">
+          <p class="field-note">Database and statement identities remain separate. Time shares are within each row's engine and selected scope, not one cross-engine percentage. Total and mean time measure client duration for libSQL and native execution time for PostgreSQL. Unavailable means unsupported or not measured, never a recorded zero.</p>
+          {% if ShowLibSQL %}
+            <p class="field-note">libSQL P50 and P99 are approximate histogram percentiles. Rows read are scanned rows; a rows-read/returned ratio is unavailable when returned rows are zero.</p>
           {% endif %}
-          {% if Native.HasSamples and not Native.HasFreshSamples %}
-            <p class="field-note">No recent PostgreSQL sample is available; any native rows come from older recorded intervals.</p>
+          {% if Native %}
+            <p class="field-note">PostgreSQL rows processed are returned or affected rows, not rows scanned. Native minimum and maximum are sampled extrema whose statistics epoch may precede this period. Query-level percentiles, failures, transferred bytes and separate rows-read/written counts are unavailable. Only compatible top-level statement intervals are included; internal activity already recorded in history is not retrospectively removed.</p>
+            {% if Native.HasIntervals %}
+              <p class="field-note">PostgreSQL samples span {{ Native.FirstCollectedAt }} through {{ Native.CollectedAt }}; {{ Native.Discontinuities }} baseline changes. Restarts, resets and incompatible intervals are excluded.</p>
+            {% else %}
+              <p class="field-note">{{ Native.EmptyTitle }}. {{ Native.EmptyNote }}</p>
+            {% endif %}
+            {% if Native.HasSamples and not Native.HasFreshSamples %}
+              <p class="field-note">No recent PostgreSQL sample is available; any native rows come from older recorded intervals.</p>
+            {% endif %}
           {% endif %}
+        </div>
+        {% if TableRows %}
+          {% include "partials/querypagetable.django" %}
+        {% else %}
+          <div class="card-body"><div class="empty"><span class="empty-title">{% if HasDatabases %}Nothing measured yet{% else %}No accessible databases{% endif %}</span><span>Queries are limited to databases you can monitor in this scope and period.</span></div></div>
         {% endif %}
-      </div>
-      {% if TableRows %}
-        {% include "partials/querypagetable.django" %}
-      {% else %}
-        <div class="card-body"><div class="empty"><span class="empty-title">{% if HasDatabases %}Nothing measured yet{% else %}No accessible databases{% endif %}</span><span>Queries are limited to databases you can monitor in this scope and period.</span></div></div>
-      {% endif %}
-      <div class="card-foot is-split">
+        <div class="card-foot is-split">
       <span class="tally">Showing {{ FirstRow }}-{{ LastRow }} of {{ Total }} query groups</span>
       <div class="steps">
         <a class="step {% if Page <= 1 %}is-off{% endif %}" href="{{ FirstPagePath }}" aria-label="First page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg></a>
@@ -44,7 +48,8 @@
         <a class="step {% if Page >= Pages %}is-off{% endif %}" href="{{ LastPagePath }}" aria-label="Last page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg></a>
       </div>
     </div>
-    </div>
+      </div>
+    {% endif %}
   {% else %}
     {% include "insights/querieslegacy.django" %}
   {% endif %}

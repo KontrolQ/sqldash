@@ -3,25 +3,35 @@ package permissions
 import "strings"
 
 func ForEngine(key string, engine string) string {
-	if !strings.HasPrefix(key, "libsql.") && !strings.HasPrefix(key, "postgres.") {
+	prefix, _, separated := strings.Cut(key, ".")
+	if !separated || prefix != "libsql" && prefix != "postgres" && prefix != "redis" {
 		return key
 	}
-	if engine == "" || engine == "libsql" {
-		if strings.HasPrefix(key, "libsql.") {
+	if engine == "" {
+		engine = "libsql"
+	}
+	if prefix == engine {
+		if Known(key) {
 			return key
 		}
 		return ""
 	}
-	if engine != "postgres" {
+	if prefix != "libsql" {
+		return ""
+	}
+	if engine != "postgres" && engine != "redis" {
 		return ""
 	}
 	if key == TokenManage {
+		if engine == "redis" {
+			return RedisCredentialsManage
+		}
 		return PostgresCredentialsManage
 	}
-	if strings.HasPrefix(key, "postgres.") {
-		return key
+	if key == SQLExecute && engine == "redis" {
+		return RedisConsoleExecute
 	}
-	mapped := "postgres." + strings.TrimPrefix(key, "libsql.")
+	mapped := engine + "." + strings.TrimPrefix(key, "libsql.")
 	if !Known(mapped) {
 		return ""
 	}
@@ -38,6 +48,14 @@ func Dependencies(key string) []string {
 		return []string{PostgresDataRead, PostgresDataWrite}
 	case PostgresActivityManage:
 		return []string{PostgresActivityView}
+	case RedisDataWrite, RedisConsoleExecute, RedisCredentialsManage, RedisSlowLogView, RedisMonitorView:
+		return []string{RedisDataRead}
+	case RedisActivityManage:
+		return []string{RedisActivityView}
+	case RedisSlowLogManage:
+		return []string{RedisSlowLogView}
+	case RedisSubscribe, RedisPublish:
+		return []string{RedisDatabaseView}
 	}
 	return nil
 }

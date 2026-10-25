@@ -42,6 +42,8 @@ func CreateFromUploadEngine(ctx context.Context, asked, engine, fileName string,
 	var stageError error
 	if engine == models.EnginePostgres {
 		staged, stageError = stageNative(contents)
+	} else if engine == models.EngineRedis {
+		staged, stageError = stageNativeDirectory(config.RedisStagingPath(), contents)
 	} else {
 		staged, stageError = stage(name, fileName, contents)
 	}
@@ -57,7 +59,10 @@ func CreateFromUploadEngine(ctx context.Context, asked, engine, fileName string,
 }
 
 func stageNative(contents io.Reader) (string, error) {
-	directory := config.PostgresStagingPath()
+	return stageNativeDirectory(config.PostgresStagingPath(), contents)
+}
+
+func stageNativeDirectory(directory string, contents io.Reader) (string, error) {
 	if err := os.MkdirAll(directory, 0700); err != nil {
 		return "", err
 	}
@@ -248,7 +253,7 @@ func Fork(ctx context.Context, from, asked string, at *time.Time) *fiber.Error {
 	if !actor.CanDatabase(source, permissions.DataRead) {
 		return shortcuts.ServiceError(http.StatusForbidden, AuthorityRefused)
 	}
-	if source.Kind() == models.EnginePostgres && at != nil {
+	if source.Kind() != models.EngineLibSQL && at != nil {
 		return shortcuts.ServiceError(http.StatusBadRequest, MomentUnusable)
 	}
 	if at != nil && at.After(time.Now()) {

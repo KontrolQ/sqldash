@@ -27,7 +27,11 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 	shown := &ShowContext{Title: record.Name, Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", RowsRead: "—", RowsWritten: "—", QueryCount: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
 	shown.CanCloneRemote = overviewhelper.CanCloneRemote(actor)
 	shown.RemoteTLSModes = overviewhelper.RemoteTLSModes()
-	if record.Kind() == models.EnginePostgres {
+	if record.Kind() == models.EngineRedis {
+		if err := redisContext(fresh, record, shown); err != nil {
+			return nil, err
+		}
+	} else if record.Kind() == models.EnginePostgres {
 		if record.Available() {
 			if statistics, err := control.Statistics(fresh, record); err == nil {
 				shown.Storage = readableSize(statistics.StorageBytes)
@@ -68,7 +72,7 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 			shown.Tokens = tokenViews
 		}
 	}
-	if record.Available() && actor.CanDatabase(record, permissions.DataRead) {
+	if record.Kind() != models.EngineRedis && record.Available() && actor.CanDatabase(record, permissions.DataRead) {
 		shown.Tables = tableCount(fresh, record)
 	}
 	if actor.CanDatabase(record, permissions.NetworkManage) {

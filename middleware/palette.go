@@ -46,8 +46,10 @@ func palette(context fiber.Ctx) error {
 	groups = append(groups, meta.PaletteGroup{Label: PaletteDatabasesLabel, Items: destinations})
 	if current != nil && heldAccess.CanDatabase(current, permissions.DataRead) && current.Available() {
 		groups = append(groups, meta.PaletteGroup{Label: fmt.Sprintf(PaletteInsideLabel, opened), Items: sectionsOf(current, heldAccess)})
-		if tables := tablesOf(context, opened); len(tables) > 0 {
-			groups = append(groups, meta.PaletteGroup{Label: PaletteTablesLabel, Items: tables})
+		if current.Kind() != models.EngineRedis {
+			if tables := tablesOf(context, opened); len(tables) > 0 {
+				groups = append(groups, meta.PaletteGroup{Label: PaletteTablesLabel, Items: tables})
+			}
 		}
 	}
 	context.Locals(meta.PaletteKey, groups)
@@ -65,6 +67,13 @@ func sectionsOf(record *models.Database, held *access.AccountAccess) []meta.Pale
 	} {
 		if held.CanDatabase(record, destination.permission) {
 			items = append(items, meta.PaletteItem{Label: destination.label, URL: base + destination.suffix})
+		}
+	}
+	if record.Kind() == models.EngineRedis {
+		for _, destination := range []struct{ permission, label, suffix string }{{permissions.RedisSlowLogView, "Slow log", "/slow-log"}, {permissions.RedisMonitorView, "Command monitor", "/monitor"}, {permissions.RedisSubscribe, "Pub/Sub", "/pubsub"}, {permissions.RedisActivityView, "Connections", "/connections"}} {
+			if held.CanDatabase(record, destination.permission) {
+				items = append(items, meta.PaletteItem{Label: destination.label, URL: base + destination.suffix})
+			}
 		}
 	}
 	return items

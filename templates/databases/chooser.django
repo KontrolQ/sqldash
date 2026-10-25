@@ -4,9 +4,9 @@
     <div class="database-engine-choices">
       {% for option in CreateEngines %}
       <button class="database-engine-choice" type="button" data-sheet-open="new-database-{{ option.Value }}" data-engine-choice="{{ option.Value }}">
-        <span class="database-engine-logo"><img src="{% if option.Value == "postgres" %}{% static "images/postgresql-white.svg" %}{% else %}{% static "images/libsql-white.svg" %}{% endif %}" alt="" width="88" height="56"></span>
+        <span class="database-engine-logo"><img src="{% if option.Value == "postgres" %}{% static "images/postgresql-white.svg" %}{% elif option.Value == "redis" %}{% static "images/redis-white.svg" %}{% else %}{% static "images/libsql-white.svg" %}{% endif %}" alt="" width="88" height="56"></span>
         <span class="database-engine-title">{{ option.Label }}</span>
-        <span class="database-engine-note">{% if option.Value == "postgres" %}Native PostgreSQL connections.{% else %}SQLite-compatible, with HTTP clients.{% endif %}</span>
+        <span class="database-engine-note">{% if option.Value == "postgres" %}Native PostgreSQL connections.{% elif option.Value == "redis" %}Managed Redis with native clients.{% else %}SQLite-compatible, with HTTP clients.{% endif %}</span>
       </button>
       {% endfor %}
     </div>
@@ -16,6 +16,8 @@
 {% for option in CreateEngines %}
   {% if option.Value == "postgres" %}
     {% include "databases/create.django" with create_engine=option.Value create_label=option.Label can_import=CanImportPostgres %}
+  {% elif option.Value == "redis" %}
+    {% include "databases/create.django" with create_engine=option.Value create_label=option.Label can_import=CanImportRedis %}
   {% else %}
     {% include "databases/create.django" with create_engine=option.Value create_label=option.Label can_import=CanImportLibSQL %}
   {% endif %}

@@ -1,6 +1,9 @@
 package pggateway
 
-import "errors"
+import (
+	"errors"
+	"sqldash/nativetls"
+)
 
 const (
 	invalidConfigurationMessage = "invalid PostgreSQL gateway configuration"
@@ -13,11 +16,6 @@ const (
 	connectionLimitMessage      = "PostgreSQL connection limit reached"
 	channelBindingMessage       = "SCRAM channel binding is not supported by this gateway; use channel_binding=disable or prefer"
 	terminationFailedMessage    = "PostgreSQL backend termination could not be confirmed"
-	invalidTLSConfiguration     = "invalid PostgreSQL TLS configuration"
-	invalidCertificateMessage   = "invalid PostgreSQL certificate or private key"
-	incompleteCertificatePair   = "PostgreSQL certificate and private key must both be supplied"
-	invalidAuthorityMessage     = "PostgreSQL certificate authority is missing, damaged, or expired"
-	certificateStorageBusy      = "PostgreSQL certificate storage is already being changed"
 	callbackFailedMessage       = "PostgreSQL gateway callback did not complete normally"
 	certificateAuthorityName    = "sqldash PostgreSQL certificate authority"
 	certificateLeafName         = "sqldash PostgreSQL"
@@ -34,6 +32,6 @@ var (
 	ErrConnectionLimit     = errors.New(connectionLimitMessage)
 	ErrChannelBinding      = errors.New(channelBindingMessage)
 	ErrUnsafe              = errors.New(terminationFailedMessage)
-	ErrInvalidTLS          = errors.New(invalidTLSConfiguration)
+	ErrInvalidTLS          = nativetls.ErrInvalidTLS
 	ErrCallback            = errors.New(callbackFailedMessage)
 )

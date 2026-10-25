@@ -49,6 +49,9 @@ func scopedQueryTable(ctx context.Context, asked QueriesAsk, engine string) (*Qu
 		shown.Native = nativeQueryState(nativeRecords, history, asked, until)
 		rows = append(rows, nativeTableRows(history.Queries)...)
 	}
+	if includesInsightEngine(engine, models.EngineRedis, options) {
+		shown.Redis = redisInsights(fresh, records, true)
+	}
 	orderQueryTable(rows, shown.Sort, shown.Direction)
 	paginateQueryTable(shown, rows, asked.Page)
 	return shown, nil

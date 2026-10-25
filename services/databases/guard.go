@@ -40,6 +40,10 @@ func acceptableEngineName(name string, engine string) (string, *fiber.Error) {
 		return "", shortcuts.ServiceError(http.StatusBadRequest, NameUnusable)
 	}
 
+	if engine == models.EngineRedis && !models.PublicRedisUsername(name) {
+		return "", shortcuts.ServiceError(http.StatusBadRequest, NameReserved)
+	}
+
 	if slices.Contains(ReservedNames, name) {
 		return "", shortcuts.ServiceError(http.StatusBadRequest, NameReserved)
 	}

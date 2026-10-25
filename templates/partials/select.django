@@ -1,5 +1,5 @@
 <div class="select{% if select_wide %} is-wide{% endif %}" data-select>
-  <select name="{{ select_name }}" aria-label="{{ select_label }}"{% if select_form %} form="{{ select_form }}"{% endif %}{% if select_submits %} onchange="this.form.submit()"{% endif %}>
+  <select name="{{ select_name }}" aria-label="{{ select_label }}"{% if select_hook %} data-{{ select_hook }}{% endif %}{% if select_form %} form="{{ select_form }}"{% endif %}{% if select_submits %} onchange="this.form.submit()"{% endif %}>
   {% for option in select_options %}
     <option value="{{ option.Value }}" {% if option.Value == select_chosen %}selected{% endif %}>{{ option.Label }}</option>
   {% endfor %}

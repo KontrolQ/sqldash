@@ -65,6 +65,7 @@ const (
 	AuthorityRefused           = "You no longer have permission to perform that action."
 	EngineRefused              = "That database engine or operation is not supported."
 	PostgresUnavailable        = "PostgreSQL is not available on this instance."
+	RedisUnavailable           = "Redis is not available on this instance."
 	DatabaseNotReady           = "This database is not ready. Its operation is pending or needs recovery."
 	OperationFailed            = "The operation could not be completed. The database remains unavailable until recovery or deletion completes."
 	SettingsUnavailable        = "The current database settings could not be read."

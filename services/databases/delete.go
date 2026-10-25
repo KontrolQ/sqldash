@@ -22,6 +22,7 @@ import (
 	snippetRepository "sqldash/repositories/snippet"
 	tokenRepository "sqldash/repositories/token"
 	credentialpending "sqldash/services/postgresconnections/pending"
+	"sqldash/services/redisconnections"
 	"sqldash/telemetry"
 	"sqldash/utils/shortcuts"
 
@@ -66,6 +67,9 @@ func Delete(ctx context.Context, name string) *fiber.Error {
 		if err := transaction.Model(&models.PostgresConnection{}).Where("database_id = ?", record.ID).Updates(map[string]any{"state": "revoked", "revoked_at": now, "generation": gorm.Expr("generation + 1")}).Error; err != nil {
 			return err
 		}
+		if err := transaction.Model(&models.RedisConnection{}).Where("database_id = ?", record.ID).Updates(map[string]any{"state": "revoked", "revoked_at": now, "generation": gorm.Expr("generation + 1")}).Error; err != nil {
+			return err
+		}
 		return transaction.Create(operation).Error
 	})
 	if reserveError != nil {
@@ -84,6 +88,8 @@ func clearImports(ctx context.Context, record *models.Database) error {
 	directory := config.ImportsPath()
 	if record.Kind() == models.EnginePostgres {
 		directory = config.PostgresStagingPath()
+	} else if record.Kind() == models.EngineRedis {
+		directory = config.RedisStagingPath()
 	}
 	for _, operation := range operations {
 		var payload operationPayload
@@ -140,6 +146,14 @@ func finishDelete(ctx context.Context, record *models.Database, operation *model
 			return err
 		}
 	}
+	if record.Kind() == models.EngineRedis {
+		if err := redisconnections.Clear(ctx, record.ID); err != nil {
+			return err
+		}
+		if err := database.DB.WithContext(ctx).Where("database_id = ?", record.ID).Delete(&models.RedisStatistics{}).Error; err != nil {
+			return err
+		}
+	}
 	if record.Kind() == models.EngineLibSQL {
 		hosting.Withdraw(ctx, record.Name)
 	}
@@ -149,6 +163,9 @@ func finishDelete(ctx context.Context, record *models.Database, operation *model
 			return err
 		}
 		if err := transaction.Unscoped().Where("database_id = ?", record.ID).Delete(&models.PostgresConnection{}).Error; err != nil {
+			return err
+		}
+		if err := transaction.Unscoped().Where("database_id = ?", record.ID).Delete(&models.RedisConnection{}).Error; err != nil {
 			return err
 		}
 		if err := transaction.Unscoped().Where("database_id = ?", record.ID).Delete(&models.DatabaseShare{}).Error; err != nil {

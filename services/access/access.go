@@ -6,6 +6,7 @@ import (
 	"sqldash/database"
 	"sqldash/models"
 	"sqldash/permissions"
+	"sqldash/sessions"
 )
 
 type AccountAccess struct {
@@ -17,6 +18,18 @@ type AccountAccess struct {
 }
 
 func Load(accountID uint) (*AccountAccess, error) { return LoadWith(database.DB, accountID) }
+
+func Refresh(parent context.Context) (context.Context, *AccountAccess, error) {
+	actor, err := LoadWith(database.DB.WithContext(parent), AccountID(parent))
+	if err != nil || actor == nil || !actor.Account.Active {
+		return parent, nil, Refused
+	}
+	reference := sessions.ContextReference(parent)
+	if reference.Key != "" && (reference.AccountID != actor.Account.ID || reference.Version != actor.Account.SessionVersion || !sessions.ValidReference(parent, reference)) {
+		return parent, nil, Refused
+	}
+	return WithContext(parent, actor), actor, nil
+}
 
 func LoadWith(store *gorm.DB, accountID uint) (*AccountAccess, error) {
 	var account models.Account

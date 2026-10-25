@@ -17,14 +17,14 @@ func (self store) Get(key string) ([]byte, error) {
 	return self.GetWithContext(context.Background(), key)
 }
 
-func (self store) GetWithContext(_ context.Context, key string) ([]byte, error) {
+func (self store) GetWithContext(ctx context.Context, key string) ([]byte, error) {
 	if key == "" {
 		return nil, nil
 	}
 
 	held := &models.Session{}
 
-	findError := database.DB.Where("key = ?", key).First(held).Error
+	findError := database.DB.WithContext(ctx).Where("key = ?", key).First(held).Error
 	if findError == gorm.ErrRecordNotFound {
 		return nil, nil
 	}

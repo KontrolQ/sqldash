@@ -15,7 +15,14 @@ import (
 func init() { urls.Guard = guardRoute }
 
 func routeCapability(name string) string {
+	if capability := RedisRouteCapability(name); capability != "" {
+		return capability
+	}
 	switch name {
+	case "databases.redis.settings":
+		return permissions.RedisDatabaseSettings
+	case "databases.redis.overview.rotate.primary", "databases.redis.connections.create", "databases.redis.connections.rotate", "databases.redis.connections.revoke", "databases.redis.connections.rotate.primary", "databases.redis.connections.reveal":
+		return permissions.RedisCredentialsManage
 	case "databases", "databases.show":
 		return permissions.DatabaseView
 	case "databases.create":
@@ -32,6 +39,8 @@ func routeCapability(name string) string {
 		return permissions.DatabaseExport
 	case "databases.export.postgres.archive", "databases.export.postgres.sql":
 		return permissions.PostgresDatabaseExport
+	case "redis.certificate":
+		return permissions.RedisDataRead
 	case "postgres.certificate":
 		return permissions.PostgresDataRead
 	case "databases.fork":
@@ -86,7 +95,7 @@ func guardRoute(route urls.RegisteredRoute) fiber.Handler {
 			if context.Get("Sec-Fetch-Site") == "cross-site" {
 				return fiber.ErrForbidden
 			}
-			if origin := context.Get("Origin"); origin != "" {
+			if origin := context.Get("Origin"); origin != "" && origin != "null" {
 				parsed, parseError := url.Parse(origin)
 				if parseError != nil || parsed.User != nil || !strings.EqualFold(parsed.Host, string(context.Request().Host())) {
 					return fiber.ErrForbidden
@@ -107,7 +116,7 @@ func guardRoute(route urls.RegisteredRoute) fiber.Handler {
 			allowed := held.CanAny(needed)
 			if needed == permissions.DatabaseCreate || needed == permissions.DatabaseImport {
 				kind := context.FormValue("engine", models.EngineLibSQL)
-				if kind != models.EngineLibSQL && kind != models.EnginePostgres {
+				if !models.IsKnownEngine(kind) {
 					return fiber.ErrBadRequest
 				}
 				allowed = held.Can(permissions.ForEngine(needed, kind))
@@ -127,12 +136,21 @@ func guardRoute(route urls.RegisteredRoute) fiber.Handler {
 }
 
 func guardDatabase(context fiber.Ctx, held *access.AccountAccess, record *models.Database, name string, needed string) error {
+	if record.Kind() == models.EngineRedis {
+		if name == "databases.structure" || strings.HasPrefix(name, "databases.structure.") || strings.Contains(name, ".tokens.") || name == "databases.export.file" || strings.HasPrefix(name, "databases.explore.") || name == "databases.console.run" || name == "databases.console.cancel" {
+			return fiber.ErrNotFound
+		}
+		if name == "databases.connections" {
+			needed = permissions.RedisActivityView
+		}
+	}
+	alternative := record.Kind() == models.EngineRedis && (name == "databases.connections" && (held.CanDatabase(record, permissions.RedisActivityView) || held.CanDatabase(record, permissions.RedisCredentialsManage)) || name == "databases.redis.pubsub" && (held.CanDatabase(record, permissions.RedisSubscribe) || held.CanDatabase(record, permissions.RedisPublish)))
 	sharing := name == "databases.share" || name == "databases.sharing"
 	if sharing {
 		if !held.CanShare(record) {
 			return fiber.ErrForbidden
 		}
-	} else if needed == "" || !held.CanDatabase(record, needed) {
+	} else if !alternative && (needed == "" || !held.CanDatabase(record, needed)) {
 		return shortcuts.ServiceError(fiber.StatusForbidden, access.Refused.Error())
 	}
 	if record.Kind() == models.EnginePostgres && (strings.Contains(name, ".tokens.") || name == "databases.export.file") {
@@ -141,12 +159,13 @@ func guardDatabase(context fiber.Ctx, held *access.AccountAccess, record *models
 	context.Locals("DatabaseEngine", record.Kind())
 	context.Locals("DatabaseRecord", record)
 	context.Locals("IsPostgres", record.Kind() == models.EnginePostgres)
+	context.Locals("IsRedis", record.Kind() == models.EngineRedis)
 	for key, allowed := range access.Actions(held, record) {
 		context.Locals(key, allowed)
 	}
 	mode := engines.ReadOnly
 	mapped := permissions.ForEngine(needed, record.Kind())
-	if mapped == permissions.DataWrite || mapped == permissions.PostgresDataWrite {
+	if mapped == permissions.DataWrite || mapped == permissions.PostgresDataWrite || mapped == permissions.RedisDataWrite {
 		mode = engines.ReadWrite
 	}
 	if mapped == permissions.PostgresObjectsManage {
@@ -154,6 +173,9 @@ func guardDatabase(context fiber.Ctx, held *access.AccountAccess, record *models
 	}
 	if mapped == permissions.SQLExecute || mapped == permissions.PostgresSQLExecute {
 		mode = engines.SQLMode(held.CanDatabase(record, permissions.DataWrite), held.CanDatabase(record, permissions.PostgresObjectsManage))
+	}
+	if mapped == permissions.RedisConsoleExecute && held.CanDatabase(record, permissions.RedisDataWrite) {
+		mode = engines.ReadWrite
 	}
 	context.SetContext(engines.WithMode(engines.WithDatabase(context.Context(), record), mode))
 	return nil

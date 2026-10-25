@@ -5,13 +5,14 @@ import (
 	connectionControllers "sqldash/controllers/postgresconnections"
 	managementControllers "sqldash/controllers/postgresmanagement"
 	managementPages "sqldash/pages/postgresmanagement"
+	redispage "sqldash/pages/redis"
 	"sqldash/utils/urls"
 )
 
 func init() {
 	urls.SetNamespace("")
 	urls.Path(urls.Post, "/databases/import/remote", databaseControllers.CloneRemote, "databases.import.remote")
-	urls.Path(urls.Get, "/databases/:name/connections", managementPages.Connections, "databases.connections")
+	urls.Path(urls.Get, "/databases/:name/connections", redisPage(managementPages.Connections, redispage.Connections), "databases.connections")
 	urls.Path(urls.Post, "/databases/:name/connections/rotate", connectionControllers.RotatePrimary, "databases.connections.rotate.primary")
 	urls.Path(urls.Post, "/databases/:name/connections/reveal", connectionControllers.Reveal, "databases.connections.reveal")
 	urls.Path(urls.Post, "/databases/:name/connections", connectionControllers.Create, "databases.connections.create")

@@ -2,6 +2,7 @@ package databases
 
 import (
 	"sqldash/services/postgresconnections/overviewhelper"
+	"sqldash/services/redisconnections"
 	tokenservice "sqldash/services/tokens"
 	"sqldash/utils/collections"
 )
@@ -17,6 +18,8 @@ type IndexContext struct {
 	CanImportDatabases bool
 	CanImportLibSQL    bool
 	CanImportPostgres  bool
+	CanImportRedis     bool
+	ObjectHeading      string
 	CanCloneRemote     bool
 	RemoteTLSModes     []collections.Option
 	RemoteCloneForm    *RemoteCloneForm
@@ -44,6 +47,7 @@ type DatabaseView struct {
 	Ready       bool
 	Storage     string
 	Tables      string
+	Objects     string
 	RowsRead    string
 	Queries     string
 	Actions     map[string]bool
@@ -80,6 +84,21 @@ type ShowContext struct {
 	Port                               int
 	Username                           string
 	PostgresCredentials                *overviewhelper.Credentials
+	RedisCredentials                   *redisconnections.Issued
+	MemoryUsed                         string
+	MemoryLimit                        string
+	MemoryAmount                       string
+	MemoryUnit                         string
+	MemoryUnits                        []collections.Option
+	MemoryLimitBytes                   string
+	EvictionPolicy                     string
+	Persistence                        string
+	Fsync                              string
+	EvictionPolicies                   []collections.Option
+	PersistenceOptions                 []collections.Option
+	FsyncOptions                       []collections.Option
+	PlaintextAllowed                   bool
+	ManagedRedisCA                     bool
 	PasswordProblem                    string
 	CanCloneRemote                     bool
 	RemoteTLSModes                     []collections.Option

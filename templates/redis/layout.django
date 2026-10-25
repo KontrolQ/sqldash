@@ -1,0 +1,36 @@
+{% extends "layouts/base.django" %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/redis.css" %}">
+{% endblock %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Name }}</h1>
+      <p class="page-subtitle">{{ Address }}</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <div class="redis-root" data-redis-page="{{ Section }}" data-redis-api="{{ APIPath }}" data-redis-activity-manage="{% if CanManageActivity %}true{% else %}false{% endif %}" data-redis-write="{% if CanWriteData %}true{% else %}false{% endif %}">
+    <div class="alert is-bad" data-redis-error role="alert" hidden><div class="alert-title">Request failed</div><div class="alert-body" data-redis-error-message></div></div>
+    {% if Unavailable %}
+      <div class="alert"><div class="alert-title">Redis unavailable</div><div class="alert-body">{{ Unavailable }}</div></div>
+    {% endif %}
+    {% if MetadataProblem %}
+      <div class="alert"><div class="alert-title">Some details are unavailable</div><div class="alert-body">{{ MetadataProblem }}</div></div>
+    {% endif %}
+    {% block rediscontent %}
+    {% endblock %}
+    <dialog class="dialog redis-shared-dialog" data-redis-dialog aria-labelledby="redis-dialog-title">
+      <form method="dialog" class="stack" data-redis-dialog-form>
+        <div class="dialog-head"><div class="dialog-title" id="redis-dialog-title"></div></div>
+        <div class="dialog-body stack" data-redis-dialog-body></div>
+        <p class="field-note" data-redis-dialog-error role="alert" hidden></p>
+        <div class="dialog-foot"><button class="button is-outline" type="button" data-redis-dialog-cancel>Cancel</button><button class="button" type="submit" data-redis-dialog-submit>Apply</button></div>
+      </form>
+    </dialog>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/redis.js" %}" defer></script>
+{% endblock %}

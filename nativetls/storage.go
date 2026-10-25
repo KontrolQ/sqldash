@@ -1,4 +1,4 @@
-package pggateway
+package nativetls
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func writeCertificateFile(path string, contents []byte, mode os.FileMode) error 
 		_ = temporary.Close()
 		return permissionError
 	}
-	if writeError := writeAll(temporary, contents); writeError != nil {
+	if _, writeError := temporary.Write(contents); writeError != nil {
 		_ = temporary.Close()
 		return writeError
 	}

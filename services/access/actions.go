@@ -33,5 +33,15 @@ func Actions(held *AccountAccess, record *models.Database) map[string]bool {
 	flags["CanViewActivity"] = record.Kind() == models.EnginePostgres && held.Can(permissions.PostgresActivityView)
 	flags["CanManageActivity"] = record.Kind() == models.EnginePostgres && held.Can(permissions.PostgresActivityManage)
 	flags["CanManageExtensions"] = record.Kind() == models.EnginePostgres && held.Can(permissions.PostgresExtensionsManage)
+	if record.Kind() == models.EngineRedis {
+		flags["CanManageConnections"] = held.Can(permissions.RedisCredentialsManage)
+		flags["CanViewActivity"] = held.Can(permissions.RedisActivityView)
+		flags["CanManageActivity"] = held.Can(permissions.RedisActivityManage)
+	}
+	flags["CanViewSlowLog"] = record.Kind() == models.EngineRedis && held.Can(permissions.RedisSlowLogView)
+	flags["CanResetSlowLog"] = record.Kind() == models.EngineRedis && held.Can(permissions.RedisSlowLogManage)
+	flags["CanMonitorRedis"] = record.Kind() == models.EngineRedis && held.Can(permissions.RedisMonitorView)
+	flags["CanSubscribeRedis"] = record.Kind() == models.EngineRedis && held.Can(permissions.RedisSubscribe)
+	flags["CanPublishRedis"] = record.Kind() == models.EngineRedis && held.Can(permissions.RedisPublish)
 	return flags
 }

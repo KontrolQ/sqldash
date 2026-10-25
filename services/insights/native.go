@@ -124,6 +124,9 @@ func GetScopedOverview(ctx context.Context, name string, windowLabel string, eng
 			return nil, err
 		}
 	}
+	if includesInsightEngine(engine, models.EngineRedis, options) {
+		shown.Redis = redisInsights(fresh, records, false)
+	}
 	return shown, nil
 }
 
@@ -154,11 +157,14 @@ func selectedInsightEngine(engine string, records []models.Database, name string
 	if name != "" && len(records) == 1 {
 		engine = records[0].Kind()
 	}
-	if engine != models.EngineLibSQL && engine != models.EnginePostgres {
+	if !models.IsKnownEngine(engine) {
 		return AllEngines, nil
 	}
 	if includesInsightEngine(engine, engine, options) {
 		return engine, nil
+	}
+	if engine == models.EngineRedis && !config.Redis.Enabled {
+		return "", shortcuts.ServiceError(http.StatusServiceUnavailable, "Redis is unavailable.")
 	}
 	if engine == models.EnginePostgres && !config.Postgres.Enabled {
 		return "", shortcuts.ServiceError(http.StatusServiceUnavailable, PostgresUnavailable)
@@ -202,6 +208,9 @@ func insightEngineOptions(actor *access.AccountAccess, postgresEnabled bool) []c
 	}
 	if postgresEnabled && actor.Can(permissions.PostgresInsightsView) {
 		choices = append(choices, collections.Option{Value: models.EnginePostgres, Label: PostgresLabel})
+	}
+	if config.Redis.Enabled && actor.Can(permissions.RedisInsightsView) {
+		choices = append(choices, collections.Option{Value: models.EngineRedis, Label: "Redis"})
 	}
 	return choices
 }

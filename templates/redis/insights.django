@@ -1,0 +1,22 @@
+{% extends "redis/layout.django" %}
+{% block rediscontent %}
+  <section class="card">
+    <div class="card-head"><div class="card-title">Insights</div><div class="card-note">Redis server aggregates. History is sampled while this page is open and retained for one hour.</div></div>
+    <div class="card-body stack">
+      <div class="redis-toolbar"><span class="field-note" data-redis-measured-at>Waiting for a measurement…</span><div class="redis-actions"><div class="redis-check">{% include "partials/checkbox.django" with checkbox_id="redis-live-insights" checkbox_label="Refresh every 5 seconds" checkbox_on=1 checkbox_hook="redis-insights-live" %}<label for="redis-live-insights">Live refresh</label></div><button class="button is-outline is-small" type="button" data-redis-insights-refresh>Refresh</button></div></div>
+      <div class="redis-notice" data-redis-history-note hidden></div>
+      <dl class="tiles is-plain" data-redis-metrics></dl>
+      <div class="redis-chart-grid"><figure class="redis-chart"><figcaption>Commands per second</figcaption><div data-redis-chart="commandsPerSecond"></div></figure><figure class="redis-chart"><figcaption>Memory used</figcaption><div data-redis-chart="used_memory"></div></figure></div>
+      <details>
+        <summary>Measurement history</summary>
+        <div class="redis-table-wrap" data-redis-history></div>
+      </details>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><div class="card-title">Server and persistence</div><div class="card-note">Rates restart after a server restart or counter reset. Unavailable rates are not shown as zero.</div></div>
+    <div class="card-body">
+      <dl class="redis-definitions" data-redis-server></dl>
+    </div>
+  </section>
+{% endblock %}

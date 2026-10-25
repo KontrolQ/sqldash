@@ -11,7 +11,7 @@ func (self *AccountAccess) CanDatabase(record *models.Database, permission strin
 }
 
 func (self *AccountAccess) CanAny(permission string) bool {
-	return self.Can(permission) || self.Can(permissions.ForEngine(permission, models.EnginePostgres))
+	return self.Can(permission) || self.Can(permissions.ForEngine(permission, models.EnginePostgres)) || self.Can(permissions.ForEngine(permission, models.EngineRedis))
 }
 
 func (self *AccountAccess) CanShare(record *models.Database) bool {

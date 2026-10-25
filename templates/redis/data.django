@@ -1,0 +1,97 @@
+{% extends "layouts/base.django" %}
+{% block tight %}
+  is-tight
+{% endblock %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Database }}</h1>
+      <p class="page-subtitle">{{ Address }}</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <div class="redis-data-root" data-redis-page="data" data-redis-api="{{ APIPath }}" data-redis-write="{% if CanWriteData %}true{% else %}false{% endif %}">
+    <div class="alert is-bad" data-redis-error role="alert" hidden><div class="alert-body" data-redis-error-message></div></div>
+    <div class="workspace explorer-data" data-redis-data>
+      <aside class="rail" aria-label="Redis keys">
+        <div class="rail-head"><input class="input" type="search" name="match" form="redis-key-filter-form" placeholder="Search keys" aria-label="Search keys" data-rail-search data-redis-key-search><button class="step" type="button" data-redis-refresh title="Reload the list" aria-label="Reload the key list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M8 16H3v5"/></svg></button></div>
+        <div class="rail-list redis-key-tree" data-redis-tree role="group" aria-label="Loaded keys"><div class="rail-empty" role="status">Loading keys…</div></div>
+      </aside>
+      <div class="bench">
+        <div class="workbar">
+          <button class="step" type="button" data-rail-toggle data-rail-label="key list" aria-label="Hide the key list" aria-expanded="true" title="Hide the key list"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+          <div class="tabs is-compact"><span class="tab is-current"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Data</span></div>
+          <span class="badge is-outline explorer-relation-name" data-redis-key-name>No key selected</span>
+          <div class="menu" data-menu>
+            <button class="button is-outline is-small" type="button" data-menu-trigger aria-haspopup="true" aria-expanded="false"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg>Filters<span class="badge is-secondary" data-redis-filter-count hidden></span></button>
+            <div class="menu-content is-filters" data-menu-content hidden>
+              <form class="stack" id="redis-key-filter-form" data-redis-scan-form>
+                <div class="field"><span class="label">Key type</span>{% include "partials/select.django" with select_name="type" select_label="Key type" select_chosen="" select_options=FilterKeyTypes select_wide=1 %}</div>
+                <div class="field"><span class="label">Search encoding</span>{% include "partials/select.django" with select_name="matchEncoding" select_label="Search encoding" select_chosen="text" select_options=ByteEncodings select_wide=1 %}<span class="field-note">Search is bounded with SCAN. Text searches match anywhere in a key name; hex and base64 search exact byte patterns.</span></div>
+                <div class="filter-foot"><button class="button is-ghost is-small" type="button" data-redis-clear-filters>Clear all</button><span class="tab-bar-spacer"></span><button class="button is-small" type="submit">Apply</button></div>
+              </form>
+            </div>
+          </div>
+          {% include "partials/select.django" with select_name="view" select_label="Value view" select_chosen="pretty" select_options=ViewOptions select_small=1 select_hook="redis-value-view" %}
+          {% include "partials/select.django" with select_name="encoding" select_label="Value encoding" select_chosen="text" select_options=ByteEncodings select_small=1 select_hook="redis-value-encoding" %}
+          {% if CanWriteData %}
+            <button class="button is-small" type="button" data-reveal="redis-create"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>Add key</button>
+            <button class="button is-outline is-small" type="button" data-redis-add-entry disabled>Add entry</button>
+          {% endif %}
+          <div class="workbar-right">
+            <span class="tally" data-redis-loaded>0 loaded</span>
+            <button class="step" type="button" data-redis-load-more aria-label="Load more keys" title="Load more keys" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            <button class="step" type="button" data-redis-reload-key aria-label="Reload the value" title="Reload the value" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M8 16H3v5"/></svg></button>
+            <div class="menu" data-menu><button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+              <div class="menu-content" data-menu-content hidden>
+                <button class="menu-plain" type="button" data-redis-copy-name disabled>Copy key name</button>
+                {% if CanWriteData %}<div data-redis-list-actions hidden><button class="menu-plain" type="button" data-redis-list-push>Push first</button><button class="menu-plain" type="button" data-redis-list-pop-first>Pop first</button><button class="menu-plain" type="button" data-redis-list-pop-last>Pop last</button><div class="menu-separator"></div></div><button class="menu-plain" type="button" data-redis-rename disabled>Rename key</button><button class="menu-plain" type="button" data-redis-copy-key disabled>Duplicate key</button><div class="menu-separator"></div><button class="menu-plain" type="button" data-redis-delete disabled>Delete key</button>{% endif %}
+                {% if CanRunSQL %}<div class="menu-separator"></div><a class="menu-plain" href="{% url "databases.console" name=Database %}">Open the console</a>{% endif %}
+                {% if CanExportDatabases %}<a class="menu-plain" href="{% url "databases.export" name=Database %}">Download a snapshot</a>{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="workbar is-second">
+          <label data-redis-filter-label><input class="input is-small is-search" type="search" data-redis-value-filter placeholder="Search loaded entries" aria-label="Search loaded entries"></label>
+          <span class="badge is-outline" data-redis-type hidden></span>{% if CanWriteData %}<button class="button is-ghost is-small" type="button" data-redis-change-ttl title="Change expiry" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-redis-ttl>No key selected</span></button>{% else %}<span class="tally" data-redis-ttl></span>{% endif %}<span class="tally" data-redis-length></span>
+          <div class="workbar-right">
+            <button class="button is-ghost is-small" type="button" data-redis-value-more hidden>Next entries</button>
+            {% if CanWriteData %}<div class="workbar-group" data-redis-entry-selection hidden><span class="selection-count" data-redis-entry-count></span><button class="button is-ghost is-small" type="button" data-redis-entry-clear>Clear</button><button class="button is-destructive is-small" type="button" data-redis-entry-delete>Delete entries</button></div><div class="workbar-group"><button class="button is-ghost is-small" type="button" data-redis-discard disabled>Discard</button><button class="button is-small" type="button" data-redis-save disabled>Save changes <span class="badge is-secondary" data-redis-change-count>0</span></button></div>{% endif %}
+          </div>
+        </div>
+        <span data-redis-draft-state hidden></span>
+        <div class="explorer-key-note field-note" data-redis-partial hidden></div>
+        {% if Unavailable %}
+          <div class="explorer-key-note field-note" role="status">{{ Unavailable }}</div>
+        {% endif %}
+        <div class="sheet-empty" data-redis-key-empty><strong>Nothing selected</strong><span>Choose a key on the left to see its value.</span></div>
+        <section class="sheet" data-redis-value hidden>
+          <div data-redis-editor></div>
+          <div data-redis-stream-groups></div>
+        </section>
+        {% if CanWriteData %}
+          {% include "redis/createkey.django" %}
+        {% endif %}
+      </div>
+    </div>
+    <template data-redis-checkbox-template>{% include "partials/checkbox.django" with checkbox_label="Pick this entry" %}</template>
+    <dialog class="dialog redis-data-dialog" data-redis-dialog aria-labelledby="redis-dialog-title">
+      <form method="dialog" data-redis-dialog-form>
+        <div class="dialog-head"><div class="dialog-title" id="redis-dialog-title"></div></div>
+        <div class="dialog-body stack" data-redis-dialog-body></div>
+        <div class="alert is-bad" data-redis-dialog-error role="alert" hidden><div class="alert-body" data-redis-dialog-error-message></div></div>
+        <div class="dialog-foot"><button class="button is-outline" type="button" data-redis-dialog-cancel>Cancel</button><button class="button" type="submit" data-redis-dialog-submit>Apply</button></div>
+      </form>
+    </dialog>
+  </div>
+{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/postgres-explorer.css" %}">
+  <link rel="stylesheet" href="{% static "css/redisdata.css" %}">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/redis.js" %}" defer></script>
+  <script src="{% static "js/redisdata.js" %}" defer></script>
+{% endblock %}

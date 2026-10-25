@@ -1,0 +1,39 @@
+{% extends "layouts/base.django" %}
+{% block tight %}
+  is-tight
+{% endblock %}
+{% block content %}
+  <div class="page-head is-slim">
+    <div class="page-title">
+      <h1>{{ Name }}</h1>
+      <p class="page-subtitle">{{ Address }}</p>
+    </div>
+  </div>
+  {% include "partials/databasetabs.django" %}
+  {% include "partials/alert.django" %}
+  <section class="workspace redis-console-workspace" aria-label="Redis console">
+    <div class="bench">
+      <div class="workbar">
+        <span class="badge is-outline">Redis · DB 0</span>
+        <span class="tally" data-redis-terminal-status role="status">Ready</span>
+        <div class="workbar-right"><button class="button is-ghost is-small" type="button" data-redis-terminal-clear>Clear</button><span class="tally">Enter to run · Shift + Enter for a new line</span></div>
+      </div>
+      {% if Unavailable %}
+        <div class="console-problem" role="status">{{ Unavailable }}</div>
+      {% endif %}
+      <div class="redis-console-surface" data-redis-terminal data-api="{{ APIPath }}" data-prompt="{{ Name }}:db0&gt;" tabindex="-1">
+        <div class="redis-console-transcript" data-redis-terminal-output role="log" aria-label="Redis command results" aria-live="polite"></div>
+        <div class="redis-console-line" data-redis-terminal-line>
+          <span class="redis-console-prompt" data-redis-terminal-prompt aria-hidden="true">{{ Name }}:db0&gt;</span>
+          <span class="redis-console-command" data-redis-terminal-input role="textbox" aria-label="Redis command" aria-multiline="true" contenteditable="plaintext-only" spellcheck="false" autocapitalize="off" autocorrect="off"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/redisconsole.css" %}">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static "js/redisconsole.js" %}" defer></script>
+{% endblock %}
