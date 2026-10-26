@@ -14,18 +14,22 @@ func Create(ctx context.Context, asked string) *fiber.Error {
 }
 
 func CreateEngine(ctx context.Context, asked string, engine string) *fiber.Error {
+	_, createError := CreateEngineRecord(ctx, asked, engine)
+	return createError
+}
+
+func CreateEngineRecord(ctx context.Context, asked string, engine string) (*models.Database, *fiber.Error) {
 	engine = selectedEngine(engine)
 	fresh, actor, authorityError := creationActor(ctx, engine, permissions.DatabaseCreate)
 	if authorityError != nil {
-		return authorityError
+		return nil, authorityError
 	}
-	name, nameError := acceptableEngineName(asked, engine)
-	if nameError != nil {
-		return nameError
-	}
-	record, operation, reserveError := reserveDatabase(fresh, name, engine, actor.Account.ID, "create", 0, operationPayload{})
+	record, operation, reserveError := reserveCreation(fresh, actor, NormalizeName(asked), engine)
 	if reserveError != nil {
-		return reserveError
+		return nil, reserveError
 	}
-	return executeOperation(fresh, record, operation)
+	if createError := executeOperation(fresh, record, operation); createError != nil {
+		return nil, createError
+	}
+	return record, nil
 }

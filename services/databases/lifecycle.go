@@ -21,13 +21,17 @@ import (
 	"sqldash/services/access"
 	primarycredentials "sqldash/services/postgresconnections/primary"
 	"sqldash/sqld"
+	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const operationTimeout = 15 * time.Minute
+
+var nameReservationConflict = errors.New(NameTaken)
 
 func OperationRetryDelay(attempts uint) time.Duration {
 	if attempts > 6 {
@@ -66,8 +70,12 @@ func reserveDatabase(ctx context.Context, name, engine string, accountID uint, k
 		operation.LeaseUntil = &until
 	}
 	err = database.DB.WithContext(ctx).Transaction(func(transaction *gorm.DB) error {
-		if err := transaction.Create(record).Error; err != nil {
-			return err
+		reservation := transaction.Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "name"}}, DoNothing: true}).Create(record)
+		if reservation.Error != nil {
+			return reservation.Error
+		}
+		if reservation.RowsAffected == 0 {
+			return nameReservationConflict
 		}
 		operation.DatabaseID = record.ID
 		if err := transaction.Create(operation).Error; err != nil {
@@ -87,8 +95,12 @@ func reserveDatabase(ctx context.Context, name, engine string, accountID uint, k
 		}
 		return nil
 	})
-	if err != nil {
+	if errors.Is(err, nameReservationConflict) {
 		return nil, nil, shortcuts.ServiceError(http.StatusConflict, NameTaken)
+	}
+	if err != nil {
+		logger.Errorf(LogPrefix, CreateFailedLog, name, err)
+		return nil, nil, shortcuts.ServiceError(http.StatusInternalServerError, CreateRefused)
 	}
 	return record, operation, nil
 }

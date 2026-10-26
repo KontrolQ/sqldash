@@ -1,7 +1,8 @@
 package databases
 
 const (
-	FormUnreadable = "That form could not be read."
+	FormUnreadable  = "That form could not be read."
+	CreatedWithName = "Database created as %s."
 )
 
 const (

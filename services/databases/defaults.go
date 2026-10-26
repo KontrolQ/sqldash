@@ -5,9 +5,12 @@ const (
 
 	IndexTitle = "Databases"
 
-	MinimumNameLength = 2
-	MaximumNameLength = 48
-	NamePattern       = `^[a-z0-9][a-z0-9-]*[a-z0-9]$`
+	MinimumNameLength           = 2
+	MaximumNameLength           = 48
+	NamePattern                 = `^[a-z0-9][a-z0-9-]*[a-z0-9]$`
+	NameSuffixLength            = 4
+	NameSuffixAlphabet          = "abcdefghijklmnopqrstuvwxyz0123456789"
+	MaximumCreationNameAttempts = 10
 )
 
 var ReservedNames = []string{"sqldash", "admin", "api", "static", "login", "setup", "logout"}

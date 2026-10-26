@@ -1,6 +1,7 @@
 package databases
 
 import (
+	"fmt"
 	"net/http"
 
 	"sqldash/permissions"
@@ -20,12 +21,16 @@ func Create(context fiber.Ctx) error {
 	}
 
 	asked.Name = service.NormalizeName(asked.Name)
-	if createError := service.CreateEngine(context.Context(), asked.Name, asked.Engine); createError != nil {
+	record, createError := service.CreateEngineRecord(context.Context(), asked.Name, asked.Engine)
+	if createError != nil {
 		sessions.Complain(context, createError.Message)
 		return shortcuts.Redirect(context, IndexRoute)
 	}
 
-	audit.Note(context, asked.Name, audit.DatabaseCreated, StartedEmpty)
+	audit.NoteDatabase(context, record, audit.DatabaseCreated, StartedEmpty)
+	if record.Name != asked.Name {
+		sessions.Report(context, fmt.Sprintf(CreatedWithName, record.Name))
+	}
 
 	return shortcuts.Redirect(context, IndexRoute)
 }
