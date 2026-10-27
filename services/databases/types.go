@@ -91,6 +91,8 @@ type ShowContext struct {
 	MemoryUnit                         string
 	MemoryUnits                        []collections.Option
 	MemoryLimitBytes                   string
+	RedisMemoryBudget                  string
+	RedisMemoryOverhead                string
 	EvictionPolicy                     string
 	Persistence                        string
 	Fsync                              string

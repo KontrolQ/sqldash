@@ -30,6 +30,19 @@ func Parse(value string) (int64, error) {
 	return number.Num().Int64(), nil
 }
 
+func FormatBinary(value int64) string {
+	chosen := binaryUnits[len(binaryUnits)-1]
+	for _, unit := range binaryUnits {
+		if value >= unit.Bytes {
+			chosen = unit
+			break
+		}
+	}
+	number := new(big.Rat).SetFrac(big.NewInt(value), big.NewInt(chosen.Bytes))
+	text := strings.TrimRight(strings.TrimRight(number.FloatString(MaximumFractionDigits), "0"), ".")
+	return text + " " + chosen.Label
+}
+
 func Format(value int64) string {
 	for _, unit := range binaryUnits {
 		if value >= unit.Bytes && value%unit.Bytes == 0 {

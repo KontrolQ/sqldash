@@ -450,6 +450,9 @@ func UpdateSettings(ctx context.Context, record *models.Database, asked Settings
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if asked.MemoryLimit > config.Redis.MemoryBudget {
+		return CapacityExceeded
+	}
 	if !validSettings(settingsInstance(&models.RedisInstance{}, asked)) {
 		return InvalidSettings
 	}

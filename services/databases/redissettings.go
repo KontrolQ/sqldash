@@ -3,12 +3,15 @@ package databases
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
+	"sqldash/config"
 	"sqldash/models"
 	"sqldash/permissions"
 	"sqldash/redishost"
 	"sqldash/services/access"
+	"sqldash/utils/bytesize"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
@@ -44,7 +47,11 @@ func SaveRedisSettings(ctx context.Context, name string, settings redishost.Sett
 		if errors.Is(err, redishost.InvalidSettings) {
 			return shortcuts.ServiceError(http.StatusBadRequest, SettingsRefused)
 		}
-		if errors.Is(err, redishost.CapacityExceeded) || errors.Is(err, redishost.PolicyUnconfirmed) {
+		if errors.Is(err, redishost.CapacityExceeded) {
+			message := fmt.Sprintf(RedisMemoryAllocationRefused, bytesize.FormatBinary(config.Redis.MemoryBudget), bytesize.FormatBinary(redishost.InstanceMemoryOverhead))
+			return shortcuts.ServiceError(http.StatusConflict, message)
+		}
+		if errors.Is(err, redishost.PolicyUnconfirmed) {
 			return shortcuts.ServiceError(http.StatusConflict, SettingsRefused)
 		}
 		return shortcuts.ServiceError(http.StatusBadGateway, SettingsRefused)

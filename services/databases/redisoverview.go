@@ -24,6 +24,8 @@ func redisContext(ctx context.Context, record *models.Database, shown *ShowConte
 	shown.Host, shown.Port = config.RedisHost(), config.Redis.PublicPort
 	shown.MemoryUsed = "—"
 	shown.PlaintextAllowed = config.Redis.AllowPlaintext
+	shown.RedisMemoryBudget = bytesize.FormatBinary(config.Redis.MemoryBudget)
+	shown.RedisMemoryOverhead = bytesize.FormatBinary(redishost.InstanceMemoryOverhead)
 	shown.ManagedRedisCA = config.Redis.CertificatePath == "" && !config.Certificates.Automatic
 	shown.EvictionPolicies = collections.OptionsOf("noeviction", "No eviction", "allkeys-lru", "All keys · least recently used", "allkeys-lfu", "All keys · least frequently used", "allkeys-random", "All keys · random", "volatile-lru", "Expiring keys · least recently used", "volatile-lfu", "Expiring keys · least frequently used", "volatile-random", "Expiring keys · random", "volatile-ttl", "Expiring keys · shortest TTL")
 	shown.PersistenceOptions = collections.OptionsOf("aof-rdb", "AOF and RDB snapshots", "aof", "AOF", "rdb", "RDB snapshots")
@@ -40,9 +42,9 @@ func redisContext(ctx context.Context, record *models.Database, shown *ShowConte
 	shown.URL = shown.Address
 	actor := access.FromContext(ctx)
 	if instance, err := redishost.Instance(ctx, record); err == nil {
-		shown.MemoryLimit = bytesize.Format(instance.MemoryLimit)
+		shown.MemoryLimit = bytesize.FormatBinary(instance.MemoryLimit)
 		shown.MemoryAmount, shown.MemoryUnit, _ = strings.Cut(shown.MemoryLimit, " ")
-		shown.MemoryUnits = collections.OptionsOf("B", "Bytes", "KB", "KB", "MB", "MB", "GB", "GB", "TB", "TB", "KiB", "KiB", "MiB", "MiB", "GiB", "GiB", "TiB", "TiB")
+		shown.MemoryUnits = collections.OptionsOf("KiB", "KiB", "MiB", "MiB", "GiB", "GiB", "TiB", "TiB")
 		shown.MemoryLimitBytes = strconv.FormatInt(instance.MemoryLimit, 10)
 		shown.EvictionPolicy, shown.Persistence, shown.Fsync = instance.EvictionPolicy, instance.Persistence, instance.Fsync
 		shown.SettingsAvailable = config.Redis.Enabled && instance.State == models.DatabaseReady
