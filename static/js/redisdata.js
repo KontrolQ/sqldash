@@ -13,6 +13,13 @@
   const equalBytes = (first,second) => first?.data === second?.data;
   const bytes = value => ({encoding:'base64',data:value.data});
   const keyMap = new Map();
+  const expandedGroups = new Set();
+  const scanWindows = [];
+  const maximumWindowKeys = 10000;
+  const maximumWindowBytes = 1048576;
+  const maximumScanPages = 64;
+  const maximumScanMilliseconds = 5000;
+  const maximumWindowHistory = 128;
   const selectedEntries = new Set();
   const entryOrigins = new WeakMap();
   function entryOrigin(kind,entry) {
@@ -28,7 +35,7 @@
     input.toggleAttribute('aria-invalid', !!message);
   }
   function clearInvalid() { invalidInputs.clear(); invalid = ''; }
-  let scanCursor = '0', scanComplete = false, scanBound = false, lastDatabaseSize = '', activeScan = null, scanning = false, current = null, draft = null, ttlDraft = null;
+  let scanCursor = '0', scanWindowStart = '0', scanComplete = false, scanBound = false, rescanRequested = false, lastDatabaseSize = '', activeScan = null, scanning = false, current = null, draft = null, ttlDraft = null;
   let view = 'pretty', encoding = 'text', invalid = '', pending = false, loading = false, displaySerial = 0;
   const editor = query('[data-redis-editor]');
   const scanForm = query('[data-redis-scan-form]');
@@ -77,37 +84,13 @@
     return confirm('Discard unsaved changes?','This action opens a different key or snapshot. Your current draft has not been saved.',()=>{},'Discard draft');
   }
   function renderTree() {
-    query('[data-redis-loaded]').textContent=keyMap.size+(lastDatabaseSize?' / '+lastDatabaseSize:'')+' keys';
-    query('[data-redis-loaded]').title=keyMap.size+' loaded · '+(scanComplete?'scan complete':scanBound?'loaded-list limit reached; refine the search':'scan incomplete; load more keys');
-    const tree=query('[data-redis-tree]'); tree.replaceChildren();
-    const filter='';
-    const separator=':';
-    const groups=new Map();
-    const keys=[...keyMap.values()].sort((left,right)=>label(left.key).localeCompare(label(right.key)));
-    for(const summary of keys) {
-      const shown=label(summary.key);
-      if(filter && !shown.toLocaleLowerCase().includes(filter)) continue;
-      let parent=tree, prefix='';
-      let parts=[];
-      if(separator && summary.key.text != null) parts=shown.split(separator).slice(0,12);
-      if(parts.length>1) for(const part of parts.slice(0,-1)) {
-        prefix+=separator+part;
-        if(!groups.has(prefix)) {
-          const group=element('details'); group.open=true;
-          const heading=element('summary',part || '(empty prefix)','rail-group'); group.append(heading); parent.append(group); groups.set(prefix,group);
-        }
-        parent=groups.get(prefix);
-      }
-      const button=element('button',null,'rail-item'+(current?.key.data===summary.key.data?' is-current':''));
-      button.type='button';button.title=shown;button.setAttribute('aria-pressed',String(current?.key.data===summary.key.data));
-      const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m15.5 7.5 3 3L22 7l-3-3-3.5 3.5ZM11 11l4.5-3.5M2 17a5 5 0 1 0 10 0 5 5 0 0 0-10 0Z');icon.append(path);
-      button.append(icon,element('span',parts.length>1?parts.at(-1):shown,'rail-name'),element('span',summary.type==='ReJSON-RL'?'JSON':summary.type,'badge is-outline'));
-      button.addEventListener('click',safely(async()=>{if(await leaveDraft()) await loadKey(summary.key);}));
-      parent.append(button);
-    }
-    if(!tree.children.length) tree.append(element('div',keyMap.size?'No loaded keys match.':'No keys match. Continue scanning if the cursor is not complete.','rail-empty'));
+    query('[data-redis-loaded]').textContent=keyMap.size+' keys'+(lastDatabaseSize?' · '+lastDatabaseSize+' total':'');
+    query('[data-redis-loaded]').title=keyMap.size+' in this window · '+(scanComplete?'scan complete':scanBound?'more keys are available in the next window':'scan incomplete; continue loading keys');
+    window.SqlDashRedisTree.render(query('[data-redis-tree]'),keyMap.values(),{
+      element,label,selected:current?.key.data,expanded:expandedGroups,safely,
+      onSelect:async summary=>{if(await leaveDraft())await loadKey(summary.key);}
+    });
   }
-  let rescanRequested=false;
   function scanFilters() {
     const value=scanForm.elements.match.value;
     const format=scanForm.elements.matchEncoding.value;
@@ -116,23 +99,54 @@
     const count=(result.type?1:0)+(format!=='text'?1:0);query('[data-redis-filter-count]').textContent=String(count);query('[data-redis-filter-count]').hidden=!count;
     return result;
   }
-  async function scan(reset=false) {
+  async function scan(reset=false,previous=false) {
     if(scanning) {if(reset)rescanRequested=true;return;}
-    scanning=true;query('[data-redis-load-more]').disabled=true;
+    if(previous&&!scanWindows.length)return;
+    scanning=true;
+    const nextButton=query('[data-redis-load-more]');
+    const previousButton=query('[data-redis-previous-keys]');
+    nextButton.disabled=true;
+    previousButton.disabled=true;
     try {
-      const filters = reset || !activeScan ? scanFilters() : activeScan;
-      const result=await request('/keys/scan',{...filters,cursor:reset?'0':scanCursor,limit:200,loadedKeys:reset?[]:[...keyMap.keys()]});
-      activeScan=filters;
-      if(reset) {keyMap.clear();scanBound=false;}
-      for(const summary of result.keys) keyMap.set(summary.key.data,summary);
-      scanCursor=result.cursor;scanComplete=result.complete;
-      scanBound=keyMap.size>=10000 || [...keyMap.keys()].reduce((total,key)=>total+key.length,0)>=1048576;
-      lastDatabaseSize=result.databaseSize;
-      renderTree();
+      const filters=reset || !activeScan?scanFilters():activeScan;
+      let cursor=reset?'0':previous?scanWindows.at(-1):scanCursor;
+      let replacing=reset || previous || scanBound;
+      let loadedBytes=replacing?0:[...keyMap.keys()].reduce((total,key)=>total+key.length,0);
+      const started=Date.now();
+      let pages=0;
+      do {
+        const result=await request('/keys/scan',{...filters,cursor,limit:1000});
+        if(rescanRequested)break;
+        if(replacing){
+          if(reset){scanWindows.length=0;expandedGroups.clear();}
+          else if(previous)scanWindows.pop();
+          else {scanWindows.push(scanWindowStart);if(scanWindows.length>maximumWindowHistory)scanWindows.shift();}
+          scanWindowStart=cursor;
+          keyMap.clear();scanBound=false;replacing=false;
+        }
+        activeScan=filters;
+        for(const summary of result.keys){
+          if(!keyMap.has(summary.key.data))loadedBytes+=summary.key.data.length;
+          keyMap.set(summary.key.data,summary);
+        }
+        cursor=result.cursor;scanCursor=cursor;scanComplete=result.complete;lastDatabaseSize=result.databaseSize;
+        scanBound=keyMap.size>=maximumWindowKeys || loadedBytes>=maximumWindowBytes;
+        pages++;
+        query('[data-redis-loaded]').textContent=keyMap.size+' keys · scanning…';
+      }while(!scanComplete && !scanBound && pages<maximumScanPages && Date.now()-started<maximumScanMilliseconds);
+      if(!rescanRequested)renderTree();
     } catch(problem) {
+      renderTree();
       if(!keyMap.size)query('[data-redis-tree]').replaceChildren(element('div','Keys could not be loaded. Reload the list to retry.','rail-empty'));
       throw problem;
-    } finally {scanning=false;query('[data-redis-load-more]').disabled=scanComplete || scanBound;if(rescanRequested){rescanRequested=false;safely(()=>scan(true))();}}
+    } finally {
+      scanning=false;
+      nextButton.disabled=scanComplete;
+      nextButton.title=scanComplete?'Scan complete':scanBound?'Next window of keys':'Continue key scan';
+      nextButton.setAttribute('aria-label',nextButton.title);
+      previousButton.disabled=!scanWindows.length;
+      if(rescanRequested){rescanRequested=false;safely(()=>scan(true))();}
+    }
   }
   async function loadKey(key,cursor='') {
     if(!closeCell())return;
@@ -511,6 +525,7 @@
   query('[data-redis-key-search]').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>safely(()=>scan(true))(),250);});
   query('[data-redis-clear-filters]').addEventListener('click',safely(async()=>{for(const [name,value] of [['type',''],['matchEncoding','text']]){scanForm.elements[name].value=value;scanForm.elements[name].dispatchEvent(new Event('change',{bubbles:true}));}await scan(true);}));
   query('[data-redis-load-more]').addEventListener('click',safely(()=>scan(false)));
+  query('[data-redis-previous-keys]').addEventListener('click',safely(()=>scan(false,true)));
   query('[data-redis-value-filter]').addEventListener('input',()=>{if(invalid)return;selectedEntries.clear();renderEditor();updateActions();});
   query('[data-redis-value-view]').addEventListener('change',event=>{if(invalid){event.target.value=view;error(invalid+' Fix or discard the draft before changing view.');return;}view=event.target.value;renderEditor();});
   query('[data-redis-value-encoding]').addEventListener('change',event=>{if(invalid){event.target.value=encoding;error(invalid+' Fix or discard the draft before changing encoding.');return;}encoding=event.target.value;renderEditor();});
