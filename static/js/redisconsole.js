@@ -56,6 +56,10 @@
     input.dispatchEvent(new Event('input', {bubbles: true}));
   }
 
+  function clearTranscript() {
+    output.replaceChildren();
+  }
+
   function entry(command) {
     const result = node('div', '', 'redis-console-entry');
     const line = node('div', '', 'redis-console-line');
@@ -93,6 +97,14 @@
     if (pending) return;
     const command = readInput().trim();
     if (!command) { replaceInput(''); return; }
+    if (command.toLowerCase() === 'clear') {
+      clearTranscript();
+      historyIndex = history.length;
+      savedDraft = '';
+      status.textContent = 'Ready';
+      replaceInput('');
+      return;
+    }
     const resultEntry = entry(command);
     input.textContent = '';
     if (command.length > maximumCommandLength) {
@@ -142,7 +154,7 @@
       return;
     }
     if (modified && event.key.toLowerCase() === 'l') {
-      event.preventDefault(); output.replaceChildren(); return;
+      event.preventDefault(); clearTranscript(); return;
     }
     if (modified && event.key.toLowerCase() === 'c' && !window.getSelection()?.toString()) {
       event.preventDefault();
@@ -177,7 +189,7 @@
   terminal.addEventListener('click', event => {
     if (!pending && !window.getSelection()?.toString() && !event.target.closest('a, button, [contenteditable]')) focusInput(true);
   });
-  document.querySelector('[data-redis-terminal-clear]').addEventListener('click', () => { output.replaceChildren(); focusInput(true); });
+  document.querySelector('[data-redis-terminal-clear]').addEventListener('click', () => { clearTranscript(); focusInput(true); });
   window.addEventListener('pagehide', () => { leaving = true; history.length = 0; savedDraft = ''; });
   window.addEventListener('pageshow', () => { leaving = false; });
   focusInput(true);
