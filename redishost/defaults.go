@@ -1,6 +1,9 @@
 package redishost
 
-import "time"
+import (
+	"sqldash/config"
+	"time"
+)
 
 const (
 	manifestVersion        = 1
@@ -9,7 +12,7 @@ const (
 	maximumDatabaseID      = 2000000000
 	instanceOverhead       = 64 * 1024 * 1024
 	InstanceMemoryOverhead = instanceOverhead
-	privateClientReserve   = 32
+	privateClientReserve   = config.RedisControlConnections
 	controlTimeout         = 5 * time.Second
 	maximumControlBytes    = 4096
 	maximumManifestBytes   = 1024 * 1024

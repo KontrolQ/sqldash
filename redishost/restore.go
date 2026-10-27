@@ -546,8 +546,7 @@ func restoreCapacity(ctx context.Context, control *redisclient.Client, instance 
 	if usedError != nil || excludedError != nil || used < 0 || excluded < 0 || excluded > used {
 		return Unavailable
 	}
-	reserve := max(int64(1024*1024), instance.MemoryLimit/10)
-	if used-excluded > instance.MemoryLimit-reserve {
+	if !restoreMemoryAllowed(used, excluded, instance.MemoryLimit) {
 		return CapacityExceeded
 	}
 	return nil

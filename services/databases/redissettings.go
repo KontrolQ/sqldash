@@ -48,7 +48,10 @@ func SaveRedisSettings(ctx context.Context, name string, settings redishost.Sett
 			return shortcuts.ServiceError(http.StatusBadRequest, SettingsRefused)
 		}
 		if errors.Is(err, redishost.CapacityExceeded) {
-			message := fmt.Sprintf(RedisMemoryAllocationRefused, bytesize.FormatBinary(config.Redis.MemoryBudget), bytesize.FormatBinary(redishost.InstanceMemoryOverhead))
+			message := RedisMemoryBelowUsage
+			if config.Redis.MemoryBudget > 0 {
+				message = fmt.Sprintf(RedisMemoryAllocationRefused, bytesize.FormatBinary(config.Redis.MemoryBudget), bytesize.FormatBinary(redishost.InstanceMemoryOverhead))
+			}
 			return shortcuts.ServiceError(http.StatusConflict, message)
 		}
 		if errors.Is(err, redishost.PolicyUnconfirmed) {

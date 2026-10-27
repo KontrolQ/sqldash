@@ -127,16 +127,8 @@ func (self *manager) start(ctx context.Context, record *models.Database) error {
 	if err := checkQuarantine(instance); err != nil {
 		return err
 	}
-	var reserved int64
-	var instances int64
-	if err := database.DB.WithContext(ctx).Model(&models.RedisInstance{}).Select("coalesce(sum(memory_limit + ?), 0)", instanceOverhead).Scan(&reserved).Error; err != nil {
-		return Unavailable
-	}
-	if err := database.DB.WithContext(ctx).Model(&models.RedisInstance{}).Count(&instances).Error; err != nil {
-		return Unavailable
-	}
-	if instances > int64(config.Redis.MaximumInstances) || reserved > config.Redis.MemoryBudget {
-		return CapacityExceeded
+	if err := checkCapacity(database.DB.WithContext(ctx)); err != nil {
+		return err
 	}
 	lock, err := lockOwnedFile(lockPath(record.ID), true)
 	if err != nil {

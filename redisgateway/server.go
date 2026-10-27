@@ -23,7 +23,7 @@ func Run(ctx context.Context, supplied Options) error {
 		}
 	}
 	defer listener.Close()
-	self := &gateway{options: options, sessions: make(map[*session]struct{}), databases: make(map[uint]int), handshakes: make(chan struct{}, options.MaximumHandshakes), callbacks: make(chan struct{}, options.MaximumConnections+options.MaximumHandshakes), terminations: make(chan struct{}, 8), enforcements: make(chan struct{}, 16), failures: make(chan error, 1), listener: listener}
+	self := &gateway{options: options, sessions: make(map[*session]struct{}), databases: make(map[uint]int), handshakes: make(chan struct{}, options.MaximumHandshakes), callbacks: make(chan struct{}, max(options.MaximumConnections, DefaultMaximumCallbacks)+options.MaximumHandshakes), terminations: make(chan struct{}, 8), enforcements: make(chan struct{}, 16), failures: make(chan error, 1), listener: listener}
 	stopped := make(chan struct{})
 	defer close(stopped)
 	go func() {
@@ -49,7 +49,7 @@ func Run(ctx context.Context, supplied Options) error {
 			return err
 		}
 		self.mutex.Lock()
-		if len(self.sessions) >= options.MaximumConnections {
+		if options.MaximumConnections > 0 && len(self.sessions) >= options.MaximumConnections {
 			self.mutex.Unlock()
 			_ = connection.SetWriteDeadline(time.Now().Add(time.Second))
 			_ = rediswire.WriteAll(connection, []byte(connectionLimit))
@@ -101,7 +101,7 @@ func (self *gateway) closeSessions() {
 func (self *gateway) reserve(current *session, databaseID uint) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
-	if self.databases[databaseID] >= self.options.MaximumSessionsPerDatabase {
+	if self.options.MaximumSessionsPerDatabase > 0 && self.databases[databaseID] >= self.options.MaximumSessionsPerDatabase {
 		return false
 	}
 	self.databases[databaseID]++

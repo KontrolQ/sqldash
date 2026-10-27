@@ -2,6 +2,7 @@ package redishost
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 )
 
 func validSettings(instance *models.RedisInstance) bool {
-	if instance.MemoryLimit < 1024*1024 || instance.MemoryLimit > config.Redis.MemoryBudget {
+	if instance.MemoryLimit < 0 || instance.MemoryLimit > 0 && instance.MemoryLimit < 1024*1024 || instance.MemoryLimit > math.MaxInt64-instanceOverhead || memoryExceedsBudget(instance.MemoryLimit) {
 		return false
 	}
 	switch instance.EvictionPolicy {
@@ -37,7 +38,10 @@ func writeConfiguration(instance *models.RedisInstance) error {
 	var contents strings.Builder
 	contents.WriteString("bind 127.0.0.1\nport 0\nprotected-mode yes\ndaemonize no\nsupervised no\ndatabases 1\n")
 	fmt.Fprintf(&contents, "unixsocket %s\nunixsocketperm 600\ndir %s\naclfile %s\n", strconv.Quote(socketPath(instance.DatabaseID)), strconv.Quote(dataDirectory(instance.DatabaseID)), strconv.Quote(aclPath(instance.DatabaseID)))
-	fmt.Fprintf(&contents, "maxmemory %d\nmaxmemory-policy %s\nmaxclients %d\n", instance.MemoryLimit, instance.EvictionPolicy, config.Redis.MaximumConnections+privateClientReserve)
+	fmt.Fprintf(&contents, "maxmemory %d\nmaxmemory-policy %s\n", instance.MemoryLimit, instance.EvictionPolicy)
+	if config.Redis.MaximumConnections > 0 {
+		fmt.Fprintf(&contents, "maxclients %d\n", config.Redis.MaximumConnections+privateClientReserve)
+	}
 	contents.WriteString("dbfilename dump.rdb\nappendfilename appendonly.aof\nappenddirname appendonlydir\naof-load-truncated no\nstop-writes-on-bgsave-error yes\nrdbchecksum yes\nlogfile \"\"\nslowlog-log-slower-than 10000\nslowlog-max-len 128\n")
 	if instance.Persistence == "rdb" {
 		contents.WriteString("appendonly no\n")

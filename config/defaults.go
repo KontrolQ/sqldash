@@ -17,4 +17,5 @@ const (
 
 	MinimumRequestBodyLimit = 4 * 1024 * 1024
 	MultipartUploadOverhead = 64 * 1024
+	RedisControlConnections = 32
 )

@@ -14,7 +14,6 @@ import (
 	"syscall"
 	"time"
 
-	"sqldash/config"
 	"sqldash/database"
 	"sqldash/models"
 
@@ -203,6 +202,9 @@ func runtimeSettings(ctx context.Context, client *redisclient.Client) (Settings,
 }
 
 func validateSettingsMemory(ctx context.Context, client *redisclient.Client, limit int64) error {
+	if limit == 0 {
+		return nil
+	}
 	information, err := client.Info(ctx, "memory").Result()
 	if err != nil {
 		return Unavailable
@@ -218,25 +220,22 @@ func validateSettingsMemory(ctx context.Context, client *redisclient.Client, lim
 }
 
 func reservedSettings(before, after Settings) Settings {
-	after.MemoryLimit = max(before.MemoryLimit, after.MemoryLimit)
+	if before.MemoryLimit == 0 || after.MemoryLimit == 0 {
+		after.MemoryLimit = 0
+	} else {
+		after.MemoryLimit = max(before.MemoryLimit, after.MemoryLimit)
+	}
 	return after
 }
 
 func reserveSettings(ctx context.Context, instance *models.RedisInstance, settings Settings) error {
 	settings = reservedSettings(instanceSettings(instance), settings)
 	return database.DB.WithContext(ctx).Transaction(func(transaction *gorm.DB) error {
-		var reserved int64
-		if err := transaction.Model(&models.RedisInstance{}).Select("coalesce(sum(memory_limit + ?), 0)", instanceOverhead).Scan(&reserved).Error; err != nil {
-			return Unavailable
-		}
-		if reserved < instance.MemoryLimit+instanceOverhead || settings.MemoryLimit > config.Redis.MemoryBudget || reserved-instance.MemoryLimit > config.Redis.MemoryBudget-settings.MemoryLimit {
-			return CapacityExceeded
-		}
 		updated := transaction.Model(&models.RedisInstance{}).Where("id = ? AND identity = ? AND generation = ? AND process_id = ? AND run_id = ? AND state = ? AND memory_limit = ? AND eviction_policy = ? AND persistence = ? AND fsync = ?", instance.ID, instance.Identity, instance.Generation, instance.ProcessID, instance.RunID, models.DatabaseReady, instance.MemoryLimit, instance.EvictionPolicy, instance.Persistence, instance.Fsync).Updates(map[string]any{"memory_limit": settings.MemoryLimit, "eviction_policy": settings.EvictionPolicy, "persistence": settings.Persistence, "fsync": settings.Fsync, "state": models.DatabaseApplying})
 		if updated.Error != nil || updated.RowsAffected != 1 {
 			return PolicyUnconfirmed
 		}
-		return nil
+		return checkMemoryCapacity(transaction)
 	})
 }
 
@@ -450,7 +449,7 @@ func UpdateSettings(ctx context.Context, record *models.Database, asked Settings
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if asked.MemoryLimit > config.Redis.MemoryBudget {
+	if memoryExceedsBudget(asked.MemoryLimit) {
 		return CapacityExceeded
 	}
 	if !validSettings(settingsInstance(&models.RedisInstance{}, asked)) {

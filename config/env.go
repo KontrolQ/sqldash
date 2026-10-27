@@ -53,11 +53,11 @@ type redisSettings struct {
 	AllowPlaintext       bool          `env:"REDIS_ALLOW_PLAINTEXT" envDefault:"true"`
 	CertificatePath      string        `env:"REDIS_CERTIFICATE_PATH"`
 	PrivateKeyPath       string        `env:"REDIS_PRIVATE_KEY_PATH"`
-	MemoryLimit          int64         `env:"REDIS_MEMORY_LIMIT" envDefault:"268435456"`
-	MemoryBudget         int64         `env:"REDIS_MEMORY_BUDGET" envDefault:"1073741824"`
-	MaximumInstances     int           `env:"REDIS_MAXIMUM_INSTANCES" envDefault:"16"`
-	MaximumConnections   int           `env:"REDIS_MAXIMUM_CONNECTIONS" envDefault:"100"`
-	MaximumValueBytes    int64         `env:"REDIS_MAXIMUM_VALUE_BYTES" envDefault:"8388608"`
+	MemoryLimit          int64         `env:"REDIS_MEMORY_LIMIT" envDefault:"0"`
+	MemoryBudget         int64         `env:"REDIS_MEMORY_BUDGET" envDefault:"0"`
+	MaximumInstances     int           `env:"REDIS_MAXIMUM_INSTANCES" envDefault:"0"`
+	MaximumConnections   int           `env:"REDIS_MAXIMUM_CONNECTIONS" envDefault:"0"`
+	MaximumValueBytes    int64         `env:"REDIS_MAXIMUM_VALUE_BYTES" envDefault:"536870912"`
 	MaximumScanBatch     int64         `env:"REDIS_MAXIMUM_SCAN_BATCH" envDefault:"1000"`
 	MaximumStreamBuffer  int           `env:"REDIS_MAXIMUM_STREAM_BUFFER" envDefault:"1000"`
 	StartupTimeout       time.Duration `env:"REDIS_STARTUP_TIMEOUT" envDefault:"60s"`

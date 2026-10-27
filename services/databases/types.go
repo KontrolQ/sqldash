@@ -102,6 +102,7 @@ type ShowContext struct {
 	MemoryUnits                        []collections.Option
 	MemoryLimitBytes                   string
 	RedisMemoryBudget                  string
+	RedisMemoryBudgetLimited           bool
 	RedisMemoryOverhead                string
 	EvictionPolicy                     string
 	Persistence                        string

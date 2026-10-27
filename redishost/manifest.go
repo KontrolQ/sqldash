@@ -49,7 +49,12 @@ func prepareInstance(ctx context.Context, record *models.Database) (*models.Redi
 		if err != nil {
 			return nil, err
 		}
-		instance = models.RedisInstance{DatabaseID: record.ID, Identity: string(identity), Generation: 1, State: models.DatabasePending, MemoryLimit: config.Redis.MemoryLimit, EvictionPolicy: "noeviction", Persistence: "aof-rdb", Fsync: "everysec"}
+		memoryLimit, err := initialMemoryLimit(database.DB.WithContext(ctx))
+		if err != nil {
+			clear(identity)
+			return nil, err
+		}
+		instance = models.RedisInstance{DatabaseID: record.ID, Identity: string(identity), Generation: 1, State: models.DatabasePending, MemoryLimit: memoryLimit, EvictionPolicy: "noeviction", Persistence: "aof-rdb", Fsync: "everysec"}
 		clear(identity)
 		if err := database.DB.WithContext(ctx).Create(&instance).Error; err != nil {
 			return nil, Unavailable

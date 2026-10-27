@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"math"
 	"net"
 	"strconv"
 	"strings"
@@ -15,10 +16,10 @@ func VerifyRedis() error {
 	if Redis.BinaryPath == "" || Redis.ModulesDirectory == "" {
 		return errors.New("Redis runtime paths must be configured")
 	}
-	if Redis.MemoryLimit < 1024*1024 || Redis.MemoryBudget < Redis.MemoryLimit || Redis.MaximumInstances < 1 || Redis.MaximumInstances > 65536 {
+	if Redis.MemoryLimit < 0 || Redis.MemoryLimit > 0 && Redis.MemoryLimit < 1024*1024 || Redis.MemoryBudget < 0 || Redis.MemoryBudget > 0 && Redis.MemoryBudget < Redis.MemoryLimit || Redis.MaximumInstances < 0 {
 		return errors.New("Redis memory and instance limits are invalid")
 	}
-	if Redis.MaximumConnections < 1 || Redis.MaximumConnections > 100000 || Redis.MaximumValueBytes < 1 || Redis.MaximumValueBytes > 512*1024*1024 {
+	if Redis.MaximumConnections < 0 || Redis.MaximumConnections > math.MaxInt-RedisControlConnections || Redis.MaximumValueBytes < 1 || Redis.MaximumValueBytes > 512*1024*1024 {
 		return errors.New("Redis connection and value limits are invalid")
 	}
 	if Redis.MaximumScanBatch < 1 || Redis.MaximumScanBatch > 10000 || Redis.MaximumStreamBuffer < 1 || Redis.MaximumStreamBuffer > 100000 {

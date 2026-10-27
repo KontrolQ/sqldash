@@ -24,7 +24,11 @@ func redisContext(ctx context.Context, record *models.Database, shown *ShowConte
 	shown.Host, shown.Port = config.RedisHost(), config.Redis.PublicPort
 	shown.MemoryUsed = "—"
 	shown.PlaintextAllowed = config.Redis.AllowPlaintext
-	shown.RedisMemoryBudget = bytesize.FormatBinary(config.Redis.MemoryBudget)
+	shown.RedisMemoryBudget = "Unlimited"
+	shown.RedisMemoryBudgetLimited = config.Redis.MemoryBudget > 0
+	if shown.RedisMemoryBudgetLimited {
+		shown.RedisMemoryBudget = bytesize.FormatBinary(config.Redis.MemoryBudget)
+	}
 	shown.RedisMemoryOverhead = bytesize.FormatBinary(redishost.InstanceMemoryOverhead)
 	shown.ManagedRedisCA = config.Redis.CertificatePath == "" && !config.Certificates.Automatic
 	shown.EvictionPolicies = collections.OptionsOf("noeviction", "No eviction", "allkeys-lru", "All keys · least recently used", "allkeys-lfu", "All keys · least frequently used", "allkeys-random", "All keys · random", "volatile-lru", "Expiring keys · least recently used", "volatile-lfu", "Expiring keys · least frequently used", "volatile-random", "Expiring keys · random", "volatile-ttl", "Expiring keys · shortest TTL")

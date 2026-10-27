@@ -1,16 +1,13 @@
 package redisgateway
 
-import "crypto/tls"
+import (
+	"crypto/tls"
+	"math"
+)
 
 func normalize(options Options) (Options, error) {
 	if options.ListenAddress == "" {
 		options.ListenAddress = ":6379"
-	}
-	if options.MaximumConnections == 0 {
-		options.MaximumConnections = DefaultMaximumConnections
-	}
-	if options.MaximumSessionsPerDatabase == 0 {
-		options.MaximumSessionsPerDatabase = DefaultMaximumSessionsPerDatabase
 	}
 	if options.MaximumHandshakes == 0 {
 		options.MaximumHandshakes = DefaultMaximumHandshakes
@@ -27,7 +24,10 @@ func normalize(options Options) (Options, error) {
 	if options.TerminationTimeout == 0 {
 		options.TerminationTimeout = DefaultTerminationTimeout
 	}
-	if options.MaximumConnections < 1 || options.MaximumSessionsPerDatabase < 1 || options.MaximumHandshakes < 1 || options.HandshakeTimeout <= 0 || options.ValidationInterval <= 0 || options.ValidationTimeout <= 0 || options.TerminationTimeout <= 0 {
+	if options.MaximumConnections < 0 || options.MaximumSessionsPerDatabase < 0 || options.MaximumHandshakes < 1 || options.HandshakeTimeout <= 0 || options.ValidationInterval <= 0 || options.ValidationTimeout <= 0 || options.TerminationTimeout <= 0 {
+		return options, InvalidOptions
+	}
+	if max(options.MaximumConnections, DefaultMaximumCallbacks) > math.MaxInt-options.MaximumHandshakes {
 		return options, InvalidOptions
 	}
 	if options.ValidationInterval+options.ValidationTimeout > MaximumPolicyDelay || !options.AllowPlaintext && options.TLSConfig == nil {
