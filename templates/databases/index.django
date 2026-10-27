@@ -35,8 +35,8 @@ Create database
               <th scope="col">Address</th>
               <th scope="col" class="table-numeric">{% if ObjectHeading %}{{ ObjectHeading }}{% else %}Tables{% endif %}</th>
               <th scope="col" class="table-numeric">Storage</th>
-              <th scope="col" class="table-numeric">Rows read</th>
-              <th scope="col" class="table-numeric">Queries</th>
+              <th scope="col" class="table-numeric">{{ ReadHeading }}</th>
+              <th scope="col" class="table-numeric">{{ QueryHeading }}</th>
               <th scope="col">State</th>
               <th scope="col" class="table-pick"></th>
             </tr>
@@ -49,8 +49,8 @@ Create database
                 <td class="mono muted">{{ database.Address }}</td>
                 <td class="table-numeric">{% if database.Objects %}{{ database.Objects }}{% else %}{{ database.Tables }}{% endif %}</td>
                 <td class="table-numeric">{{ database.Storage }}</td>
-                <td class="table-numeric">{{ database.RowsRead }}</td>
-                <td class="table-numeric">{{ database.Queries }}</td>
+                <td class="table-numeric" title="{{ database.ActivityMetrics.RowsReadNote }}">{{ database.ActivityMetrics.RowsRead }}{% if not Engine %} <span class="muted">{{ database.ActivityMetrics.RowsReadLabel|lower }}</span>{% endif %}</td>
+                <td class="table-numeric" title="{{ database.ActivityMetrics.QueryCountNote }}">{{ database.ActivityMetrics.QueryCount }}{% if not Engine %} <span class="muted">{{ database.ActivityMetrics.QueryCountLabel|lower }}</span>{% endif %}</td>
                 <td>
                   {% if not database.Ready %}<span class="badge is-outline">{{ database.State }}</span>{% elif not database.Online %}<span class="badge is-outline">Offline</span>{% elif database.Blocked %}
                     <span class="badge is-outline">Blocked</span>

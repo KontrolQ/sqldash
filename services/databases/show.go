@@ -24,7 +24,7 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 	}
 	actor := access.FromContext(fresh)
 	address := record.Name + "." + config.Server.Domain
-	shown := &ShowContext{Title: record.Label(), Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", RowsRead: "—", RowsWritten: "—", QueryCount: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
+	shown := &ShowContext{Title: record.Label(), Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", ActivityMetrics: unavailableActivityMetrics(record.Kind()), RowsWritten: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
 	shown.CanCloneRemote = overviewhelper.CanCloneRemote(actor)
 	shown.RemoteTLSModes = overviewhelper.RemoteTLSModes()
 	if record.Kind() == models.EngineRedis {
@@ -37,6 +37,7 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 				shown.Storage = readableSize(statistics.StorageBytes)
 				shown.Connections = readableCount(statistics.Connections)
 				shown.Transactions = readableCount(statistics.TransactionsCommitted)
+				shown.ActivityMetrics = postgresActivityMetrics(statistics)
 				shown.Online = true
 			}
 			if actor.CanDatabase(record, permissions.DatabaseSettings) {
@@ -51,9 +52,8 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 	} else if record.Available() {
 		if statistics, err := engines.Statistics(fresh, name); err == nil {
 			shown.Storage = readableSize(statistics.StorageBytesUsed)
-			shown.RowsRead = readableCount(statistics.RowsRead)
+			shown.ActivityMetrics = libsqlActivityMetrics(statistics)
 			shown.RowsWritten = readableCount(statistics.RowsWritten)
-			shown.QueryCount = readableCount(statistics.QueryCount)
 			shown.Online = true
 		}
 		if settings, err := engines.Configuration(fresh, name); err == nil {

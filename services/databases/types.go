@@ -20,6 +20,8 @@ type IndexContext struct {
 	CanImportPostgres  bool
 	CanImportRedis     bool
 	ObjectHeading      string
+	ReadHeading        string
+	QueryHeading       string
 	CanCloneRemote     bool
 	RemoteTLSModes     []collections.Option
 	RemoteCloneForm    *RemoteCloneForm
@@ -35,7 +37,17 @@ type RemoteCloneForm struct {
 	Error    string
 }
 
+type ActivityMetrics struct {
+	RowsRead        string
+	QueryCount      string
+	RowsReadLabel   string
+	QueryCountLabel string
+	RowsReadNote    string
+	QueryCountNote  string
+}
+
 type DatabaseView struct {
+	ActivityMetrics
 	DisplayName string
 	Name        string
 	Engine      string
@@ -49,12 +61,11 @@ type DatabaseView struct {
 	Storage     string
 	Tables      string
 	Objects     string
-	RowsRead    string
-	Queries     string
 	Actions     map[string]bool
 }
 
 type ShowContext struct {
+	ActivityMetrics
 	Title                              string
 	Name                               string
 	Engine                             string
@@ -73,9 +84,7 @@ type ShowContext struct {
 	SettingsAvailable                  bool
 	Storage                            string
 	Tables                             string
-	RowsRead                           string
 	RowsWritten                        string
-	QueryCount                         string
 	Connections                        string
 	Transactions                       string
 	ConnectionLimit                    int

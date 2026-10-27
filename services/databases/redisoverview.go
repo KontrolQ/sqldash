@@ -54,6 +54,7 @@ func redisContext(ctx context.Context, record *models.Database, shown *ShowConte
 			shown.Storage = readableSize(statistics.StorageBytes)
 			shown.MemoryUsed = readableSize(statistics.MemoryBytes)
 			shown.Connections = readableCount(statistics.Connections)
+			shown.ActivityMetrics = redisActivityMetrics(statistics)
 			if statistics.Keys >= 0 {
 				shown.Tables = readableCount(statistics.Keys)
 			}

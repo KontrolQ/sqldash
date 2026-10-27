@@ -52,8 +52,14 @@ func GetIndexDataForEngine(ctx context.Context, engine string) (*IndexContext, *
 	} else if engine == "" {
 		objectHeading = "Tables / keys"
 	}
+	readHeading, queryHeading := "Read activity", "Queries / commands"
+	if engine != "" {
+		metrics := unavailableActivityMetrics(engine)
+		readHeading, queryHeading = metrics.RowsReadLabel, metrics.QueryCountLabel
+	}
 	return &IndexContext{
 		Title: IndexTitle, Databases: toDatabaseViews(fresh, filtered), Engine: engine,
+		ReadHeading: readHeading, QueryHeading: queryHeading,
 		EngineFilters: collections.OptionsOf("", "Every engine", models.EngineLibSQL, "libSQL", models.EnginePostgres, "PostgreSQL", models.EngineRedis, "Redis"),
 		CreateEngines: createEngines, ImportEngines: importEngines, CanCreateDatabases: len(createEngines) > 0, CanImportDatabases: len(importEngines) > 0,
 		CanImportLibSQL: canImportLibSQL, CanImportPostgres: canImportPostgres, CanImportRedis: canImportRedis, ObjectHeading: objectHeading,
@@ -111,21 +117,17 @@ func toDatabaseViews(ctx context.Context, records []models.Database) []DatabaseV
 	actor := access.FromContext(ctx)
 	for index := range records {
 		record := &records[index]
-		view := DatabaseView{Name: record.Name, DisplayName: record.Label(), Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Address: record.Name + "." + config.Server.Domain, Protected: record.Protected, Storage: "Unavailable", Tables: "—", Objects: "—", RowsRead: "—", Queries: "—", Ready: record.Available(), Actions: access.Actions(actor, record)}
+		view := DatabaseView{Name: record.Name, DisplayName: record.Label(), Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Address: record.Name + "." + config.Server.Domain, Protected: record.Protected, Storage: "Unavailable", Tables: "—", Objects: "—", ActivityMetrics: unavailableActivityMetrics(record.Kind()), Ready: record.Available(), Actions: access.Actions(actor, record)}
 		fresh := engines.WithDatabase(ctx, record)
 		if record.Kind() == models.EngineRedis {
 			view.Address = config.RedisHost() + ":" + strconv.Itoa(config.Redis.PublicPort)
 			if record.Available() {
-				if statistics, err := engines.Statistics(fresh, record.Name); err == nil {
-					view.Storage = readableSize(statistics.StorageBytesUsed)
+				if statistics, err := redishost.StatisticsFor(fresh, record, actor.CanDatabase(record, permissions.DataRead)); err == nil {
+					view.Storage = readableSize(statistics.StorageBytes)
+					view.ActivityMetrics = redisActivityMetrics(statistics)
 					view.Online = true
-				}
-				if actor.CanDatabase(record, permissions.DataRead) {
-					if client, err := redishost.Client(fresh, record, redishost.ReadOnly); err == nil {
-						if count, err := client.DBSize(fresh).Result(); err == nil {
-							view.Objects = readableCount(count)
-						}
-						client.Close()
+					if statistics.Keys >= 0 {
+						view.Objects = readableCount(statistics.Keys)
 					}
 				}
 			}
@@ -134,14 +136,14 @@ func toDatabaseViews(ctx context.Context, records []models.Database) []DatabaseV
 			if record.Available() {
 				if statistics, err := control.Statistics(fresh, record); err == nil {
 					view.Storage = readableSize(statistics.StorageBytes)
+					view.ActivityMetrics = postgresActivityMetrics(statistics)
 					view.Online = true
 				}
 			}
 		} else if record.Available() {
 			if statistics, err := engines.Statistics(fresh, record.Name); err == nil {
 				view.Storage = readableSize(statistics.StorageBytesUsed)
-				view.RowsRead = readableCount(statistics.RowsRead)
-				view.Queries = readableCount(statistics.QueryCount)
+				view.ActivityMetrics = libsqlActivityMetrics(statistics)
 				view.Online = true
 			}
 			if settings, err := engines.Configuration(fresh, record.Name); err == nil {

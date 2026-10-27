@@ -45,6 +45,8 @@
     </div>
     {% if Engine == "redis" %}<div class="tile"><span class="tile-label">Connections</span><div class="tile-line"><span class="tile-value">{{ Connections }}</span></div></div><div class="tile"><span class="tile-label">Memory</span><div class="tile-line"><span class="tile-value">{{ MemoryUsed }}</span></div></div>{% endif %}
     {% if Engine == "postgres" %}<div class="tile"><span class="tile-label">Connections</span><div class="tile-line"><span class="tile-value">{{ Connections }}</span></div></div><div class="tile"><span class="tile-label">Committed transactions</span><div class="tile-line"><span class="tile-value">{{ Transactions }}</span></div></div>{% endif %}
+    <div class="tile" title="{{ ActivityMetrics.RowsReadNote }}"><span class="tile-label">{{ ActivityMetrics.RowsReadLabel }}</span><div class="tile-line"><span class="tile-value">{{ ActivityMetrics.RowsRead }}</span></div></div>
+    <div class="tile" title="{{ ActivityMetrics.QueryCountNote }}"><span class="tile-label">{{ ActivityMetrics.QueryCountLabel }}</span><div class="tile-line"><span class="tile-value">{{ ActivityMetrics.QueryCount }}</span></div></div>
   </div>
   {% if Engine == "postgres" %}
     <p class="field-note">Storage uses the instance disk. There is no separate hard storage quota for this database.</p>
