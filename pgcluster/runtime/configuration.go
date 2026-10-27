@@ -35,7 +35,7 @@ func writeConfiguration(credentials *supervisor.Credentials) error {
 		"log_parameter_max_length_on_error = 0",
 		"log_connections = off",
 		"log_disconnections = off",
-		"log_line_prefix = '%m [%p] '",
+		"log_line_prefix = '[%p] '",
 		"",
 	}, "\n")
 	authentication := strings.Join([]string{

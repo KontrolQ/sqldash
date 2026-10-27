@@ -23,7 +23,7 @@ func supervise() {
 	defer stop()
 	processes := make([]supervisor.Process, 0, 5)
 	if config.Sqld.Managed {
-		processes = append(processes, supervisor.Process{Name: SqldProcessName, Path: config.Sqld.BinaryPath, Arguments: sqldArguments(), ShutdownGroup: 100})
+		processes = append(processes, supervisor.Process{Name: SqldProcessName, Path: config.Sqld.BinaryPath, Arguments: sqldArguments(), LogPrefix: "libSQL", LogFormat: logger.LibSQLOutput, ShutdownGroup: 100})
 	} else {
 		logger.Infof(LogPrefix, UnmanagedSqldLog, config.Sqld.Address)
 	}

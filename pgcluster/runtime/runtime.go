@@ -14,6 +14,7 @@ import (
 	"sqldash/config"
 	"sqldash/secretstore"
 	"sqldash/supervisor"
+	"sqldash/utils/logger"
 )
 
 type Runtime struct {
@@ -349,6 +350,8 @@ func (self *Runtime) Process(readiness func(context.Context) error) (supervisor.
 	}
 	return supervisor.Process{
 		Name:                ProcessName,
+		LogPrefix:           "PostgreSQL",
+		LogFormat:           logger.PostgresOutput,
 		Path:                filepath.Join(config.Postgres.BinaryDirectory, "postgres"),
 		Arguments:           []string{"-D", config.PostgresDataPath(), "-c", "config_file=" + filepath.Join(config.PostgresConfigPath(), configurationFileName)},
 		Directory:           config.PostgresDirectory(),

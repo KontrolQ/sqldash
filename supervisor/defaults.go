@@ -12,4 +12,5 @@ const (
 	ReadinessTimeout      = 60 * time.Second
 	ReadinessInterval     = 250 * time.Millisecond
 	StopConfirmationGrace = 5 * time.Second
+	OutputDrainTimeout    = 5 * time.Second
 )

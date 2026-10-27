@@ -193,6 +193,13 @@ func (self *Supervisor) runOnce(ctx context.Context, process *managedProcess) er
 	command.Dir = configuration.Directory
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
+	if configuration.LogPrefix != "" {
+		output := logger.ProcessStream(configuration.LogPrefix, configuration.LogFormat)
+		defer output.Close()
+		command.Stdout = output
+		command.Stderr = output
+		command.WaitDelay = OutputDrainTimeout
+	}
 	if err := configureCredentials(command, configuration.Credentials); err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ const (
 	LogPrefix         = "Database"
 	SchemaReadyMarker = "database-permission-namespaces"
 
+	SlowQueryThreshold    = 200 * time.Millisecond
 	MaxConnectionLifetime = time.Hour
 	MaxIdleConnections    = 5
 	MaxOpenConnections    = 25

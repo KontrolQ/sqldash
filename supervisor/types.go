@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"sync"
 	"time"
+
+	"sqldash/utils/logger"
 )
 
 type Credentials struct {
@@ -24,6 +26,8 @@ type Process struct {
 	Environment         []string
 	IsolatedEnvironment bool
 	Directory           string
+	LogPrefix           string
+	LogFormat           logger.OutputFormat
 	Credentials         *Credentials
 	Prepare             func(context.Context) error
 	Readiness           func(context.Context) error

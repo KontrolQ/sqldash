@@ -35,7 +35,7 @@ func formatPrefix(prefix string) string {
 		return ""
 	}
 
-	padding := ""
+	padding := " "
 	if len(prefix) < PrefixWidth {
 		padding = strings.Repeat(" ", PrefixWidth-len(prefix))
 	}

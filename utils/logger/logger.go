@@ -2,7 +2,9 @@ package logger
 
 import (
 	"fmt"
+	standardlog "log"
 	"os"
+	"strings"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -37,6 +39,8 @@ func init() {
 	)
 
 	instance = zap.New(core, zap.AddCaller())
+	standardlog.SetFlags(0)
+	standardlog.SetOutput(ProcessStream("Runtime", PlainOutput))
 }
 
 func SetDebug(enabled bool) {
@@ -77,5 +81,7 @@ func emit(levelLabel LogLevel, zapLevel zapcore.Level, prefix string, message an
 		panic(NotInitialized)
 	}
 
-	instance.Log(zapLevel, buildFullMessage(levelLabel, prefix, message))
+	for line := range strings.SplitSeq(strings.TrimSuffix(fmt.Sprint(message), "\n"), "\n") {
+		instance.Log(zapLevel, buildFullMessage(levelLabel, prefix, line))
+	}
 }
