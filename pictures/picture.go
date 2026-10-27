@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"image"
 	"io"
+	"strings"
 )
 
 func Transform(source io.Reader, maximumBytes int64) (*Picture, error) {
@@ -71,6 +72,13 @@ func Transform(source io.Reader, maximumBytes int64) (*Picture, error) {
 }
 
 func Source(encoded string, mediaType string) string {
+	if strings.HasPrefix(encoded, ReferencePrefix) {
+		filename, storedType, validationError := StoredName(encoded)
+		if validationError != nil || storedType != mediaType {
+			return ""
+		}
+		return URLPrefix + filename
+	}
 	if encoded == "" || (mediaType != "image/jpeg" && mediaType != "image/png" && mediaType != "image/gif" && mediaType != "image/webp") {
 		return ""
 	}

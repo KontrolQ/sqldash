@@ -24,7 +24,13 @@ func SavePicture(accountID uint, source io.Reader) *fiber.Error {
 		return shortcuts.ServiceError(status, processError.Error())
 	}
 
-	if saveError := repository.SavePicture(accountID, picture.Base64, picture.MediaType); saveError != nil {
+	reference, storageError := pictures.Store(picture.Base64, picture.MediaType)
+	if storageError != nil {
+		logger.Errorf(LogPrefix, SaveFailedLog, storageError)
+		return shortcuts.ServiceError(http.StatusInternalServerError, SaveRefused)
+	}
+
+	if saveError := repository.SavePicture(accountID, reference, picture.MediaType); saveError != nil {
 		logger.Errorf(LogPrefix, SaveFailedLog, saveError)
 		return shortcuts.ServiceError(http.StatusInternalServerError, SaveRefused)
 	}

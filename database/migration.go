@@ -1,8 +1,12 @@
 package database
 
-import "sqldash/models"
+import (
+	"context"
 
-func migrate() error {
+	"sqldash/models"
+)
+
+func migrate(ctx context.Context) error {
 	if migrationError := migrateOIDColumns(); migrationError != nil {
 		return migrationError
 	}
@@ -22,5 +26,8 @@ func migrate() error {
 	if ownershipError := migrateOwnership(); ownershipError != nil {
 		return ownershipError
 	}
-	return migrateEngines()
+	if migrationError := migrateEngines(); migrationError != nil {
+		return migrationError
+	}
+	return migratePicturesWith(ctx, DB)
 }

@@ -22,7 +22,7 @@ func Initialize(parent context.Context) error {
 		return lockError
 	}
 	defer unlockSchema(file)
-	return migrate()
+	return migrate(parent)
 }
 
 func Verify() error {

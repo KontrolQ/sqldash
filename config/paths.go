@@ -10,6 +10,10 @@ func DatabasesPath() string {
 	return filepath.Join(Data.Directory, DatabasesDirectory)
 }
 
+func PicturesPath() string {
+	return filepath.Join(Data.Directory, "pictures")
+}
+
 func ImportsPath() string {
 	return filepath.Join(Data.Directory, ImportsDirectory)
 }
