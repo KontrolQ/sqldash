@@ -22,7 +22,7 @@ type success struct {
 }
 
 func decodeRequest(context fiber.Ctx, target any) *fiber.Error {
-	if len(context.Body()) > service.RequestLimit() || !strings.HasPrefix(strings.ToLower(context.Get("Content-Type")), "application/json") {
+	if !strings.HasPrefix(strings.ToLower(context.Get("Content-Type")), "application/json") {
 		return fiber.NewError(400, service.InvalidRequest)
 	}
 	decoder := json.NewDecoder(bytes.NewReader(context.Body()))

@@ -6,9 +6,6 @@ import (
 )
 
 func ParseCommands(text string) ([][][]byte, error) {
-	if len(text) > DefaultMaximumBytes {
-		return nil, LimitExceeded
-	}
 	var commands [][][]byte
 	var arguments [][]byte
 	var current []byte
@@ -18,9 +15,6 @@ func ParseCommands(text string) ([][][]byte, error) {
 	flushArgument := func() error {
 		if !started {
 			return nil
-		}
-		if len(arguments) >= DefaultMaximumElements {
-			return LimitExceeded
 		}
 		arguments = append(arguments, append([]byte{}, current...))
 		current = nil
@@ -34,9 +28,6 @@ func ParseCommands(text string) ([][][]byte, error) {
 		}
 		if len(arguments) == 0 {
 			return nil
-		}
-		if len(commands) >= 256 {
-			return LimitExceeded
 		}
 		commands = append(commands, arguments)
 		arguments = nil
@@ -138,6 +129,9 @@ func ReadCommand(reader *bufio.Reader, limits Limits) ([][]byte, error) {
 		commands, err := ParseCommands(string(line))
 		if err != nil || len(commands) != 1 {
 			return nil, InvalidCommand
+		}
+		if len(commands[0]) > limits.MaximumElements {
+			return nil, LimitExceeded
 		}
 		return commands[0], nil
 	}

@@ -50,8 +50,8 @@ func commandSet(names string) map[string]bool {
 
 func Execute(ctx context.Context, name string, asked ConsoleRequest) (*ConsoleResult, *fiber.Error) {
 	commands, parseError := rediswire.ParseCommands(asked.Commands)
-	if parseError != nil || len(commands) == 0 || len(commands) > 100 {
-		return nil, fiber.NewError(400, "Enter at most 100 valid Redis commands. Binary arguments may use quoted \\xNN escapes.")
+	if parseError != nil || len(commands) == 0 {
+		return nil, fiber.NewError(400, "Enter valid Redis commands. Binary arguments may use quoted \\xNN escapes.")
 	}
 	fresh, actor, record, err := authorize(ctx, name, permissions.RedisConsoleExecute, true)
 	if err != nil {
@@ -136,7 +136,7 @@ func Execute(ctx context.Context, name string, asked ConsoleRequest) (*ConsoleRe
 		}
 	}()
 	start := time.Now()
-	budget, elements := maximumReplyBytes, maximumReplyElements
+	budget, elements := consoleReplyLimits()
 	for _, command := range commands {
 		if err := checkAuthority(bounded); err != nil {
 			return nil, fiber.NewError(403, "Redis console authority changed. Completed commands are not rolled back; inspect affected keys before retrying.")
@@ -171,24 +171,26 @@ func Execute(ctx context.Context, name string, asked ConsoleRequest) (*ConsoleRe
 }
 
 func typedReply(value any, budget, elements *int, depth int) Reply {
-	if depth > 32 || *budget <= 0 || *elements <= 0 {
+	if depth > 32 || *budget == 0 || *elements == 0 {
 		return Reply{Type: "truncated", Truncated: true}
 	}
-	*elements--
+	if *elements > 0 {
+		*elements--
+	}
 	switch held := value.(type) {
 	case nil:
 		return Reply{Type: "null"}
 	case int64:
 		text := strconv.FormatInt(held, 10)
-		*budget -= len(text)
+		consumeReplyBytes(budget, len(text))
 		return Reply{Type: "integer", Text: text}
 	case uint64:
 		text := strconv.FormatUint(held, 10)
-		*budget -= len(text)
+		consumeReplyBytes(budget, len(text))
 		return Reply{Type: "integer", Text: text}
 	case float64:
 		text := strconv.FormatFloat(held, 'g', -1, 64)
-		*budget -= len(text)
+		consumeReplyBytes(budget, len(text))
 		return Reply{Type: "double", Text: text}
 	case bool:
 		return Reply{Type: "boolean", Text: strconv.FormatBool(held)}
@@ -198,12 +200,16 @@ func typedReply(value any, budget, elements *int, depth int) Reply {
 		return byteReply(held, budget)
 	case error:
 		text := limitedText(held.Error(), 4096)
-		*budget -= len(text)
+		consumeReplyBytes(budget, len(text))
 		return Reply{Type: "error", Text: text}
 	case []any:
-		result := Reply{Type: "array", Items: make([]Reply, 0, min(len(held), *elements))}
+		capacity := len(held)
+		if *elements >= 0 {
+			capacity = min(capacity, *elements)
+		}
+		result := Reply{Type: "array", Items: make([]Reply, 0, capacity)}
 		for _, item := range held {
-			if *budget <= 0 || *elements <= 0 {
+			if *budget == 0 || *elements == 0 {
 				result.Truncated = true
 				break
 			}
@@ -217,13 +223,16 @@ func typedReply(value any, budget, elements *int, depth int) Reply {
 }
 
 func byteReply(value []byte, budget *int) Reply {
-	limit := max(0, *budget/2)
+	limit := len(value)
+	if *budget >= 0 {
+		limit = max(0, *budget/2)
+	}
 	truncated := len(value) > limit
 	if truncated {
 		value = value[:limit]
 	}
 	encoded := redisdata.EncodeBytes(value)
-	*budget -= len(encoded.Data) + len(value)
+	consumeReplyBytes(budget, len(encoded.Data)+len(value))
 	return Reply{Type: "bytes", Bytes: &encoded, Truncated: truncated}
 }
 

@@ -2,6 +2,7 @@ package redishost
 
 import (
 	"context"
+	"math"
 	"net"
 	"os"
 	"strconv"
@@ -99,7 +100,7 @@ func privateClient(ctx context.Context, record *models.Database, instance *model
 			if err != nil {
 				return nil, err
 			}
-			return rediswire.Guard(connection, rediswire.Limits{MaximumBytes: config.Redis.MaximumValueBytes + 1024*1024, MaximumBulkBytes: config.Redis.MaximumValueBytes, MaximumElements: 32768, MaximumDepth: 64}), nil
+			return rediswire.Guard(connection, rediswire.Limits{MaximumBytes: math.MaxInt64, MaximumBulkBytes: config.Redis.MaximumValueBytes, MaximumElements: math.MaxInt, MaximumDepth: 64}), nil
 		},
 	})
 	clear(password)
