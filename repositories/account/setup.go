@@ -23,6 +23,6 @@ func CreateFirst(record *models.Account) error {
 		if createError := transaction.Create(record).Error; createError != nil {
 			return createError
 		}
-		return transaction.Create(&models.Site{ID: 1, OwnerAccountID: record.ID, LegacyRolesRemoved: true}).Error
+		return transaction.Create(&models.Site{ID: 1, OwnerAccountID: record.ID}).Error
 	})
 }

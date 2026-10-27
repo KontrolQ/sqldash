@@ -3,7 +3,8 @@ package database
 import "time"
 
 const (
-	LogPrefix = "Database"
+	LogPrefix         = "Database"
+	SchemaReadyMarker = "database-permission-namespaces"
 
 	MaxConnectionLifetime = time.Hour
 	MaxIdleConnections    = 5

@@ -27,5 +27,5 @@ func Initialize(parent context.Context) error {
 
 func Verify() error {
 	var marker models.SchemaMigration
-	return DB.First(&marker, "name = ?", "database-permission-namespaces").Error
+	return DB.First(&marker, "name = ?", SchemaReadyMarker).Error
 }

@@ -2,17 +2,17 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"sqldash/models"
+	"sqldash/pictures"
+
+	"gorm.io/gorm/clause"
 )
 
 func migrate(ctx context.Context) error {
-	if migrationError := migrateOIDColumns(); migrationError != nil {
-		return migrationError
-	}
-	if migrationError := DB.AutoMigrate(
-		&models.Account{},
-		&models.AccountPicture{},
+	if migrationError := DB.WithContext(ctx).AutoMigrate(
+		&models.Account{}, &models.AccountPicture{},
 		&models.Site{}, &models.Role{}, &models.RolePermission{}, &models.AccountRole{},
 		&models.DatabaseShare{}, &models.AccountLink{}, &models.OwnershipTransfer{}, &models.SMTPSettings{},
 		&models.Session{}, &models.Database{}, &models.AccessRule{}, &models.Token{},
@@ -23,11 +23,16 @@ func migrate(ctx context.Context) error {
 	); migrationError != nil {
 		return migrationError
 	}
-	if ownershipError := migrateOwnership(); ownershipError != nil {
-		return ownershipError
+	if markerError := DB.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&models.SchemaMigration{Name: SchemaReadyMarker, AppliedAt: time.Now().UTC()}).Error; markerError != nil {
+		return markerError
 	}
-	if migrationError := migrateEngines(); migrationError != nil {
-		return migrationError
+	var references []string
+	for _, model := range []any{&models.Account{}, &models.AccountPicture{}} {
+		var retained []string
+		if readingError := DB.WithContext(ctx).Unscoped().Model(model).Where("profile_picture LIKE ?", pictures.ReferencePrefix+"%").Pluck("profile_picture", &retained).Error; readingError != nil {
+			return readingError
+		}
+		references = append(references, retained...)
 	}
-	return migratePicturesWith(ctx, DB)
+	return pictures.Prune(references)
 }

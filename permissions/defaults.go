@@ -2,7 +2,6 @@ package permissions
 
 const (
 	LogPrefix                 = "Permissions"
-	SuperAdminKind            = "super-admin"
 	SuperAdminPosition        = 1000000
 	DatabaseView              = "libsql.databases.view"
 	DatabaseCreate            = "libsql.databases.create"
