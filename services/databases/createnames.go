@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func reserveCreation(ctx context.Context, actor *access.AccountAccess, asked string, engine string) (*models.Database, *models.DatabaseOperation, *fiber.Error) {
+func reserveCreation(ctx context.Context, actor *access.AccountAccess, asked string, engine string, displayName string) (*models.Database, *models.DatabaseOperation, *fiber.Error) {
 	for attempt := 0; attempt < MaximumCreationNameAttempts; attempt++ {
 		candidate, candidateError := creationNameCandidate(asked, actor.Account.Username, attempt)
 		if candidateError != nil {
@@ -22,7 +22,7 @@ func reserveCreation(ctx context.Context, actor *access.AccountAccess, asked str
 		}
 		name, nameError := acceptableEngineName(candidate, engine)
 		if nameError == nil {
-			record, operation, reserveError := reserveDatabase(ctx, name, engine, actor.Account.ID, "create", 0, operationPayload{})
+			record, operation, reserveError := reserveDatabase(ctx, name, engine, actor.Account.ID, "create", 0, operationPayload{DisplayName: displayName})
 			if reserveError == nil {
 				return record, operation, nil
 			}

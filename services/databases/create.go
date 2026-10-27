@@ -2,6 +2,7 @@ package databases
 
 import (
 	"context"
+	"strings"
 
 	"sqldash/models"
 	"sqldash/permissions"
@@ -24,7 +25,7 @@ func CreateEngineRecord(ctx context.Context, asked string, engine string) (*mode
 	if authorityError != nil {
 		return nil, authorityError
 	}
-	record, operation, reserveError := reserveCreation(fresh, actor, NormalizeName(asked), engine)
+	record, operation, reserveError := reserveCreation(fresh, actor, NormalizeName(asked), engine, strings.TrimSpace(asked))
 	if reserveError != nil {
 		return nil, reserveError
 	}

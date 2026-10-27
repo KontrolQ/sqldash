@@ -38,14 +38,14 @@ func palette(context fiber.Ctx) error {
 	var current *models.Database
 	for index := range records {
 		record := &records[index]
-		destinations = append(destinations, meta.PaletteItem{Label: record.Name, Note: record.Kind(), URL: DatabasePath + url.PathEscape(record.Name)})
+		destinations = append(destinations, meta.PaletteItem{Label: record.Label(), Note: record.Kind(), URL: DatabasePath + url.PathEscape(record.Name)})
 		if record.Name == opened {
 			current = record
 		}
 	}
 	groups = append(groups, meta.PaletteGroup{Label: PaletteDatabasesLabel, Items: destinations})
 	if current != nil && heldAccess.CanDatabase(current, permissions.DataRead) && current.Available() {
-		groups = append(groups, meta.PaletteGroup{Label: fmt.Sprintf(PaletteInsideLabel, opened), Items: sectionsOf(current, heldAccess)})
+		groups = append(groups, meta.PaletteGroup{Label: fmt.Sprintf(PaletteInsideLabel, current.Label()), Items: sectionsOf(current, heldAccess)})
 		if current.Kind() != models.EngineRedis {
 			if tables := tablesOf(context, opened); len(tables) > 0 {
 				groups = append(groups, meta.PaletteGroup{Label: PaletteTablesLabel, Items: tables})

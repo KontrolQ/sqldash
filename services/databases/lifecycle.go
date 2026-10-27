@@ -42,10 +42,11 @@ func OperationRetryDelay(attempts uint) time.Duration {
 }
 
 type operationPayload struct {
-	Path   string
-	Moment *time.Time
-	Phase  string
-	Remote *remotePayload
+	DisplayName string
+	Path        string
+	Moment      *time.Time
+	Phase       string
+	Remote      *remotePayload
 }
 
 func reserveDatabase(ctx context.Context, name, engine string, accountID uint, kind string, sourceID uint, payload operationPayload) (*models.Database, *models.DatabaseOperation, *fiber.Error) {
@@ -62,7 +63,7 @@ func reserveDatabase(ctx context.Context, name, engine string, accountID uint, k
 	if err != nil {
 		return nil, nil, shortcuts.ServiceError(http.StatusInternalServerError, OperationFailed)
 	}
-	record := &models.Database{Name: name, Engine: engine, State: models.DatabasePending, OwnerAccountID: accountID, PolicyVersion: 1}
+	record := &models.Database{Name: name, DisplayName: payload.DisplayName, Engine: engine, State: models.DatabasePending, OwnerAccountID: accountID, PolicyVersion: 1}
 	operation := &models.DatabaseOperation{AccountID: accountID, Engine: engine, Kind: kind, State: models.DatabasePending, SourceDatabaseID: sourceID, Payload: string(encoded)}
 	if kind == "remote-clone" {
 		until := time.Now().Add(3 * time.Minute)

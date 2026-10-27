@@ -27,7 +27,7 @@ func routeCapability(name string) string {
 		return permissions.DatabaseView
 	case "databases.create":
 		return permissions.DatabaseCreate
-	case "databases.settings", "databases.settings.postgres":
+	case "databases.settings", "databases.settings.postgres", "databases.displayname":
 		return permissions.DatabaseSettings
 	case "databases.delete":
 		return permissions.DatabaseDelete
@@ -156,6 +156,7 @@ func guardDatabase(context fiber.Ctx, held *access.AccountAccess, record *models
 	if record.Kind() == models.EnginePostgres && (strings.Contains(name, ".tokens.") || name == "databases.export.file") {
 		return fiber.ErrNotFound
 	}
+	context.Locals("DatabaseDisplayName", record.Label())
 	context.Locals("DatabaseEngine", record.Kind())
 	context.Locals("DatabaseRecord", record)
 	context.Locals("IsPostgres", record.Kind() == models.EnginePostgres)

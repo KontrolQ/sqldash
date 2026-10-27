@@ -52,7 +52,7 @@ func redisInsights(ctx context.Context, records []models.Database, withCommands 
 			break
 		}
 		base := "/databases/" + url.PathEscape(record.Name)
-		row := RedisDatabaseView{Name: record.Name, Path: base + "/insights", CommandsPath: base + "/queries", Memory: UnavailableValue, Clients: UnavailableValue, Keys: UnavailableValue, Operations: UnavailableValue, CollectedAt: UnavailableValue}
+		row := RedisDatabaseView{Name: record.Label(), Path: base + "/insights", CommandsPath: base + "/queries", Memory: UnavailableValue, Clients: UnavailableValue, Keys: UnavailableValue, Operations: UnavailableValue, CollectedAt: UnavailableValue}
 		if !record.Available() {
 			row.Problem = "Database is not ready."
 			shown.Databases = append(shown.Databases, row)
@@ -71,7 +71,7 @@ func redisInsights(ctx context.Context, records []models.Database, withCommands 
 						shown.Truncated = true
 						break
 					}
-					shown.Commands = append(shown.Commands, RedisCommandView{Database: record.Name, Path: row.CommandsPath, Name: command.Name, Calls: command.Calls, Microseconds: command.Microseconds, MeanMicroseconds: command.MicrosecondsPerCall, Rejected: command.RejectedCalls, Failed: command.FailedCalls})
+					shown.Commands = append(shown.Commands, RedisCommandView{Database: record.Label(), Path: row.CommandsPath, Name: command.Name, Calls: command.Calls, Microseconds: command.Microseconds, MeanMicroseconds: command.MicrosecondsPerCall, Rejected: command.RejectedCalls, Failed: command.FailedCalls})
 				}
 			}
 		} else {

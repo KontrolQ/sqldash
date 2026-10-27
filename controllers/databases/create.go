@@ -20,7 +20,6 @@ func Create(context fiber.Ctx) error {
 		return shortcuts.ServiceError(http.StatusBadRequest, FormUnreadable)
 	}
 
-	asked.Name = service.NormalizeName(asked.Name)
 	record, createError := service.CreateEngineRecord(context.Context(), asked.Name, asked.Engine)
 	if createError != nil {
 		sessions.Complain(context, createError.Message)
@@ -28,9 +27,7 @@ func Create(context fiber.Ctx) error {
 	}
 
 	audit.NoteDatabase(context, record, audit.DatabaseCreated, StartedEmpty)
-	if record.Name != asked.Name {
-		sessions.Report(context, fmt.Sprintf(CreatedWithName, record.Name))
-	}
+	sessions.Report(context, fmt.Sprintf(CreatedWithName, record.Label()))
 
 	return shortcuts.Redirect(context, IndexRoute)
 }

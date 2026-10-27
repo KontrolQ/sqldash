@@ -15,6 +15,7 @@ const (
 	NameReserved          = "That name is reserved."
 	NameTaken             = "A database with that name already exists."
 	NameAllocationRefused = "An available database name could not be allocated. Try again."
+	DisplayNameInvalid    = "Choose a display name of 1 to 48 characters without control characters."
 	CreateRefused         = "The database could not be created."
 	DeleteRefused         = "The database could not be deleted."
 	DatabaseMissing       = "No such database."

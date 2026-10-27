@@ -7,6 +7,7 @@ const (
 
 	MinimumNameLength           = 2
 	MaximumNameLength           = 48
+	MaximumDisplayNameLength    = 48
 	NamePattern                 = `^[a-z0-9][a-z0-9-]*[a-z0-9]$`
 	NameSuffixLength            = 4
 	NameSuffixAlphabet          = "abcdefghijklmnopqrstuvwxyz0123456789"

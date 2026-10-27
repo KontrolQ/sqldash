@@ -24,7 +24,7 @@ func GetShowData(ctx context.Context, name, secret string) (*ShowContext, *fiber
 	}
 	actor := access.FromContext(fresh)
 	address := record.Name + "." + config.Server.Domain
-	shown := &ShowContext{Title: record.Name, Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", RowsRead: "—", RowsWritten: "—", QueryCount: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
+	shown := &ShowContext{Title: record.Label(), Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Ready: record.Available(), Actions: access.Actions(actor, record), Address: address, URL: AddressScheme + address, Protected: record.Protected, Storage: "Unavailable", Tables: "—", RowsRead: "—", RowsWritten: "—", QueryCount: "—", Connections: "—", Transactions: "—", Scopes: collections.OptionsOf(ReadWriteValue, ReadWriteLabel, ReadOnlyValue, ReadOnlyLabel)}
 	shown.CanCloneRemote = overviewhelper.CanCloneRemote(actor)
 	shown.RemoteTLSModes = overviewhelper.RemoteTLSModes()
 	if record.Kind() == models.EngineRedis {

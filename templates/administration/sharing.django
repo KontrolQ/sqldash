@@ -2,7 +2,7 @@
 {% block content %}
   <div class="page-head is-slim">
     <div class="page-title">
-      <h1>{{ Database }}</h1>
+      <h1>{{ DatabaseDisplayName|default:Database }}</h1>
       <p class="page-subtitle">Share access with other users.</p>
     </div>
   </div>
@@ -11,7 +11,7 @@
   <section class="admin-sharing">
     <div class="admin-section-heading">
       <h2>Database access</h2>
-      <p>Choose who can access {{ Database }}.</p>
+      <p>Choose who can access {{ DatabaseDisplayName|default:Database }}.</p>
     </div>
     <div class="admin-table-frame">
       {% for member in Members %}

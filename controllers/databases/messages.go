@@ -1,8 +1,10 @@
 package databases
 
 const (
-	FormUnreadable  = "That form could not be read."
-	CreatedWithName = "Database created as %s."
+	FormUnreadable         = "That form could not be read."
+	CreatedWithName        = "Database created as %s."
+	DisplayNameSaved       = "Display name saved."
+	DisplayNameAuditDetail = "Display name updated"
 )
 
 const (

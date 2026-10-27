@@ -111,7 +111,7 @@ func toDatabaseViews(ctx context.Context, records []models.Database) []DatabaseV
 	actor := access.FromContext(ctx)
 	for index := range records {
 		record := &records[index]
-		view := DatabaseView{Name: record.Name, Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Address: record.Name + "." + config.Server.Domain, Protected: record.Protected, Storage: "Unavailable", Tables: "—", Objects: "—", RowsRead: "—", Queries: "—", Ready: record.Available(), Actions: access.Actions(actor, record)}
+		view := DatabaseView{Name: record.Name, DisplayName: record.Label(), Engine: record.Kind(), EngineLabel: engineLabel(record.Kind()), State: stateLabel(record), Address: record.Name + "." + config.Server.Domain, Protected: record.Protected, Storage: "Unavailable", Tables: "—", Objects: "—", RowsRead: "—", Queries: "—", Ready: record.Available(), Actions: access.Actions(actor, record)}
 		fresh := engines.WithDatabase(ctx, record)
 		if record.Kind() == models.EngineRedis {
 			view.Address = config.RedisHost() + ":" + strconv.Itoa(config.Redis.PublicPort)

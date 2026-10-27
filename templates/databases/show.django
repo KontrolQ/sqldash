@@ -2,7 +2,7 @@
 {% block content %}
   <div class="page-head is-slim">
     <div class="page-title">
-      <h1>{{ Name }} <span class="badge is-outline">{{ EngineLabel }}</span></h1>
+      <h1>{{ DatabaseDisplayName|default:Name }} <span class="badge is-outline">{{ EngineLabel }}</span></h1>
       <p class="page-subtitle">{{ Address }}</p>
     </div>
     {% if Actions.CanExportDatabases and Ready %}
@@ -237,6 +237,17 @@
       </div>
     </div>
   {% endif %}
+  {% if Actions.CanEditDatabaseSettings %}
+    <div class="card">
+      <div class="card-head has-border"><div class="card-title">Display name</div><div class="card-note">Change the dashboard label without changing connection addresses or logins.</div></div>
+      <div class="card-body">
+        <form class="stack" method="post" action="{% url "databases.displayname" name=Name %}">
+          <div class="field"><label class="label" for="database-display-name">Display name</label><input class="input" id="database-display-name" name="displayName" value="{{ DatabaseDisplayName|default:Name }}" maxlength="48" required><span class="field-note">Connection identifier: <code>{{ Name }}</code></span></div>
+          <div class="actions"><button class="button" type="submit">Save display name</button></div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
   {% if Actions.CanDeleteDatabases %}
     <div class="card">
       <div class="card-head has-border">
@@ -244,8 +255,8 @@
         <div class="card-note">This removes the database and everything in it.</div>
       </div>
       <div class="card-body">
-        <form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ Name }} and all its data are removed. This cannot be undone." data-confirm-title="Delete {{ Name }}?" data-confirm-action="Delete database">
-          <button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ Name }}</button>
+        <form method="post" action="{% url "databases.delete" name=Name %}" data-confirm="{{ DatabaseDisplayName|default:Name }} and all its data are removed. This cannot be undone." data-confirm-title="Delete {{ DatabaseDisplayName|default:Name }}?" data-confirm-action="Delete database">
+          <button class="button is-destructive" type="submit" {% if Protected %}disabled{% endif %}>Delete {{ DatabaseDisplayName|default:Name }}</button>
         </form>
       </div>
     </div>

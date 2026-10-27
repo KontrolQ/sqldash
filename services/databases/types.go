@@ -36,6 +36,7 @@ type RemoteCloneForm struct {
 }
 
 type DatabaseView struct {
+	DisplayName string
 	Name        string
 	Engine      string
 	EngineLabel string

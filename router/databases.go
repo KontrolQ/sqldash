@@ -18,6 +18,7 @@ func init() {
 	urls.Path(urls.Get, "/databases/:name/insights", redisPage(insightpage.ForDatabase, redispage.Insights), "databases.insights")
 	urls.Path(urls.Get, "/databases/:name/queries", redisPage(insightpage.QueriesForDatabase, redispage.Commands), "databases.queries")
 	urls.Path(urls.Post, "/databases/:name/settings", controller.SaveSettings, "databases.settings")
+	urls.Path(urls.Post, "/databases/:name/display-name", controller.SaveDisplayName, "databases.displayname")
 	urls.Path(urls.Post, "/databases/import", controller.Import, "databases.import")
 	urls.Path(urls.Get, "/databases/:name/export", controller.Export, "databases.export")
 	urls.Path(urls.Get, "/databases/:name/export/file", controller.ExportFile, "databases.export.file")

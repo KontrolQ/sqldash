@@ -169,7 +169,7 @@ func Users(actor *access.AccountAccess, query string, page int, editing uint, is
 		return nil, findError
 	}
 	for _, record := range visible {
-		data.Databases = append(data.Databases, Choice{ID: record.ID, Name: record.Name, Owned: record.OwnerAccountID == editing && editing != 0, Selected: record.OwnerAccountID == editing && editing != 0})
+		data.Databases = append(data.Databases, Choice{ID: record.ID, Name: record.Label(), Owned: record.OwnerAccountID == editing && editing != 0, Selected: record.OwnerAccountID == editing && editing != 0})
 	}
 	invitations := database.DB.Where("kind = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?", Invitation, time.Now())
 	if !actor.Owner && !actor.Super {

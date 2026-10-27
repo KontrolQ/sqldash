@@ -280,7 +280,7 @@ func nativeInsights(ctx context.Context, records []models.Database, windowLabel 
 		stale := until.Sub(sample.CollectedAt) > 3*pgmetrics.SampleInterval
 		shown.HasFreshSamples = shown.HasFreshSamples || !stale
 		record := byID[sample.DatabaseID]
-		shown.Databases = append(shown.Databases, NativeDatabaseView{Name: record.Name, Path: overviewPathFor(record.Name), Storage: readableBytes(sample.StorageBytes), Connections: sample.Connections,
+		shown.Databases = append(shown.Databases, NativeDatabaseView{Name: record.Label(), Path: overviewPathFor(record.Name), Storage: readableBytes(sample.StorageBytes), Connections: sample.Connections,
 			CollectedAt: sample.CollectedAt.Local().Format(time.DateTime), StatisticsReset: optionalMoment(sample.ResetAt), StatementReset: optionalMoment(sample.StatementResetAt),
 			PostmasterStarted: sample.PostmasterStartedAt.Local().Format(time.DateTime), StatementsAvailable: sample.StatementsAvailable, Stale: stale})
 	}

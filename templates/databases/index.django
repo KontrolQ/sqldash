@@ -44,7 +44,7 @@ Create database
           <tbody>
             {% for database in Databases %}
               <tr>
-                <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked or not database.Online %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.Name }}</a></td>
+                <td><a class="table-name" href="{% url "databases.show" name=database.Name %}"><span class="dot {% if database.Blocked or not database.Online %}is-blocked{% else %}is-live{% endif %}"></span>{{ database.DisplayName }}</a></td>
                 <td><span class="badge is-outline">{{ database.EngineLabel }}</span></td>
                 <td class="mono muted">{{ database.Address }}</td>
                 <td class="table-numeric">{% if database.Objects %}{{ database.Objects }}{% else %}{{ database.Tables }}{% endif %}</td>
@@ -62,7 +62,7 @@ Create database
                 </td>
                 <td class="table-pick">
                   <div class="menu" data-menu>
-                    <button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions for {{ database.Name }}">
+                    <button class="step" type="button" data-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="More actions for {{ database.DisplayName }}">
 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
 </button>
                     <div class="menu-content" data-menu-content hidden>

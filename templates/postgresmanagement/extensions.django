@@ -6,7 +6,7 @@
   <div class="page-head is-slim">
     <div class="page-title">
       <h1>Extensions</h1>
-      <p class="page-subtitle">Enable or disable extensions for {{ Name }}.</p>
+      <p class="page-subtitle">Enable or disable extensions for {{ DatabaseDisplayName|default:Name }}.</p>
     </div>
   </div>
   {% include "partials/databasetabs.django" %}
