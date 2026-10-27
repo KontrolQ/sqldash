@@ -16,6 +16,7 @@ import (
 	"sqldash/models"
 	"sqldash/permissions"
 	"sqldash/sqld"
+	"sqldash/transferpolicy"
 	"sqldash/utils/shortcuts"
 
 	"github.com/gofiber/fiber/v3"
@@ -76,9 +77,9 @@ func stageNativeDirectory(directory string, contents io.Reader) (string, error) 
 		os.Remove(path)
 		return "", err
 	}
-	copied, copyError := io.Copy(handle, io.LimitReader(contents, (1<<30)+1))
+	_, copyError := transferpolicy.Copy(handle, contents)
 	closeError := handle.Close()
-	if copyError != nil || closeError != nil || copied > 1<<30 {
+	if copyError != nil || closeError != nil {
 		os.Remove(path)
 		return "", errors.New(ImportRefused)
 	}
@@ -112,7 +113,7 @@ func stage(name string, fileName string, contents io.Reader) (string, error) {
 
 	defer handle.Close()
 
-	if _, copyError := io.Copy(handle, contents); copyError != nil {
+	if _, copyError := transferpolicy.Copy(handle, contents); copyError != nil {
 		os.Remove(staged)
 		return "", copyError
 	}
@@ -128,7 +129,7 @@ func stageFile(name string, contents io.Reader) (string, error) {
 		return "", createError
 	}
 
-	if _, copyError := io.Copy(handle, contents); copyError != nil {
+	if _, copyError := transferpolicy.Copy(handle, contents); copyError != nil {
 		handle.Close()
 		os.Remove(held)
 

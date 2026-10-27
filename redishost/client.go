@@ -81,11 +81,18 @@ func privateClient(ctx context.Context, record *models.Database, instance *model
 	if err != nil {
 		return nil, err
 	}
+	readTimeout := config.Redis.CommandTimeout
+	if readTimeout == 0 {
+		readTimeout = -1
+	}
+	if profile == systemProfile || profile == Inspect {
+		readTimeout = controlTimeout
+	}
 	client := redisclient.NewClient(&redisclient.Options{
 		Addr: socketPath(record.ID), Network: "unix", Protocol: 2,
 		Username: systemUsername(record.ID, profile), Password: string(password),
 		DisableIdentity: true, MaxRetries: -1, PoolSize: 2, MaxIdleConns: 1,
-		DialTimeout: controlTimeout, ReadTimeout: config.Redis.CommandTimeout, WriteTimeout: controlTimeout,
+		DialTimeout: controlTimeout, ReadTimeout: readTimeout, WriteTimeout: controlTimeout,
 		ContextTimeoutEnabled: true,
 		Dialer: func(parent context.Context, network, address string) (net.Conn, error) {
 			connection, err := dialInstance(parent, instance)

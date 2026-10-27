@@ -23,8 +23,7 @@ func writeConfiguration(credentials *supervisor.Credentials) error {
 		"unix_socket_directories = " + configurationString(config.PostgresRuntimePath()),
 		"unix_socket_permissions = 0700",
 		"password_encryption = 'scram-sha-256'",
-		"max_connections = " + strconv.Itoa(config.Postgres.MaximumConnections),
-		"superuser_reserved_connections = 5",
+		"superuser_reserved_connections = " + strconv.Itoa(config.PostgresReservedConnections),
 		"shared_preload_libraries = 'pg_stat_statements'",
 		"pg_stat_statements.track = 'all'",
 		"ssl = off",
@@ -38,6 +37,9 @@ func writeConfiguration(credentials *supervisor.Credentials) error {
 		"log_line_prefix = '[%p] '",
 		"",
 	}, "\n")
+	if config.Postgres.MaximumConnections > 0 {
+		configuration += "max_connections = " + strconv.Itoa(config.Postgres.MaximumConnections) + "\n"
+	}
 	authentication := strings.Join([]string{
 		"local all all scram-sha-256",
 		"host all all 127.0.0.1/32 scram-sha-256",

@@ -15,7 +15,8 @@ const (
 
 	AppVersion = "0.1.0"
 
-	MinimumRequestBodyLimit = 4 * 1024 * 1024
-	MultipartUploadOverhead = 64 * 1024
-	RedisControlConnections = 32
+	RequestBodyBufferBytes      = 4 * 1024 * 1024
+	MultipartUploadOverhead     = 64 * 1024
+	RedisControlConnections     = 32
+	PostgresReservedConnections = 5
 )

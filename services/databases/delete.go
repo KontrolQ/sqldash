@@ -47,13 +47,13 @@ func Delete(ctx context.Context, name string) *fiber.Error {
 	operation.AccountID = actor.Account.ID
 	reserveError := database.DB.WithContext(fresh).Transaction(func(transaction *gorm.DB) error {
 		var active int64
-		if err := transaction.Model(&models.DatabaseOperation{}).Where("database_id = ? AND state IN ? AND lease_until > ?", record.ID, []string{models.DatabasePending, models.DatabaseApplying, remoteStagingState}, time.Now()).Count(&active).Error; err != nil {
+		if err := transaction.Model(&models.DatabaseOperation{}).Where("database_id = ? AND state IN ? AND coalesce(heartbeat_until, lease_until) > ?", record.ID, []string{models.DatabasePending, models.DatabaseApplying, remoteStagingState}, time.Now()).Count(&active).Error; err != nil {
 			return err
 		}
 		if active != 0 {
 			return errors.New(DatabaseNotReady)
 		}
-		if err := transaction.Model(&models.DatabaseOperation{}).Where("database_id = ? AND state <> ?", record.ID, models.DatabaseReady).Updates(map[string]any{"state": "cancelled", "lease_until": nil}).Error; err != nil {
+		if err := transaction.Model(&models.DatabaseOperation{}).Where("database_id = ? AND state <> ?", record.ID, models.DatabaseReady).Updates(map[string]any{"state": "cancelled", "lease_until": nil, "heartbeat_until": nil}).Error; err != nil {
 			return err
 		}
 		result := transaction.Model(record).Where("protected = ?", false).Updates(map[string]any{"state": models.DatabaseDeleting, "policy_version": gorm.Expr("policy_version + 1")})
@@ -171,7 +171,7 @@ func finishDelete(ctx context.Context, record *models.Database, operation *model
 		if err := transaction.Unscoped().Where("database_id = ?", record.ID).Delete(&models.DatabaseShare{}).Error; err != nil {
 			return err
 		}
-		completed := transaction.Model(operation).Where("state = ? AND lease_until = ?", models.DatabaseApplying, operation.LeaseUntil).Updates(map[string]any{"state": models.DatabaseReady, "failure": "", "lease_until": nil})
+		completed := transaction.Model(operation).Where("state = ? AND lease_until = ?", models.DatabaseApplying, operation.LeaseUntil).Updates(map[string]any{"state": models.DatabaseReady, "failure": "", "lease_until": nil, "heartbeat_until": nil})
 		if completed.Error != nil {
 			return completed.Error
 		}

@@ -15,7 +15,7 @@ func ImageUpload(field string, fallback string, next fiber.Handler) fiber.Handle
 			sessions.Complain(context, ImageMissing)
 			return shortcuts.RedirectToPath(context, fallback)
 		}
-		if file.Size > int64(config.Server.MaximumImageUploadBytes) {
+		if config.Server.MaximumImageUploadBytes > 0 && file.Size > int64(config.Server.MaximumImageUploadBytes) {
 			sessions.Complain(context, ImageUploadTooLarge)
 			return shortcuts.RedirectToPath(context, fallback)
 		}

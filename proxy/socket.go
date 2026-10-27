@@ -79,7 +79,11 @@ func carryFrames(runContext context.Context, from *websocket.Conn, to *websocket
 	fromClient := request != nil
 	defer func() { finished <- struct{}{} }()
 
-	from.SetReadLimit(MaximumFrame)
+	maximum := config.Server.MaximumWebSocketMessageBytes
+	if maximum == 0 {
+		maximum = -1
+	}
+	from.SetReadLimit(maximum)
 
 	for {
 		kind, frame, readError := from.Read(runContext)

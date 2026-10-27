@@ -100,7 +100,7 @@ func (self *StreamTicket) authority(ctx context.Context) (context.Context, *mode
 }
 
 func (self *StreamTicket) Run(parent context.Context, subscription *SubscriptionRequest, deliver func(LiveEvent) error) error {
-	bounded, cancel := context.WithTimeout(parent, streamLifetime)
+	bounded, cancel := context.WithCancel(parent)
 	defer cancel()
 	fresh, record, err := self.authority(bounded)
 	if err != nil {

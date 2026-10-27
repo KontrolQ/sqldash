@@ -29,7 +29,6 @@ const (
 	UseNoteInterval     = time.Minute
 
 	SocketScheme = "ws://"
-	MaximumFrame = 32 << 20
 )
 
 const (

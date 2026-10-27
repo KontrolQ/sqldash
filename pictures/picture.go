@@ -8,12 +8,18 @@ import (
 )
 
 func Transform(source io.Reader, maximumBytes int64) (*Picture, error) {
-	data, readError := io.ReadAll(io.LimitReader(source, maximumBytes+1))
+	if maximumBytes < 0 {
+		return nil, UploadTooLarge
+	}
+	if maximumBytes > 0 {
+		source = io.LimitReader(source, maximumBytes+1)
+	}
+	data, readError := io.ReadAll(source)
 	if readError != nil {
 		return nil, ImageUnreadable
 	}
 
-	if int64(len(data)) > maximumBytes {
+	if maximumBytes > 0 && int64(len(data)) > maximumBytes {
 		return nil, UploadTooLarge
 	}
 

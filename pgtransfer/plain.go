@@ -15,7 +15,7 @@ func (self *job) inputFormat(input *os.File) (string, error) {
 	if statError != nil || !information.Mode().IsRegular() || information.Size() == 0 {
 		return "", InvalidSource
 	}
-	if information.Size() > self.maximumBytes {
+	if self.maximumBytes > 0 && information.Size() > self.maximumBytes {
 		return "", SizeExceeded
 	}
 	magic := make([]byte, len(ArchiveMagic))

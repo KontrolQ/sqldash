@@ -12,8 +12,6 @@ func (self Options) normalized() (Options, error) {
 		value    *int
 		fallback int
 	}{
-		{&self.MaximumConnections, DefaultMaximumConnections},
-		{&self.MaximumSessions, DefaultMaximumSessions},
 		{&self.MaximumHandshakes, DefaultMaximumHandshakes},
 		{&self.MaximumStartupBytes, DefaultMaximumStartupBytes},
 		{&self.MaximumHandshakeFrameBytes, DefaultMaximumHandshakeFrameBytes},
@@ -55,7 +53,7 @@ func (self Options) normalized() (Options, error) {
 	if self.ListenAddress == "" || self.BackendAddress == "" || self.ValidationInterval > MaximumPolicyDelay-self.ValidationTimeout {
 		return self, ErrInvalidOptions
 	}
-	if self.MaximumSessions > self.MaximumConnections || self.MaximumHandshakes > self.MaximumConnections || self.MaximumStartupBytes < maximumCancelPacketBytes || self.MaximumStartupBytes > 1024*1024 {
+	if self.MaximumConnections < 0 || self.MaximumSessions < 0 || self.MaximumConnections > 0 && self.MaximumSessions > self.MaximumConnections || self.MaximumStartupBytes < maximumCancelPacketBytes || self.MaximumStartupBytes > 1024*1024 {
 		return self, ErrInvalidOptions
 	}
 	if self.MaximumHandshakeFrameBytes < 512 || self.MaximumHandshakeFrameBytes > 1024*1024 || self.MaximumHandshakeBytes < self.MaximumHandshakeFrameBytes || self.MaximumHandshakeBytes > 16*1024*1024 {

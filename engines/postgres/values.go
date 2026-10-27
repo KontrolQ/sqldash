@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"sqldash/config"
 	"sqldash/engines"
 	"sqldash/sqld"
 
@@ -32,7 +33,7 @@ func resultColumns(types *pgtype.Map, fields []pgconn.FieldDescription) []sqld.C
 }
 
 func normalizeResult(types *pgtype.Map, fields []pgconn.FieldDescription, rows [][][]byte) (*engines.Result, error) {
-	if len(rows) > MaximumResultRows {
+	if config.Query.MaximumRows > 0 && len(rows) > config.Query.MaximumRows {
 		return nil, ResultLimit
 	}
 	result := &engines.Result{Columns: resultColumns(types, fields)}
@@ -43,7 +44,7 @@ func normalizeResult(types *pgtype.Map, fields []pgconn.FieldDescription, rows [
 			return nil, normalizeError
 		}
 		totalBytes += rowBytes
-		if totalBytes > MaximumResultBytes {
+		if config.Query.MaximumResultBytes > 0 && int64(totalBytes) > config.Query.MaximumResultBytes {
 			return nil, ResultLimit
 		}
 		result.Rows = append(result.Rows, row)

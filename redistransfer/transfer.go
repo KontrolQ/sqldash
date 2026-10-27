@@ -9,6 +9,7 @@ import (
 
 	"sqldash/models"
 	"sqldash/redishost"
+	"sqldash/transferpolicy"
 )
 
 type Options struct {
@@ -49,7 +50,7 @@ func (self *authorizedReader) Read(contents []byte) (int, error) {
 }
 
 func transfer(ctx context.Context, options Options, operation func(context.Context, func(context.Context) error) error) error {
-	if options.Authorize == nil {
+	if options.Authorize == nil || options.Timeout < 0 {
 		return redishost.PolicyUnconfirmed
 	}
 	var authority sync.Mutex
@@ -66,15 +67,13 @@ func transfer(ctx context.Context, options Options, operation func(context.Conte
 		}
 		return checked.Err()
 	}
-	timeout := options.Timeout
-	if timeout <= 0 {
-		timeout = 2 * time.Minute
-	}
-	if timeout > redishost.MaximumTransferTimeout {
-		timeout = redishost.MaximumTransferTimeout
-	}
-	bounded, stop := context.WithTimeout(ctx, timeout)
+	bounded, stop := transferpolicy.Context(ctx, options.Timeout)
 	defer stop()
+	release, capacityError := transferpolicy.Acquire(bounded)
+	if capacityError != nil {
+		return capacityError
+	}
+	defer release()
 	work, cancel := context.WithCancelCause(bounded)
 	defer cancel(nil)
 	if err := authorize(work); err != nil {

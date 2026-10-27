@@ -31,6 +31,10 @@ func GetIndexData(accountID uint) (*IndexContext, *fiber.Error) {
 	}
 
 	account := auth.ToAccountView(held)
+	pictureUploadLimit := "No upload size limit"
+	if config.Server.MaximumImageUploadBytes > 0 {
+		pictureUploadLimit = fmt.Sprintf(PictureUploadLimit, float64(config.Server.MaximumImageUploadBytes)/(1024*1024))
+	}
 
 	return &IndexContext{
 		Title:                   IndexTitle,
@@ -38,7 +42,7 @@ func GetIndexData(accountID uint) (*IndexContext, *fiber.Error) {
 		DisplayName:             account.DisplayName,
 		Email:                   account.Email,
 		ProfilePicture:          account.ProfilePicture,
-		PictureUploadLimit:      fmt.Sprintf(PictureUploadLimit, float64(config.Server.MaximumImageUploadBytes)/(1024*1024)),
+		PictureUploadLimit:      pictureUploadLimit,
 		PictureHistory:          pictureHistory(held, history),
 		MaximumImageUploadBytes: config.Server.MaximumImageUploadBytes,
 	}, nil

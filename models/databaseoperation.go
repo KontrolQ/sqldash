@@ -18,4 +18,5 @@ type DatabaseOperation struct {
 	Failure          string
 	Attempts         uint `gorm:"not null;default:0"`
 	LeaseUntil       *time.Time
+	HeartbeatUntil   *time.Time
 }

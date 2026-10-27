@@ -30,7 +30,7 @@ func runWeb() {
 	go reconcileOperations(parent)
 	engine := django.New(TemplateRoot, TemplateExtension)
 	engine.Reload(config.Server.Debug)
-	application := fiber.New(fiber.Config{AppName: WebProcessName, BodyLimit: config.RequestBodyLimit(), ErrorHandler: router.ErrorHandler, Views: engine})
+	application := fiber.New(fiber.Config{AppName: WebProcessName, BodyLimit: config.RequestBodyBufferSize(), StreamRequestBody: true, DisablePreParseMultipartForm: true, ErrorHandler: router.ErrorHandler, Views: engine})
 	application.Get("/health/ready", readyHealth)
 	middleware.Initialize(application)
 	router.Initialize(application)

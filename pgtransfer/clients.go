@@ -97,7 +97,7 @@ func (self *job) processEnvironment(readOnly bool) []string {
 func (self *job) processEnvironmentVersion(readOnly bool, version int) []string {
 	settings := "-c statement_timeout=" + strconv.FormatInt(self.options.Timeout.Milliseconds(), 10)
 	if version >= 90300 {
-		settings += " -c lock_timeout=5000"
+		settings += " -c lock_timeout=0"
 	}
 	if version >= 90600 {
 		settings += " -c idle_in_transaction_session_timeout=" + strconv.FormatInt(self.options.Timeout.Milliseconds(), 10)

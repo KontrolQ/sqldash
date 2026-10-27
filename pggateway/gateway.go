@@ -45,11 +45,11 @@ func Run(ctx context.Context, options Options) error {
 	self := &gateway{
 		options: normalized, context: runContext, cancel: cancel, listener: listener,
 		connections: make(map[net.Conn]struct{}), backends: make(map[uint32]*session),
-		connectionSlots:  make(chan struct{}, normalized.MaximumConnections),
-		sessionSlots:     make(chan struct{}, normalized.MaximumSessions),
+		connectionSlots:  quotaSlots(normalized.MaximumConnections),
+		sessionSlots:     quotaSlots(normalized.MaximumSessions),
 		handshakeSlots:   make(chan struct{}, normalized.MaximumHandshakes),
-		policyCalls:      make(chan struct{}, normalized.MaximumConnections),
-		terminationCalls: make(chan struct{}, normalized.MaximumSessions),
+		policyCalls:      make(chan struct{}, max(normalized.MaximumConnections, DefaultMaximumPolicyCalls)),
+		terminationCalls: make(chan struct{}, max(normalized.MaximumSessions, DefaultMaximumTerminationCalls)),
 	}
 	shutdownDone := make(chan struct{})
 	go func() {
@@ -73,7 +73,7 @@ func Run(ctx context.Context, options Options) error {
 		self.mutex.Lock()
 		if runContext.Err() != nil {
 			self.mutex.Unlock()
-			<-self.connectionSlots
+			releaseSlot(self.connectionSlots)
 			closeConnection(connection)
 			break
 		}
@@ -98,7 +98,7 @@ func (self *gateway) handle(connection net.Conn) {
 		self.mutex.Lock()
 		delete(self.connections, connection)
 		self.mutex.Unlock()
-		<-self.connectionSlots
+		releaseSlot(self.connectionSlots)
 	}()
 	if !acquireSlot(self.handshakeSlots) {
 		return
@@ -139,7 +139,7 @@ func (self *gateway) handle(connection net.Conn) {
 		writeProtocolError(frontend, "53300", connectionLimitMessage)
 		return
 	}
-	defer func() { <-self.sessionSlots }()
+	defer releaseSlot(self.sessionSlots)
 	identity, authorizeError := self.authorize(self.context, startup, peerIP)
 	if authorizeError != nil {
 		writeProtocolError(frontend, "28000", accessDeniedMessage)
@@ -233,7 +233,23 @@ func (self *gateway) closeIngress() {
 	}
 }
 
+func quotaSlots(maximum int) chan struct{} {
+	if maximum == 0 {
+		return nil
+	}
+	return make(chan struct{}, maximum)
+}
+
+func releaseSlot(slots chan struct{}) {
+	if slots != nil {
+		<-slots
+	}
+}
+
 func acquireSlot(slots chan struct{}) bool {
+	if slots == nil {
+		return true
+	}
 	select {
 	case slots <- struct{}{}:
 		return true

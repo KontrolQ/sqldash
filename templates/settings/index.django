@@ -29,7 +29,7 @@
 </span>
 </button>
               <input id="profile-picture" name="profile_picture" type="file" accept="image/jpeg,image/webp,image/gif,image/png" data-picture-input hidden required>
-              <p class="field-note profile-picture-note">JPG, WebP, GIF, or PNG. Up to {{ PictureUploadLimit }}.</p>
+              <p class="field-note profile-picture-note">JPG, WebP, GIF, or PNG. {% if MaximumImageUploadBytes %}Up to {{ PictureUploadLimit }}.{% else %}No upload size limit.{% endif %}</p>
               <p class="field-note profile-picture-error" data-picture-error role="status" hidden></p>
             </form>
             {% if ProfilePicture %}

@@ -8,22 +8,17 @@ const (
 	FormatSQL    = "sql"
 	FormatCustom = "custom"
 
-	DefaultMaximumBytes      = int64(1024 * 1024 * 1024)
-	DefaultTimeout           = 15 * time.Minute
-	MaximumTimeout           = 30 * time.Minute
-	CleanupTimeout           = time.Minute
-	ClientWaitDelay          = 2 * time.Second
-	MaximumConcurrentJobs    = 4
-	MaximumDiagnosticBytes   = 16 * 1024
-	MaximumVersionBytes      = 4096
-	MaximumClientOutputBytes = int64(1024 * 1024)
-	WrapperInspectionBytes   = 8192
-	CopyBufferBytes          = 64 * 1024
-	RestrictionKeyBytes      = 32
-	TransferUserID           = 65534
-	TransferGroupID          = 65534
-	PrivateDirectoryMode     = 0o700
-	PrivateFileMode          = 0o600
+	CleanupTimeout         = time.Minute
+	ClientWaitDelay        = 2 * time.Second
+	MaximumDiagnosticBytes = 16 * 1024
+	MaximumVersionBytes    = 4096
+	WrapperInspectionBytes = 8192
+	CopyBufferBytes        = 64 * 1024
+	RestrictionKeyBytes    = 32
+	TransferUserID         = 65534
+	TransferGroupID        = 65534
+	PrivateDirectoryMode   = 0o700
+	PrivateFileMode        = 0o600
 
 	DumpClient              = "pg_dump"
 	RestoreClient           = "pg_restore"

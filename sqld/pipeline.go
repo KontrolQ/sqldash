@@ -88,14 +88,21 @@ func Run(requestContext context.Context, database string, statements ...Statemen
 	request.Header.Set(ContentTypeHeader, ApplicationJSON)
 	request.Header.Set(NamespaceHeader, database)
 
-	answer, sendError := client.Do(request)
+	answer, sendError := queryClient.Do(request)
 	if sendError != nil {
 		return nil, errors.New(SendFailed)
 	}
 
 	defer answer.Body.Close()
 
-	body, readError := io.ReadAll(io.LimitReader(answer.Body, MaximumQueryResponse))
+	source := io.Reader(answer.Body)
+	if config.Query.MaximumResultBytes > 0 {
+		source = io.LimitReader(source, config.Query.MaximumResultBytes+1)
+	}
+	body, readError := io.ReadAll(source)
+	if config.Query.MaximumResultBytes > 0 && int64(len(body)) > config.Query.MaximumResultBytes {
+		return nil, errors.New(QueryResponseExceeded)
+	}
 	if readError != nil {
 		return nil, errors.New(ReadFailed)
 	}
@@ -155,6 +162,9 @@ func readResults(body []byte, wanted int) ([]*Result, error) {
 
 		if one.Response != nil && one.Response.Result != nil {
 			source := one.Response.Result
+			if config.Query.MaximumRows > 0 && len(source.Rows) > config.Query.MaximumRows {
+				return nil, errors.New(QueryResponseExceeded)
+			}
 
 			for _, column := range source.Columns {
 				kind := ""

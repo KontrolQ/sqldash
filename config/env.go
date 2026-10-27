@@ -3,14 +3,31 @@ package config
 import "time"
 
 type serverSettings struct {
-	Domain                  string `env:"DOMAIN" envDefault:"localhost"`
-	PublicURL               string `env:"PUBLIC_URL"`
-	HTTPPort                int    `env:"HTTP_PORT" envDefault:"8800"`
-	HTTPSPort               int    `env:"HTTPS_PORT" envDefault:"8443"`
-	WebAddress              string `env:"WEB_ADDRESS" envDefault:"127.0.0.1:7070"`
-	RedirectToTLS           bool   `env:"REDIRECT_TO_TLS" envDefault:"true"`
-	Debug                   bool   `env:"DEBUG" envDefault:"false"`
-	MaximumImageUploadBytes int    `env:"MAXIMUM_IMAGE_UPLOAD_BYTES" envDefault:"10485760"`
+	Domain                       string `env:"DOMAIN" envDefault:"localhost"`
+	PublicURL                    string `env:"PUBLIC_URL"`
+	HTTPPort                     int    `env:"HTTP_PORT" envDefault:"8800"`
+	HTTPSPort                    int    `env:"HTTPS_PORT" envDefault:"8443"`
+	WebAddress                   string `env:"WEB_ADDRESS" envDefault:"127.0.0.1:7070"`
+	RedirectToTLS                bool   `env:"REDIRECT_TO_TLS" envDefault:"true"`
+	Debug                        bool   `env:"DEBUG" envDefault:"false"`
+	MaximumImageUploadBytes      int    `env:"MAXIMUM_IMAGE_UPLOAD_BYTES" envDefault:"0"`
+	MaximumWebSocketMessageBytes int64  `env:"MAXIMUM_WEBSOCKET_MESSAGE_BYTES" envDefault:"0"`
+}
+
+type querySettings struct {
+	MaximumResultBytes int64 `env:"QUERY_MAXIMUM_RESULT_BYTES" envDefault:"0"`
+	MaximumRows        int   `env:"QUERY_MAXIMUM_ROWS" envDefault:"0"`
+}
+
+type historySettings struct {
+	Retention       time.Duration `env:"HISTORY_RETENTION" envDefault:"0"`
+	MaximumPictures int           `env:"PICTURE_HISTORY_LIMIT" envDefault:"0"`
+}
+
+type transferSettings struct {
+	MaximumBytes          int64         `env:"TRANSFER_MAXIMUM_BYTES" envDefault:"0"`
+	Timeout               time.Duration `env:"TRANSFER_TIMEOUT" envDefault:"0"`
+	MaximumConcurrentJobs int           `env:"TRANSFER_MAXIMUM_CONCURRENT_JOBS" envDefault:"0"`
 }
 
 type dataSettings struct {
@@ -18,10 +35,11 @@ type dataSettings struct {
 }
 
 type sqldSettings struct {
-	Managed      bool   `env:"SQLD_MANAGED" envDefault:"true"`
-	BinaryPath   string `env:"SQLD_BINARY" envDefault:"sqld"`
-	Address      string `env:"SQLD_ADDRESS" envDefault:"127.0.0.1:8080"`
-	AdminAddress string `env:"SQLD_ADMIN_ADDRESS" envDefault:"127.0.0.1:8081"`
+	Managed      bool          `env:"SQLD_MANAGED" envDefault:"true"`
+	BinaryPath   string        `env:"SQLD_BINARY" envDefault:"sqld"`
+	Address      string        `env:"SQLD_ADDRESS" envDefault:"127.0.0.1:8080"`
+	AdminAddress string        `env:"SQLD_ADMIN_ADDRESS" envDefault:"127.0.0.1:8081"`
+	QueryTimeout time.Duration `env:"SQLD_QUERY_TIMEOUT" envDefault:"0"`
 }
 
 type postgresSettings struct {
@@ -34,7 +52,7 @@ type postgresSettings struct {
 	PublicHost            string        `env:"POSTGRES_PUBLIC_HOST"`
 	PublicPort            int           `env:"POSTGRES_PUBLIC_PORT" envDefault:"5432"`
 	AdminUsername         string        `env:"POSTGRES_ADMIN_USERNAME" envDefault:"sqldash_admin"`
-	MaximumConnections    int           `env:"POSTGRES_MAXIMUM_CONNECTIONS" envDefault:"100"`
+	MaximumConnections    int           `env:"POSTGRES_MAXIMUM_CONNECTIONS" envDefault:"0"`
 	CertificatePath       string        `env:"POSTGRES_CERTIFICATE_PATH"`
 	PrivateKeyPath        string        `env:"POSTGRES_PRIVATE_KEY_PATH"`
 	InitializationTimeout time.Duration `env:"POSTGRES_INITIALIZATION_TIMEOUT" envDefault:"2m"`
@@ -62,7 +80,7 @@ type redisSettings struct {
 	MaximumStreamBuffer  int           `env:"REDIS_MAXIMUM_STREAM_BUFFER" envDefault:"1000"`
 	StartupTimeout       time.Duration `env:"REDIS_STARTUP_TIMEOUT" envDefault:"60s"`
 	ShutdownTimeout      time.Duration `env:"REDIS_SHUTDOWN_TIMEOUT" envDefault:"45s"`
-	CommandTimeout       time.Duration `env:"REDIS_COMMAND_TIMEOUT" envDefault:"30s"`
+	CommandTimeout       time.Duration `env:"REDIS_COMMAND_TIMEOUT" envDefault:"0"`
 	RevalidationInterval time.Duration `env:"REDIS_REVALIDATION_INTERVAL" envDefault:"2s"`
 }
 

@@ -216,6 +216,6 @@ func (self *job) restore(record *models.Database, input *os.File) error {
 		} else {
 			arguments = append(arguments, "-X", "--quiet", "--set=ON_ERROR_STOP=1", "--single-transaction", "--file=-")
 		}
-		return self.runClient(client, arguments, source, io.Discard, MaximumClientOutputBytes)
+		return self.runClient(client, arguments, source, io.Discard, 0)
 	})
 }

@@ -6,19 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
+	"sqldash/config"
+	"sqldash/transferpolicy"
 	"strconv"
 	"time"
 
 	redisclient "github.com/redis/go-redis/v9"
 	"sqldash/database"
 	"sqldash/models"
-)
-
-const (
-	MaximumSnapshotBytes   int64 = 1024 * 1024 * 1024
-	MaximumTransferTimeout       = 10 * time.Minute
 )
 
 func cloneLockPath(databaseID uint) string {
@@ -35,14 +33,9 @@ func visitCloneFiles(root *os.Root, visit func(string) error) error {
 		return UnsafePath
 	}
 	defer directory.Close()
-	var count int
 	for {
 		entries, readError := directory.ReadDir(64)
 		for _, entry := range entries {
-			count++
-			if count > 4096 {
-				return CapacityExceeded
-			}
 			if validCloneFile(entry.Name()) {
 				if err := visit(entry.Name()); err != nil {
 					return err
@@ -63,7 +56,7 @@ func removeCloneFile(root *os.Root, name string) error {
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
-	if err != nil || !information.Mode().IsRegular() || !verifyOwner(information, 0) || information.Mode().Perm()&0o077 != 0 || information.Size() > MaximumSnapshotBytes {
+	if err != nil || !information.Mode().IsRegular() || !verifyOwner(information, 0) || information.Mode().Perm()&0o077 != 0 {
 		return UnsafePath
 	}
 	return root.Remove(name)
@@ -193,8 +186,11 @@ func openSnapshotFile(root *os.Root, name string, owner int) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !information.Mode().IsRegular() || !verifyOwner(information, owner) || information.Size() < 9 || information.Size() > MaximumSnapshotBytes || owner == 0 && information.Mode().Perm()&0o077 != 0 {
+	if !information.Mode().IsRegular() || !verifyOwner(information, owner) || information.Size() < 9 || owner == 0 && information.Mode().Perm()&0o077 != 0 {
 		return nil, UnsafePath
+	}
+	if config.Transfer.MaximumBytes > 0 && information.Size() > config.Transfer.MaximumBytes {
+		return nil, CapacityExceeded
 	}
 	file, err := root.Open(name)
 	if err != nil {
@@ -267,8 +263,11 @@ func copySnapshot(ctx context.Context, writer io.Writer, reader io.Reader) (int6
 		}
 		count, readError := reader.Read(buffer)
 		if count > 0 {
+			if int64(count) > math.MaxInt64-total {
+				return total, CapacityExceeded
+			}
 			total += int64(count)
-			if total > MaximumSnapshotBytes {
+			if config.Transfer.MaximumBytes > 0 && total > config.Transfer.MaximumBytes {
 				return total, CapacityExceeded
 			}
 			written, err := writer.Write(buffer[:count])
@@ -292,7 +291,7 @@ func copySnapshot(ctx context.Context, writer io.Writer, reader io.Reader) (int6
 }
 
 func Snapshot(ctx context.Context, record *models.Database, writer io.Writer) error {
-	ctx, cancel := context.WithTimeout(ctx, MaximumTransferTimeout)
+	ctx, cancel := transferpolicy.Context(ctx, 0)
 	defer cancel()
 	stored, err := transferRecord(ctx, record, models.DatabaseReady)
 	if err != nil || writer == nil {

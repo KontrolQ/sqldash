@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"math"
 )
 
 type contextReader struct {
@@ -28,7 +29,7 @@ type boundedWriter struct {
 }
 
 func (self *boundedWriter) Write(source []byte) (int, error) {
-	if int64(len(source)) > self.maximumBytes-self.writtenBytes {
+	if int64(len(source)) > math.MaxInt64-self.writtenBytes || self.maximumBytes > 0 && int64(len(source)) > self.maximumBytes-self.writtenBytes {
 		self.exceeded = true
 		if self.cancel != nil {
 			self.cancel()

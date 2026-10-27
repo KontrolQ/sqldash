@@ -3,6 +3,7 @@ package control
 import (
 	"context"
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -37,13 +38,13 @@ func GetSettings(ctx context.Context, record *models.Database) (*Settings, error
 }
 
 func databaseSettings(ctx context.Context, connection *pgx.Conn, record *models.Database) (*Settings, error) {
-	settings := &Settings{ConnectionLimit: -1, StatementTimeoutMilliseconds: 30000, IdleTransactionTimeoutMilliseconds: 30000}
+	settings := &Settings{ConnectionLimit: -1}
 	var statementTimeout, idleTimeout string
 	queryError := connection.QueryRow(ctx, `SELECT database.datconnlimit,
 		COALESCE((SELECT split_part(value, '=', 2) FROM pg_catalog.pg_db_role_setting AS setting,
-			unnest(setting.setconfig) AS value WHERE setting.setdatabase = database.oid AND setting.setrole = 0 AND starts_with(value, 'statement_timeout=')), '30000ms'),
+			unnest(setting.setconfig) AS value WHERE setting.setdatabase = database.oid AND setting.setrole = 0 AND starts_with(value, 'statement_timeout=')), '0'),
 		COALESCE((SELECT split_part(value, '=', 2) FROM pg_catalog.pg_db_role_setting AS setting,
-			unnest(setting.setconfig) AS value WHERE setting.setdatabase = database.oid AND setting.setrole = 0 AND starts_with(value, 'idle_in_transaction_session_timeout=')), '30000ms')
+			unnest(setting.setconfig) AS value WHERE setting.setdatabase = database.oid AND setting.setrole = 0 AND starts_with(value, 'idle_in_transaction_session_timeout=')), '0')
 		FROM pg_catalog.pg_database AS database WHERE database.oid = $1`, record.BackendOID).Scan(&settings.ConnectionLimit, &statementTimeout, &idleTimeout)
 	if queryError != nil {
 		return nil, SafeError(queryError)
@@ -83,10 +84,14 @@ func applySessionSettings(ctx context.Context, transaction pgx.Tx, record *model
 	return nil
 }
 
+func validDatabaseSettings(settings Settings) bool {
+	return settings.ConnectionLimit >= -1 && settings.ConnectionLimit <= math.MaxInt32 &&
+		settings.StatementTimeoutMilliseconds >= 0 && settings.StatementTimeoutMilliseconds <= math.MaxInt32 &&
+		settings.IdleTransactionTimeoutMilliseconds >= 0 && settings.IdleTransactionTimeoutMilliseconds <= math.MaxInt32
+}
+
 func SetSettings(ctx context.Context, record *models.Database, settings Settings) error {
-	if settings.ConnectionLimit < -1 || settings.ConnectionLimit == 0 || settings.ConnectionLimit > 10000 ||
-		settings.StatementTimeoutMilliseconds < 100 || settings.StatementTimeoutMilliseconds > 300000 ||
-		settings.IdleTransactionTimeoutMilliseconds < 100 || settings.IdleTransactionTimeoutMilliseconds > 300000 {
+	if !validDatabaseSettings(settings) {
 		return InvalidSettings
 	}
 	roles, roleError := DatabaseRoles(record)

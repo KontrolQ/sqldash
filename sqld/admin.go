@@ -11,11 +11,14 @@ import (
 	"time"
 
 	"sqldash/config"
+	"sqldash/transferpolicy"
 )
 
 var (
-	client  = &http.Client{Timeout: AdminTimeout}
-	adminAt string
+	client         = &http.Client{Timeout: AdminTimeout}
+	queryClient    = &http.Client{Timeout: config.Sqld.QueryTimeout}
+	transferClient = &http.Client{}
+	adminAt        string
 )
 
 func init() {
@@ -37,7 +40,9 @@ func Fork(requestContext context.Context, from string, to string, at *time.Time)
 		path += "?" + TimestampParameter + "=" + at.UTC().Format(time.RFC3339)
 	}
 
-	return send(requestContext, http.MethodPost, path, nil, nil)
+	work, cancel := transferpolicy.Context(requestContext, 0)
+	defer cancel()
+	return sendWithClient(work, transferClient, http.MethodPost, path, nil, nil)
 }
 
 func Statistics(requestContext context.Context, database string) (*StatisticsRecord, error) {
@@ -82,6 +87,10 @@ func Ready(requestContext context.Context) bool {
 }
 
 func send(requestContext context.Context, method string, path string, body any, into any) error {
+	return sendWithClient(requestContext, client, method, path, body, into)
+}
+
+func sendWithClient(requestContext context.Context, sender *http.Client, method string, path string, body any, into any) error {
 	var payload io.Reader
 
 	if body != nil {
@@ -102,7 +111,7 @@ func send(requestContext context.Context, method string, path string, body any, 
 		request.Header.Set(ContentTypeHeader, ApplicationJSON)
 	}
 
-	answer, sendError := client.Do(request)
+	answer, sendError := sender.Do(request)
 	if sendError != nil {
 		return errors.New(SendFailed)
 	}

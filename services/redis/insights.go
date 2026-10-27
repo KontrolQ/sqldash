@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"sqldash/config"
 	"sqldash/database"
 	"sqldash/models"
 	"sqldash/permissions"
@@ -115,8 +116,16 @@ func Insights(ctx context.Context, name string) (*InsightResult, *fiber.Error) {
 		encoded, encodeError := json.Marshal(result.Current)
 		if encodeError != nil || database.DB.WithContext(fresh).Create(&models.RedisStatistics{DatabaseID: record.ID, RecordedAt: current.RecordedAt, Identity: record.ClusterID, RunID: current.RunID, Payload: string(encoded)}).Error != nil {
 			result.HistoryProblem = "This measurement could not be saved to aggregate history."
-		} else if database.DB.WithContext(fresh).Where("database_id = ? AND (recorded_at < ? OR identity <> ?)", record.ID, current.RecordedAt.Add(-time.Hour), record.ClusterID).Delete(&models.RedisStatistics{}).Error != nil {
-			result.HistoryProblem = "Aggregate history retention could not be updated."
+		} else {
+			prune := database.DB.WithContext(fresh).Where("database_id = ?", record.ID)
+			if config.History.Retention > 0 {
+				prune = prune.Where("recorded_at < ? OR identity <> ?", current.RecordedAt.Add(-config.History.Retention), record.ClusterID)
+			} else {
+				prune = prune.Where("identity <> ?", record.ClusterID)
+			}
+			if prune.Delete(&models.RedisStatistics{}).Error != nil {
+				result.HistoryProblem = "Aggregate history retention could not be updated."
+			}
 		}
 	}
 	return result, nil

@@ -3,6 +3,7 @@ package control
 import (
 	"context"
 	"errors"
+	"math"
 	"net"
 	"strconv"
 
@@ -189,7 +190,8 @@ func Connect(ctx context.Context, record *models.Database, mode SessionMode) (*p
 		return nil, configurationError
 	}
 	configuration.RuntimeParams["search_path"] = "public"
-	configuration.MaxProtocolMessageBodyLen = 32 << 20
+	configuration.RuntimeParams["lock_timeout"] = "0"
+	configuration.MaxProtocolMessageBodyLen = math.MaxInt32
 	configuration.BuildContextWatcherHandler = func(connection *pgconn.PgConn) ctxwatch.Handler {
 		return &pgconn.CancelRequestContextWatcherHandler{Conn: connection, DeadlineDelay: CleanupTimeout}
 	}

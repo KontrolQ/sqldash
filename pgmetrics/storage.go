@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"sqldash/config"
 	"sqldash/database"
 	"sqldash/models"
 	"sqldash/pgcluster/control"
@@ -73,7 +74,10 @@ func persist(ctx context.Context, record *models.Database, statistics *control.S
 				return err
 			}
 		}
-		cutoff := collectedAt.Add(-Retention)
+		if config.History.Retention == 0 {
+			return nil
+		}
+		cutoff := collectedAt.Add(-config.History.Retention)
 		if err := store.Where("collected_at < ?", cutoff).Delete(&models.PostgresStatementStatistics{}).Error; err != nil {
 			return err
 		}

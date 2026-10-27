@@ -10,5 +10,6 @@ const (
 )
 
 const (
-	QueryRefused = "The database refused that query."
+	QueryRefused          = "The database refused that query."
+	QueryResponseExceeded = "The result exceeds the configured query response quota. The statement may already have completed."
 )

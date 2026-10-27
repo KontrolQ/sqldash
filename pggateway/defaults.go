@@ -8,8 +8,8 @@ import (
 const (
 	LogPrefix = "PostgreSQL gateway"
 
-	DefaultMaximumConnections         = 256
-	DefaultMaximumSessions            = 128
+	DefaultMaximumPolicyCalls         = 256
+	DefaultMaximumTerminationCalls    = 128
 	DefaultMaximumHandshakes          = 32
 	DefaultMaximumStartupBytes        = 10 * 1024
 	DefaultMaximumHandshakeFrameBytes = 64 * 1024

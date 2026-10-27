@@ -155,9 +155,9 @@ func provisionRoles(ctx context.Context, connection *pgx.Conn, record *models.Da
 		}
 		for setting, value := range map[string]string{
 			"default_transaction_read_only":       readOnly,
-			"statement_timeout":                   "30000",
-			"idle_in_transaction_session_timeout": "30000",
-			"lock_timeout":                        "5000",
+			"statement_timeout":                   "0",
+			"idle_in_transaction_session_timeout": "0",
+			"lock_timeout":                        "0",
 		} {
 			if _, settingError := transaction.Exec(ctx, fmt.Sprintf("ALTER ROLE %s SET %s = %s", pgIdentifier(name), setting, pgLiteral(value))); settingError != nil {
 				return SafeError(settingError)

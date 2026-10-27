@@ -11,5 +11,5 @@ const (
 	CertificateTokenMissing  = "Automatic certificates need a Cloudflare API token, because a wildcard can only be issued over DNS-01."
 	CertificateEmailMissing  = "Automatic certificates need an email address to register with the certificate authority."
 	DataDirectoryUnreachable = "The data directory could not be created."
-	ImageUploadLimitInvalid  = "The maximum image upload size must be a positive byte count within the supported request size."
+	ImageUploadLimitInvalid  = "The maximum image upload size must be zero for no quota, or a positive byte count."
 )

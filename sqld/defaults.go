@@ -33,6 +33,4 @@ const (
 	FloatValue   = "float"
 	TextValue    = "text"
 	BlobValue    = "blob"
-
-	MaximumQueryResponse = 32 << 20
 )

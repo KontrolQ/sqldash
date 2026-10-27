@@ -25,7 +25,7 @@ func VerifyRedis() error {
 	if Redis.MaximumScanBatch < 1 || Redis.MaximumScanBatch > 10000 || Redis.MaximumStreamBuffer < 1 || Redis.MaximumStreamBuffer > 100000 {
 		return errors.New("Redis scan and stream limits are invalid")
 	}
-	if Redis.StartupTimeout <= 0 || Redis.ShutdownTimeout <= 0 || Redis.CommandTimeout <= 0 || Redis.RevalidationInterval < 100*time.Millisecond || Redis.RevalidationInterval > 4*time.Second {
+	if Redis.StartupTimeout <= 0 || Redis.ShutdownTimeout <= 0 || Redis.CommandTimeout < 0 || Redis.RevalidationInterval < 100*time.Millisecond || Redis.RevalidationInterval > 4*time.Second {
 		return errors.New("Redis timeouts are invalid")
 	}
 	if Redis.PublicPort < 1 || Redis.PublicPort > 65535 || strings.ContainsAny(Redis.PublicHost, "/@\r\n\t ") {

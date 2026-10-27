@@ -90,6 +90,9 @@ func guardRoute(route urls.RegisteredRoute) fiber.Handler {
 		if route.Namespace != "" {
 			name = route.Namespace + "." + name
 		}
+		if err := prepareCredentialBody(context, name); err != nil {
+			return err
+		}
 		credentialLink := name == "auth.join.accept" || name == "auth.recover.accept"
 		if !credentialLink && context.Method() != fiber.MethodGet && context.Method() != fiber.MethodHead && context.Method() != fiber.MethodOptions {
 			if context.Get("Sec-Fetch-Site") == "cross-site" {
@@ -115,6 +118,14 @@ func guardRoute(route urls.RegisteredRoute) fiber.Handler {
 		} else if needed != "" {
 			allowed := held.CanAny(needed)
 			if needed == permissions.DatabaseCreate || needed == permissions.DatabaseImport {
+				if !allowed {
+					return fiber.ErrForbidden
+				}
+				if needed == permissions.DatabaseImport {
+					if err := prepareImportBody(context); err != nil {
+						return err
+					}
+				}
 				kind := context.FormValue("engine", models.EngineLibSQL)
 				if !models.IsKnownEngine(kind) {
 					return fiber.ErrBadRequest

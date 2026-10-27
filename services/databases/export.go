@@ -16,6 +16,7 @@ import (
 	"sqldash/models"
 	"sqldash/permissions"
 	"sqldash/pgtransfer"
+	"sqldash/transferpolicy"
 )
 
 func authorizeExport(ctx context.Context, name string) (context.Context, *models.Database, *fiber.Error) {
@@ -68,7 +69,7 @@ func WriteFile(requestContext context.Context, databaseName string, writer io.Wr
 
 	defer handle.Close()
 
-	_, copyError := io.Copy(writer, handle)
+	_, copyError := transferpolicy.Copy(writer, handle)
 
 	return copyError
 }
@@ -84,7 +85,7 @@ func WriteDump(requestContext context.Context, databaseName string, writer io.Wr
 	if record.Kind() == models.EngineRedis {
 		return WriteRedis(fresh, databaseName, writer)
 	}
-	return writeLibSQLDump(fresh, databaseName, writer)
+	return writeLibSQLDump(fresh, databaseName, transferpolicy.Writer(writer))
 }
 
 func WritePostgres(ctx context.Context, name string, writer io.Writer, format string) error {

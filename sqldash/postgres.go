@@ -51,7 +51,7 @@ func runPostgresGateway() {
 	if configureError != nil {
 		logger.Fatalf(LogPrefix, "Could not configure native PostgreSQL TLS: %v", configureError)
 	}
-	options := pggateway.Options{ListenAddress: config.Postgres.GatewayAddress, BackendAddress: config.Postgres.Address, TLSConfig: material.Config, AllowPlaintext: true, MaximumSessions: config.Postgres.MaximumConnections - 5, Authorize: pgaccess.Authorize, Validate: pgaccess.Validate, Terminate: pgaccess.Terminate, Unsafe: blockPostgres}
+	options := pggateway.Options{ListenAddress: config.Postgres.GatewayAddress, BackendAddress: config.Postgres.Address, TLSConfig: material.Config, AllowPlaintext: true, MaximumSessions: config.PostgresSessionLimit(), Authorize: pgaccess.Authorize, Validate: pgaccess.Validate, Terminate: pgaccess.Terminate, Unsafe: blockPostgres}
 	if runError := pggateway.Run(parent, options); runError != nil && !errors.Is(runError, context.Canceled) {
 		logger.Fatalf(LogPrefix, "Native PostgreSQL gateway stopped: %v", runError)
 	}

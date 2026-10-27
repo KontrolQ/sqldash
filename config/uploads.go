@@ -1,5 +1,5 @@
 package config
 
-func RequestBodyLimit() int {
-	return max(MinimumRequestBodyLimit, Server.MaximumImageUploadBytes+MultipartUploadOverhead)
+func RequestBodyBufferSize() int {
+	return RequestBodyBufferBytes
 }

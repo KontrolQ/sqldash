@@ -22,6 +22,7 @@ import (
 	"sqldash/database"
 	"sqldash/models"
 	"sqldash/rediswire"
+	"sqldash/transferpolicy"
 )
 
 type restoreIntent struct {
@@ -135,7 +136,7 @@ func snapshotDigest(ctx context.Context, file *os.File) (string, error) {
 }
 
 func Clone(ctx context.Context, source, target *models.Database) error {
-	ctx, cancel := context.WithTimeout(ctx, MaximumTransferTimeout)
+	ctx, cancel := transferpolicy.Context(ctx, 0)
 	defer cancel()
 	if source == nil || target == nil || source.ID == target.ID {
 		return IdentityMismatch
@@ -157,7 +158,7 @@ func Clone(ctx context.Context, source, target *models.Database) error {
 }
 
 func Restore(ctx context.Context, record *models.Database, reader io.Reader) error {
-	ctx, cancel := context.WithTimeout(ctx, MaximumTransferTimeout)
+	ctx, cancel := transferpolicy.Context(ctx, 0)
 	defer cancel()
 	_, instance, err := restoreTarget(ctx, record)
 	if err != nil {
@@ -203,7 +204,7 @@ func Restore(ctx context.Context, record *models.Database, reader io.Reader) err
 }
 
 func (self *manager) restore(ctx context.Context, record *models.Database, generation uint64, token string) (result error) {
-	ctx, cancel := context.WithTimeout(ctx, MaximumTransferTimeout)
+	ctx, cancel := transferpolicy.Context(ctx, 0)
 	defer cancel()
 	stored, instance, err := restoreTarget(ctx, record)
 	if err != nil {
@@ -412,8 +413,6 @@ func inspectRestoreTree(path string, databaseID uint) error {
 		return err
 	}
 	defer root.Close()
-	var files int
-	var size int64
 	var inspect func(string, int) error
 	inspect = func(name string, depth int) error {
 		if depth > 64 {
@@ -422,11 +421,6 @@ func inspectRestoreTree(path string, databaseID uint) error {
 		information, err := root.Lstat(name)
 		if err != nil {
 			return UnsafePath
-		}
-		files++
-		size += information.Size()
-		if files > 4096 || size > MaximumSnapshotBytes*2 {
-			return CapacityExceeded
 		}
 		socket := filepath.Base(name) == "restore.sock" && information.Mode()&os.ModeSocket != 0
 		if !verifyOwner(information, userID) || !information.IsDir() && !information.Mode().IsRegular() && !socket {

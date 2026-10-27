@@ -48,7 +48,7 @@ func applyRedisOperation(ctx context.Context, record *models.Database, operation
 		if err != nil || instance.Published || instance.Identity != record.ClusterID {
 			return errors.New(EngineRefused)
 		}
-		options := redistransfer.Options{Timeout: operationTimeout, Authorize: func(step context.Context) error { _, _, err := operationAuthority(step, record, operation); return err }}
+		options := redistransfer.Options{Authorize: func(step context.Context) error { _, _, err := operationAuthority(step, record, operation); return err }}
 		switch operation.Kind {
 		case "create":
 			err = backend.Create(fresh, record)

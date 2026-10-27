@@ -10,6 +10,9 @@ import (
 var (
 	Server       serverSettings
 	Data         dataSettings
+	Transfer     transferSettings
+	History      historySettings
+	Query        querySettings
 	Sqld         sqldSettings
 	Postgres     postgresSettings
 	Redis        redisSettings
@@ -22,7 +25,7 @@ var (
 func init() {
 	_ = godotenv.Load(EnvironmentFileName)
 
-	for _, target := range []any{&Server, &Data, &Sqld, &Postgres, &Redis, &Certificates, &Hosting, &Session, &Access} {
+	for _, target := range []any{&Server, &Data, &Transfer, &History, &Query, &Sqld, &Postgres, &Redis, &Certificates, &Hosting, &Session, &Access} {
 		if parseError := env.ParseWithOptions(target, env.Options{Prefix: EnvironmentPrefix}); parseError != nil {
 			logger.Fatalf(LogPrefix, ParseFailedLog, parseError)
 		}

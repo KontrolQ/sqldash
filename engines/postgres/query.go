@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"sqldash/config"
 	"sqldash/engines"
 	"sqldash/models"
 	"sqldash/pgcluster/control"
@@ -13,14 +14,18 @@ import (
 )
 
 func (self *Backend) Run(ctx context.Context, record *models.Database, mode engines.Mode, statements ...engines.Statement) ([]*engines.Result, error) {
-	queryContext, cancel := context.WithTimeout(ctx, control.StatementTimeout)
+	queryContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 	connection, connectError := Connect(queryContext, record, mode)
 	if connectError != nil {
 		return nil, connectError
 	}
 	defer closeSession(connection)
-	if limitError := control.LimitResponseBytes(connection, MaximumResultBytes); limitError != nil {
+	maximumBytes := config.Query.MaximumResultBytes
+	if maximumBytes == 0 {
+		maximumBytes = -1
+	}
+	if limitError := control.LimitResponseBytes(connection, maximumBytes); limitError != nil {
 		return nil, limitError
 	}
 	guarded := false
@@ -113,7 +118,7 @@ func runAtomic(ctx context.Context, connection *pgx.Conn, statements []engines.S
 				return nil, normalizeError
 			}
 			totalBytes += rowBytes
-			if len(result.Rows) >= MaximumResultRows || totalBytes > MaximumResultBytes {
+			if config.Query.MaximumRows > 0 && len(result.Rows) >= config.Query.MaximumRows || config.Query.MaximumResultBytes > 0 && int64(totalBytes) > config.Query.MaximumResultBytes {
 				rows.Close()
 				return nil, ResultLimit
 			}

@@ -16,8 +16,24 @@ func verifyConfig() error {
 		return redisError
 	}
 
-	if Server.MaximumImageUploadBytes <= 0 || Server.MaximumImageUploadBytes > math.MaxInt-MultipartUploadOverhead {
+	if Server.MaximumImageUploadBytes < 0 || Server.MaximumImageUploadBytes > math.MaxInt-1 {
 		return errors.New(ImageUploadLimitInvalid)
+	}
+
+	if Server.MaximumWebSocketMessageBytes < 0 || Server.MaximumWebSocketMessageBytes > math.MaxInt64-1 || Sqld.QueryTimeout < 0 {
+		return errors.New("WebSocket and libSQL query quotas must be zero or positive")
+	}
+
+	if Transfer.MaximumBytes < 0 || Transfer.MaximumBytes > int64(math.MaxInt-MultipartUploadOverhead) || Transfer.Timeout < 0 || Transfer.MaximumConcurrentJobs < 0 {
+		return errors.New("transfer quotas must be zero or positive")
+	}
+
+	if Query.MaximumResultBytes < 0 || Query.MaximumResultBytes > math.MaxInt64-1 || Query.MaximumRows < 0 {
+		return errors.New("query quotas must be zero or positive")
+	}
+
+	if History.Retention < 0 || History.MaximumPictures < 0 {
+		return errors.New("history quotas must be zero or positive")
 	}
 
 	if Server.Domain == "" {

@@ -22,7 +22,7 @@
       if (!file) {
         return;
       }
-      if (file.size > maximum) {
+      if (maximum > 0 && file.size > maximum) {
         problem.textContent = form.dataset.pictureTooLarge;
         problem.hidden = false;
         input.value = '';

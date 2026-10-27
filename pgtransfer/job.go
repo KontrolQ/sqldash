@@ -13,9 +13,8 @@ import (
 
 	"sqldash/config"
 	"sqldash/pgcluster/control"
+	"sqldash/transferpolicy"
 )
-
-var jobSlots = make(chan struct{}, MaximumConcurrentJobs)
 
 type job struct {
 	context      context.Context
@@ -27,27 +26,36 @@ type job struct {
 	stagingPath  string
 }
 
+func normalizeOptions(options Options) (Options, error) {
+	if options.MaximumBytes < 0 || options.Timeout < 0 {
+		return options, InvalidOptions
+	}
+	options.MaximumBytes = transferpolicy.ByteLimit(options.MaximumBytes)
+	if config.Transfer.Timeout > 0 && (options.Timeout == 0 || config.Transfer.Timeout < options.Timeout) {
+		options.Timeout = config.Transfer.Timeout
+	}
+	return options, nil
+}
+
 func withJob(ctx context.Context, options Options, operation func(*job) error) (resultError error) {
-	if ctx == nil || options.MaximumBytes < 0 || options.MaximumBytes > DefaultMaximumBytes || options.Timeout < 0 || options.Timeout > MaximumTimeout {
+	if ctx == nil {
 		return InvalidOptions
+	}
+	var optionsError error
+	options, optionsError = normalizeOptions(options)
+	if optionsError != nil {
+		return optionsError
 	}
 	if identityError := executionIdentity(); identityError != nil {
 		return identityError
 	}
-	if options.MaximumBytes == 0 {
-		options.MaximumBytes = DefaultMaximumBytes
-	}
-	if options.Timeout == 0 {
-		options.Timeout = DefaultTimeout
-	}
-	ctx, cancel := context.WithTimeout(ctx, options.Timeout)
+	ctx, cancel := transferpolicy.Context(ctx, options.Timeout)
 	defer cancel()
-	select {
-	case jobSlots <- struct{}{}:
-		defer func() { <-jobSlots }()
-	case <-ctx.Done():
-		return ctx.Err()
+	release, capacityError := transferpolicy.Acquire(ctx)
+	if capacityError != nil {
+		return capacityError
 	}
+	defer release()
 	current := &job{context: ctx, options: options, maximumBytes: options.MaximumBytes}
 	if authorizeError := current.authorize(); authorizeError != nil {
 		return authorizeError
@@ -126,7 +134,7 @@ func (self *job) stage(sourcePath string) (*os.File, error) {
 	if statError != nil || !information.Mode().IsRegular() || information.Size() == 0 {
 		return nil, InvalidSource
 	}
-	if information.Size() > self.maximumBytes {
+	if self.maximumBytes > 0 && information.Size() > self.maximumBytes {
 		return nil, SizeExceeded
 	}
 	source, openError := self.staging.Open(relativePath)

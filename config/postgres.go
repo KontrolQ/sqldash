@@ -2,10 +2,18 @@ package config
 
 import (
 	"errors"
+	"math"
 	"net"
 	"strconv"
 	"strings"
 )
+
+func PostgresSessionLimit() int {
+	if Postgres.MaximumConnections == 0 {
+		return 0
+	}
+	return Postgres.MaximumConnections - PostgresReservedConnections
+}
 
 func VerifyPostgres() error {
 	if !Postgres.Enabled {
@@ -39,8 +47,8 @@ func VerifyPostgres() error {
 	if !validPostgresUsername(Postgres.AdminUsername) {
 		return errors.New("the PostgreSQL administrator username must be a lowercase identifier of at most 63 bytes")
 	}
-	if Postgres.MaximumConnections < 10 || Postgres.MaximumConnections > 100000 {
-		return errors.New("PostgreSQL maximum connections must be between 10 and 100000")
+	if Postgres.MaximumConnections < 0 || Postgres.MaximumConnections > 0 && Postgres.MaximumConnections <= PostgresReservedConnections || Postgres.MaximumConnections > math.MaxInt32 {
+		return errors.New("PostgreSQL maximum connections must be zero for the engine default, or leave room for reserved administrative connections")
 	}
 	if (Postgres.CertificatePath == "") != (Postgres.PrivateKeyPath == "") {
 		return errors.New("PostgreSQL TLS needs both a certificate and a private key")

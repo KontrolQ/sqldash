@@ -3,6 +3,7 @@ package analytics
 import (
 	"time"
 
+	"sqldash/config"
 	"sqldash/database"
 	"sqldash/models"
 	"sqldash/utils/logger"
@@ -176,35 +177,15 @@ func apply(store *gorm.DB, fresh *models.Rollup, histogram Histogram) error {
 }
 
 func Prune() {
-	now := time.Now()
-
-	cuts := []struct {
-		query string
-		value any
-	}{
-		{"occurred_at < ?", now.Add(-RawRetention)},
+	if config.History.Retention == 0 {
+		return
 	}
-
-	for _, cut := range cuts {
-		if deleteError := database.DB.Where(cut.query, cut.value).Delete(&models.Statement{}).Error; deleteError != nil {
-			logger.Warnf(LogPrefix, PruneFailedLog, deleteError)
-		}
+	cutoff := time.Now().Add(-config.History.Retention)
+	if err := database.DB.Where("occurred_at < ?", cutoff).Delete(&models.Statement{}).Error; err != nil {
+		logger.Warnf(LogPrefix, PruneFailedLog, err)
 	}
-
-	retentions := map[models.Resolution]time.Duration{
-		models.ResolutionMinute: MinuteRetention,
-		models.ResolutionHour:   HourRetention,
-		models.ResolutionDay:    DayRetention,
-	}
-
-	for resolution, keep := range retentions {
-		deleteError := database.DB.
-			Where("resolution = ? AND bucket_start < ?", resolution, now.Add(-keep)).
-			Delete(&models.Rollup{}).Error
-
-		if deleteError != nil {
-			logger.Warnf(LogPrefix, PruneFailedLog, deleteError)
-		}
+	if err := database.DB.Where("bucket_start < ?", cutoff).Delete(&models.Rollup{}).Error; err != nil {
+		logger.Warnf(LogPrefix, PruneFailedLog, err)
 	}
 }
 

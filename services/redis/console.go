@@ -115,7 +115,7 @@ func Execute(ctx context.Context, name string, asked ConsoleRequest) (*ConsoleRe
 		}
 		return nil
 	}
-	deadline, cancel := context.WithTimeout(fresh, 20*time.Second)
+	deadline, cancel := consoleContext(fresh)
 	defer cancel()
 	guarded, stop, guardError := access.Guard(deadline, checkAuthority, func(cleanup context.Context) error {
 		if err := redishost.KillClientForRun(cleanup, record, clientID, instance.RunID); err != nil {

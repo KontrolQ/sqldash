@@ -9,7 +9,6 @@ const (
 	maximumLiveBytes      = 64 * 1024
 	maximumHistorySamples = 360
 	historyInterval       = 10 * time.Second
-	streamLifetime        = 30 * time.Minute
 )
 
 func RequestLimit() int { return maximumRequestBytes }

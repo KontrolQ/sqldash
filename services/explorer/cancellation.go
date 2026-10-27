@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"regexp"
 	"sync"
-	"time"
 
 	"sqldash/models"
 	"sqldash/permissions"
@@ -29,7 +28,7 @@ var consoleJobs = struct {
 var consoleIDPattern = regexp.MustCompile(`^[a-zA-Z0-9_-]{16,80}$`)
 
 func registerConsole(parent context.Context, record *models.Database, runID string) (context.Context, func(), *fiber.Error) {
-	requestContext, cancel := context.WithTimeout(parent, 2*time.Minute)
+	requestContext, cancel := context.WithCancel(parent)
 	if runID == "" {
 		return requestContext, cancel, nil
 	}
@@ -43,10 +42,6 @@ func registerConsole(parent context.Context, record *models.Database, runID stri
 	if _, exists := consoleJobs.jobs[runID]; exists {
 		cancel()
 		return nil, nil, consoleRequestError("This query identifier is already running.")
-	}
-	if len(consoleJobs.jobs) >= 256 {
-		cancel()
-		return nil, nil, shortcuts.ServiceError(http.StatusTooManyRequests, "Too many console submissions are running.")
 	}
 	consoleJobs.jobs[runID] = consoleJob{AccountID: accountID, DatabaseID: record.ID, Cancel: cancel}
 	return requestContext, func() {

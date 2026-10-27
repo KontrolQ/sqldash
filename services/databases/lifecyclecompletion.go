@@ -28,7 +28,7 @@ func completeOperation(ctx context.Context, record *models.Database, operation *
 				return errors.New(DatabaseNotReady)
 			}
 		}
-		completion := transaction.Model(operation).Where("state = ? AND lease_until = ?", models.DatabaseApplying, operation.LeaseUntil).Updates(map[string]any{"state": models.DatabaseReady, "lease_until": nil, "failure": ""})
+		completion := transaction.Model(operation).Where("state = ? AND lease_until = ?", models.DatabaseApplying, operation.LeaseUntil).Updates(map[string]any{"state": models.DatabaseReady, "lease_until": nil, "heartbeat_until": nil, "failure": ""})
 		if completion.Error != nil {
 			return completion.Error
 		}

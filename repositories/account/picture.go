@@ -1,9 +1,9 @@
 package account
 
 import (
+	"sqldash/config"
 	"sqldash/database"
 	"sqldash/models"
-	"sqldash/pictures"
 	"sqldash/utils/collections"
 
 	"gorm.io/gorm"
@@ -44,17 +44,21 @@ func SavePicture(accountID uint, encoded string, mediaType string) error {
 			return saveError
 		}
 
-		var retained []uint
-		if findError := transaction.Model(&models.AccountPicture{}).Where("account_id = ?", accountID).Order("id desc").Limit(pictures.HistoryLimit).Pluck("id", &retained).Error; findError != nil {
-			return findError
+		if config.History.MaximumPictures == 0 {
+			return nil
 		}
-		return transaction.Unscoped().Where("account_id = ? AND id NOT IN ?", accountID, retained).Delete(&models.AccountPicture{}).Error
+		retained := transaction.Model(&models.AccountPicture{}).Select("id").Where("account_id = ?", accountID).Order("id desc").Limit(config.History.MaximumPictures)
+		return transaction.Unscoped().Where("account_id = ? AND id NOT IN (?)", accountID, retained).Delete(&models.AccountPicture{}).Error
 	})
 }
 
 func PictureHistory(accountID uint) ([]models.AccountPicture, error) {
 	var history []models.AccountPicture
-	findError := database.DB.Where("account_id = ?", accountID).Order("id desc").Limit(pictures.HistoryLimit).Find(&history).Error
+	query := database.DB.Where("account_id = ?", accountID).Order("id desc")
+	if config.History.MaximumPictures > 0 {
+		query = query.Limit(config.History.MaximumPictures)
+	}
+	findError := query.Find(&history).Error
 	return history, findError
 }
 

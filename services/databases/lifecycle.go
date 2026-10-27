@@ -21,6 +21,7 @@ import (
 	"sqldash/services/access"
 	primarycredentials "sqldash/services/postgresconnections/primary"
 	"sqldash/sqld"
+	"sqldash/transferpolicy"
 	"sqldash/utils/logger"
 	"sqldash/utils/shortcuts"
 
@@ -28,8 +29,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
-
-const operationTimeout = 15 * time.Minute
 
 var nameReservationConflict = errors.New(NameTaken)
 
@@ -108,12 +107,12 @@ func reserveDatabase(ctx context.Context, name, engine string, accountID uint, k
 
 func claimOperation(ctx context.Context, record *models.Database, operation *models.DatabaseOperation) error {
 	now := time.Now()
-	lease := now.Add(operationTimeout + time.Minute)
+	lease := now.Add(operationLeaseDuration)
 	if err := database.DB.WithContext(ctx).Transaction(func(transaction *gorm.DB) error {
 		if _, _, err := operationAuthorityWith(ctx, transaction, record, operation); err != nil {
 			return err
 		}
-		result := transaction.Model(&models.DatabaseOperation{}).Where("id = ? AND database_id = ? AND state IN ? AND (lease_until IS NULL OR lease_until < ?)", operation.ID, record.ID, []string{models.DatabasePending, models.DatabaseApplying, models.DatabaseFailed, remoteStagingState}, now).Updates(map[string]any{"state": models.DatabaseApplying, "lease_until": lease, "attempts": gorm.Expr("attempts + 1"), "failure": ""})
+		result := transaction.Model(&models.DatabaseOperation{}).Where("id = ? AND database_id = ? AND state IN ? AND (coalesce(heartbeat_until, lease_until) IS NULL OR coalesce(heartbeat_until, lease_until) < ?)", operation.ID, record.ID, []string{models.DatabasePending, models.DatabaseApplying, models.DatabaseFailed, remoteStagingState}, now).Updates(map[string]any{"state": models.DatabaseApplying, "lease_until": lease, "heartbeat_until": lease, "attempts": gorm.Expr("attempts + 1"), "failure": ""})
 		if result.Error != nil {
 			return result.Error
 		}
@@ -136,6 +135,7 @@ func claimOperation(ctx context.Context, record *models.Database, operation *mod
 	operation.State = models.DatabaseApplying
 	operation.Attempts++
 	operation.LeaseUntil = &lease
+	operation.HeartbeatUntil = &lease
 	if operation.Kind != "delete" {
 		record.State = models.DatabaseApplying
 	}
@@ -191,11 +191,13 @@ func operationAuthorityWith(ctx context.Context, store *gorm.DB, record *models.
 }
 
 func executeOperation(parent context.Context, record *models.Database, operation *models.DatabaseOperation) *fiber.Error {
-	ctx, cancel := context.WithTimeout(parent, operationTimeout)
+	ctx, cancel := transferpolicy.Context(parent, 0)
 	defer cancel()
 	if err := claimOperation(ctx, record, operation); err != nil {
 		return shortcuts.ServiceError(http.StatusConflict, DatabaseNotReady)
 	}
+	ctx, stopHeartbeat := heartbeatOperation(ctx, operation)
+	defer stopHeartbeat()
 	claimedLease := operation.LeaseUntil
 	if err := applyOperation(ctx, record, operation); err != nil {
 		message := OperationFailed
@@ -210,7 +212,7 @@ func executeOperation(parent context.Context, record *models.Database, operation
 			if operation.Kind == "delete" {
 				state = models.DatabaseDeleting
 			}
-			failed := transaction.Model(&models.DatabaseOperation{}).Where("id = ? AND state = ? AND lease_until = ?", operation.ID, models.DatabaseApplying, claimedLease).Updates(map[string]any{"state": models.DatabaseFailed, "failure": message, "lease_until": retryAt})
+			failed := transaction.Model(&models.DatabaseOperation{}).Where("id = ? AND state = ? AND lease_until = ?", operation.ID, models.DatabaseApplying, claimedLease).Updates(map[string]any{"state": models.DatabaseFailed, "failure": message, "lease_until": retryAt, "heartbeat_until": nil})
 			if failed.Error != nil {
 				return failed.Error
 			}
@@ -330,7 +332,7 @@ func applyOperation(ctx context.Context, record *models.Database, operation *mod
 				}
 			}
 			authorize := func(step context.Context) error { _, _, err := operationAuthority(step, record, operation); return err }
-			options := pgtransfer.Options{Authorize: authorize, Timeout: operationTimeout}
+			options := pgtransfer.Options{Authorize: authorize}
 			switch operation.Kind {
 			case "import":
 				if record.Kind() == models.EnginePostgres {
@@ -393,7 +395,7 @@ func applyOperation(ctx context.Context, record *models.Database, operation *mod
 
 func Reconcile(ctx context.Context) error {
 	var operations []models.DatabaseOperation
-	if err := database.DB.WithContext(ctx).Where("kind IN ? AND state IN ? AND (lease_until IS NULL OR lease_until < ?)", []string{"create", "import", "clone", "delete", "remote-clone"}, []string{models.DatabasePending, models.DatabaseApplying, models.DatabaseFailed, remoteStagingState}, time.Now()).Order("attempts asc, id asc").Limit(25).Find(&operations).Error; err != nil {
+	if err := database.DB.WithContext(ctx).Where("kind IN ? AND state IN ? AND (coalesce(heartbeat_until, lease_until) IS NULL OR coalesce(heartbeat_until, lease_until) < ?)", []string{"create", "import", "clone", "delete", "remote-clone"}, []string{models.DatabasePending, models.DatabaseApplying, models.DatabaseFailed, remoteStagingState}, time.Now()).Order("attempts asc, id asc").Limit(25).Find(&operations).Error; err != nil {
 		return err
 	}
 	var failures []error
