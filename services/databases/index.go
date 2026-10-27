@@ -47,9 +47,10 @@ func GetIndexDataForEngine(ctx context.Context, engine string) (*IndexContext, *
 	canImportPostgres := config.Postgres.Enabled && actor.Can(permissions.PostgresDatabaseCreate) && actor.Can(permissions.PostgresDatabaseImport)
 	canImportRedis := config.Redis.Enabled && actor.Can(permissions.RedisDatabaseCreate) && actor.Can(permissions.RedisDatabaseImport) && canProvision(actor, models.EngineRedis)
 	objectHeading := "Tables"
-	if engine == models.EngineRedis {
+	switch engine {
+	case models.EngineRedis:
 		objectHeading = "Keys"
-	} else if engine == "" {
+	case "":
 		objectHeading = "Tables / keys"
 	}
 	readHeading, queryHeading := "Read activity", "Queries / commands"

@@ -11,11 +11,12 @@ import (
 
 func unavailableActivityMetrics(engine string) ActivityMetrics {
 	metrics := ActivityMetrics{RowsRead: "Unavailable", QueryCount: "Unavailable", RowsReadLabel: "Rows read", QueryCountLabel: "Queries", RowsReadNote: "Cumulative rows read from the libSQL engine's native statistics.", QueryCountNote: "Cumulative queries from the libSQL engine's native statistics."}
-	if engine == models.EnginePostgres {
+	switch engine {
+	case models.EnginePostgres:
 		metrics.RowsReadLabel, metrics.QueryCountLabel = "Tuples returned", "Statement calls"
 		metrics.RowsReadNote = "PostgreSQL live rows from sequential scans and index entries from index scans, since database statistics were reset. Not SQL result rows."
 		metrics.QueryCountNote = "Tracked top-level calls for this database's application roles, since statement statistics were reset or evicted. Sensitive statements are excluded; unavailable without statement statistics."
-	} else if engine == models.EngineRedis {
+	case models.EngineRedis:
 		metrics.RowsReadLabel, metrics.QueryCountLabel = "Keyspace hits", "Commands"
 		metrics.RowsReadNote = "Successful Redis keyspace lookups since server startup or statistics reset. Not SQL rows."
 		metrics.QueryCountNote = "Redis commands processed since server startup or statistics reset, including monitoring commands."

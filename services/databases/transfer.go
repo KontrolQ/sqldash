@@ -41,11 +41,12 @@ func CreateFromUploadEngine(ctx context.Context, asked, engine, fileName string,
 	}
 	var staged string
 	var stageError error
-	if engine == models.EnginePostgres {
+	switch engine {
+	case models.EnginePostgres:
 		staged, stageError = stageNative(contents)
-	} else if engine == models.EngineRedis {
+	case models.EngineRedis:
 		staged, stageError = stageNativeDirectory(config.RedisStagingPath(), contents)
-	} else {
+	default:
 		staged, stageError = stage(name, fileName, contents)
 	}
 	if stageError != nil {
