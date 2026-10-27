@@ -79,7 +79,7 @@ func cachedCloneSnapshot(ctx context.Context, source, target *models.Database) (
 		return nil, err
 	}
 	defer root.Close()
-	origin := sha256.Sum256([]byte(fmt.Sprintf("%d:%s:%d:%s", source.ID, source.ClusterID, target.ID, target.ClusterID)))
+	origin := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%d:%s", source.ID, source.ClusterID, target.ID, target.ClusterID))
 	name := fmt.Sprintf("clone-%x.rdb", origin)
 	if err := visitCloneFiles(root, func(existing string) error {
 		if existing != name {

@@ -124,7 +124,13 @@ func writeACLDocument(instance *models.RedisInstance, document *aclDocument) err
 		if err != nil || !validUsername(username) || !validPasswordHash(user.Hash) {
 			return InvalidCredential
 		}
-		contents.WriteString("user " + username + " " + rules + " #" + user.Hash + "\n")
+		contents.WriteString("user ")
+		contents.WriteString(username)
+		contents.WriteByte(' ')
+		contents.WriteString(rules)
+		contents.WriteString(" #")
+		contents.WriteString(user.Hash)
+		contents.WriteByte('\n')
 	}
 	if err := ownedFile(aclStatePath(instance.DatabaseID), encoded, 0o600, 0); err != nil {
 		return err
